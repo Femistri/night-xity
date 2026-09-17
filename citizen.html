@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Citizen Net // Night Xity</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            background: #0b0d0e;
+            color: #eeeeee;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        header {
+            border-bottom: 1px solid #444;
+            padding: 25px 20px;
+        }
+
+
+        .system {
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: #777;
+        }
+
+
+        h1 {
+            margin: 15px 0 5px;
+            font-size: 38px;
+            letter-spacing: 5px;
+        }
+
+
+        .citizen-id {
+            color: #888;
+            font-size: 13px;
+            letter-spacing: 2px;
+        }
+
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px 20px 70px;
+        }
+
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+
+        .panel {
+            border: 1px solid #444;
+            padding: 25px;
+        }
+
+
+        .panel h2 {
+            margin-top: 0;
+            font-size: 18px;
+            letter-spacing: 3px;
+        }
+
+
+        .profile {
+            grid-column: 1 / -1;
+        }
+
+
+        .data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+
+        .data-box {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+
+        .label {
+            color: #777;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+
+        .value {
+            margin-top: 6px;
+            font-size: 18px;
+        }
+
+
+        .money {
+            font-size: 28px;
+        }
+
+
+        .item {
+            border-top: 1px solid #333;
+            padding: 14px 0;
+        }
+
+
+        .item-name {
+            font-size: 16px;
+        }
+
+
+        .item-info {
+            color: #777;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+
+        .body-placeholder {
+            min-height: 400px;
+            border: 1px dashed #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #666;
+            padding: 30px;
+        }
+
+
+        .balance {
+            font-size: 34px;
+            margin: 15px 0;
+        }
+
+
+        .positive {
+            color: #aaa;
+        }
+
+
+        .negative {
+            color: #888;
+        }
+
+
+        footer {
+            border-top: 1px solid #333;
+            text-align: center;
+            padding: 30px;
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+
+        @media (max-width: 700px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="system">
+        NIGHT XITY // CITIZEN NET
+    </div>
+
+    <h1>PERFIL CIUDADANO</h1>
+
+    <div class="citizen-id">
+        REGISTRO NX-2066-0001
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<div class="grid">
+
+
+    <!-- IDENTIDAD -->
+
+    <section class="panel profile">
+
+        <h2>IDENTIDAD</h2>
+
+        <div class="data">
+
+            <div class="data-box">
+                <div class="label">NOMBRE</div>
+                <div class="value">CIUDADANO DE PRUEBA</div>
+            </div>
+
+
+            <div class="data-box">
+                <div class="label">OCUPACIÓN</div>
+                <div class="value">TRABAJADOR INDEPENDIENTE</div>
+            </div>
+
+
+            <div class="data-box">
+                <div class="label">DISTRITO</div>
+                <div class="value">NIGHT XITY</div>
+            </div>
+
+
+            <div class="data-box">
+                <div class="label">EMPLEADOR</div>
+                <div class="value">SIN REGISTRO</div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ECONOMÍA -->
+
+    <section class="panel">
+
+        <h2>ECONOMÍA</h2>
+
+        <div class="label">
+            SALDO DISPONIBLE
+        </div>
+
+        <div class="balance">
+            $12,500
+        </div>
+
+
+        <div class="item">
+            <div class="item-name positive">
+                Salario mensual
+            </div>
+
+            <div class="item-info">
+                INGRESO +$20,000
+            </div>
+        </div>
+
+
+        <div class="item">
+            <div class="item-name negative">
+                Renta
+            </div>
+
+            <div class="item-info">
+                GASTO -$5,000
+            </div>
+        </div>
+
+
+        <div class="item">
+            <div class="item-name negative">
+                Alimentación
+            </div>
+
+            <div class="item-info">
+                GASTO -$2,500
+            </div>
+        </div>
+
+    </section>
+
+
+
+    <!-- CUERPO -->
+
+    <section class="panel">
+
+        <h2>CUERPO // MODIFICACIONES</h2>
+
+
+        <div class="body-placeholder">
+
+            <div>
+
+                <div style="font-size:60px;">
+                    ◯
+                </div>
+
+                <p>
+                    ESPACIO RESERVADO
+                    PARA EL CUERPO DEL CIUDADANO
+                </p>
+
+                <p>
+                    IMPLANTES Y MODIFICACIONES
+                    APARECERÁN AQUÍ
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- IMPLANTES -->
+
+    <section class="panel">
+
+        <h2>IMPLANTES</h2>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Interfaz neural
+            </div>
+
+            <div class="item-info">
+                IMPLANTE // ACTIVO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Óptica aumentada
+            </div>
+
+            <div class="item-info">
+                IMPLANTE // ACTIVO
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- PROGRAMAS -->
+
+    <section class="panel">
+
+        <h2>PROGRAMAS</h2>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Cartografía urbana
+            </div>
+
+            <div class="item-info">
+                SOFTWARE // INSTALADO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Sistema de identificación
+            </div>
+
+            <div class="item-info">
+                SOFTWARE // INSTALADO
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- EQUIPO -->
+
+    <section class="panel">
+
+        <h2>EQUIPO</h2>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Pistola
+            </div>
+
+            <div class="item-info">
+                EQUIPO // REGISTRADO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Máscara respiratoria
+            </div>
+
+            <div class="item-info">
+                EQUIPO // REGISTRADO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                Kit médico
+            </div>
+
+            <div class="item-info">
+                EQUIPO // REGISTRADO
+            </div>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+</main>
+
+
+
+<footer>
+
+    NIGHT XITY // CITIZEN NET
+
+    <br><br>
+
+    SISTEMA DE INFORMACIÓN CIUDADANA // 2066
+
+</footer>
+
+
+</body>
+
+</html>

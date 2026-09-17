@@ -4,37 +4,273 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Night Xity</title>
+    <title>NIGHT XITY // Citizen Net</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            background: #111;
-            color: #eee;
-            font-family: Arial, sans-serif;
-            text-align: center;
+            background: #0b0d0e;
+            color: #e8e8e8;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         header {
-            padding: 60px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
             border-bottom: 1px solid #444;
         }
 
-        h1 {
-            font-size: 60px;
-            margin: 0;
-            letter-spacing: 8px;
+        .system {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: #888;
+            margin-bottom: 35px;
         }
 
-        p {
+        h1 {
+            font-size: clamp(55px, 15vw, 130px);
+            letter-spacing: 14px;
+            margin: 0;
+            font-weight: 900;
+            line-height: 0.9;
+        }
+
+        .subtitle {
+            margin-top: 35px;
             font-size: 20px;
+            letter-spacing: 6px;
+            color: #aaa;
+        }
+
+        .status {
+            margin-top: 50px;
+            padding: 10px 18px;
+            border: 1px solid #555;
+            font-size: 12px;
+            letter-spacing: 3px;
             color: #aaa;
         }
 
         main {
-            padding: 50px 20px;
+            max-width: 1100px;
+            margin: auto;
+            padding: 70px 25px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .intro h2 {
+            font-size: 34px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        .intro p {
+            max-width: 700px;
+            margin: auto;
+            line-height: 1.8;
+            color: #aaa;
+            font-size: 17px;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            display: block;
+            text-decoration: none;
+            color: #eee;
+            border: 1px solid #444;
+            padding: 30px 25px;
+            min-height: 150px;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            background: #171a1c;
+            border-color: #aaa;
+        }
+
+        .card-number {
+            font-size: 12px;
+            color: #777;
+            letter-spacing: 3px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin: 18px 0 10px;
+            letter-spacing: 2px;
+        }
+
+        .card p {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        footer {
+            border-top: 1px solid #333;
+            padding: 35px 20px;
+            text-align: center;
+            color: #666;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 600px) {
+
+            h1 {
+                letter-spacing: 8px;
+            }
+
+            .subtitle {
+                font-size: 15px;
+                letter-spacing: 4px;
+            }
+
+            main {
+                padding: 50px 18px;
+            }
+
+            .intro h2 {
+                font-size: 27px;
+            }
         }
     </style>
+</head>
+
+<body>
+
+    <header>
+
+        <div class="system">
+            NIGHT XITY // CITIZEN NET
+        </div>
+
+        <h1>NIGHT<br>XITY</h1>
+
+        <div class="subtitle">
+            CYBERPUNK OLD SCHOOL RPG
+        </div>
+
+        <div class="status">
+            SISTEMA ACTIVO // 2066
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <section class="intro">
+
+            <h2>BIENVENIDO A LA CIUDAD</h2>
+
+            <p>
+                Night Xity es una ciudad construida sobre los restos
+                de un mundo que ya no existe.
+            </p>
+
+            <p>
+                Corporaciones, barrios, tecnología,
+                implantes, programas y personas
+                intentando sobrevivir.
+            </p>
+
+        </section>
+
+
+        <section class="menu">
+
+            <a class="card" href="#">
+                <div class="card-number">01</div>
+                <h3>ARCHIVO</h3>
+                <p>
+                    Historia, cronología y acontecimientos
+                    de Night Xity.
+                </p>
+            </a>
+
+
+            <a class="card" href="#">
+                <div class="card-number">02</div>
+                <h3>LA CIUDAD</h3>
+                <p>
+                    Distritos, barrios, corporaciones
+                    y lugares de interés.
+                </p>
+            </a>
+
+
+            <a class="card" href="#">
+                <div class="card-number">03</div>
+                <h3>CITIZEN NET</h3>
+                <p>
+                    Acceso al perfil, economía,
+                    inventario y estado ciudadano.
+                </p>
+            </a>
+
+
+            <a class="card" href="#">
+                <div class="card-number">04</div>
+                <h3>TECNOLOGÍA</h3>
+                <p>
+                    Implantes, programas,
+                    modificaciones y equipo.
+                </p>
+            </a>
+
+
+            <a class="card" href="#">
+                <div class="card-number">05</div>
+                <h3>TIENDA</h3>
+                <p>
+                    Catálogo de bienes y servicios
+                    disponibles en Night Xity.
+                </p>
+            </a>
+
+
+            <a class="card" href="#">
+                <div class="card-number">06</div>
+                <h3>RECURSOS</h3>
+                <p>
+                    Materiales para jugadores
+                    y Marakames.
+                </p>
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        NIGHT XITY // CITIZEN NET<br><br>
+        SISTEMA DE INFORMACIÓN CIUDADANA
+
+    </footer>
+
+</body>
+</html>    </style>
 </head>
 
 <body>

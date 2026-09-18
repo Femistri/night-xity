@@ -198,6 +198,58 @@
     height: auto;
     display: block;
 }
+        .implant-hotspot {
+    position: absolute;
+    z-index: 10;
+}
+
+.eye-hotspot {
+    top: 10%;
+    left: 50%;
+}
+
+.implant-hotspot summary {
+    list-style: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.implant-hotspot summary::-webkit-details-marker {
+    display: none;
+}
+
+.implant-card {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    width: 240px;
+    padding: 18px;
+    background: #111;
+    border: 1px solid #777;
+    color: #eee;
+    text-align: left;
+    z-index: 20;
+}
+
+.implant-card h3 {
+    margin-top: 0;
+    font-size: 15px;
+    letter-spacing: 2px;
+}
+
+.implant-card p {
+    font-size: 13px;
+    line-height: 1.5;
+}
     </style>
 
 </head>
@@ -329,6 +381,26 @@
         alt="Mapa corporal de modificaciones de Night Xity"
         class="body-map-image"
     >
+        <details class="implant-hotspot eye-hotspot">
+        <summary>●</summary>
+
+        <div class="implant-card">
+            <h3>ÓPTICA XCATEC V.4</h3>
+
+            <p><strong>TIPO</strong><br>
+            Implante ocular</p>
+
+            <p><strong>ESTADO</strong><br>
+            ACTIVO</p>
+
+            <p><strong>FUNCIÓN</strong><br>
+            Visión nocturna + HUD</p>
+
+            <p><strong>VALOR</strong><br>
+            $12,400</p>
+        </div>
+
+    </details>
 </div>
 
         </div>

@@ -799,6 +799,8 @@ document.getElementById("citizen-manias").innerHTML =
         ? maniasTexto.join("<br><br>")
         : "SIN REGISTRO";
 
+        console.log("MANÍA EN PANTALLA:", document.getElementById("citizen-manias").innerHTML);
+
         const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
         document.getElementById("citizen-name").textContent = nombre;
         

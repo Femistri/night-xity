@@ -1,0 +1,401 @@
+{
+  "version": 1,
+  "clases": [
+    "Link",
+    "Data",
+    "Microchip",
+    "Backup"
+  ],
+  "puntos_alma": [
+    4,
+    3,
+    2,
+    1,
+    0
+  ],
+  "tara_sintetica": {
+    "Falta de creatividad": "Disminuye la facultad humana para crear e innovar. Tener esta Tara sintética da desventaja a las pruebas relacionadas con Hardware y Sabiduría que se basen en crear algo desde cero, así como en aquellas pruebas en las que intervenga el Atributo INT.",
+    "Falta de empatía": "La empatía es la habilidad cognitiva de una persona para comprender el universo emocional de otra y actuar en consecuencia. Tener esta Tara sintética implica realizar las pruebas de comunicación, relaciones sociales o del Atributo CAR en desventaja y la pérdida de los Talentos de tipo social.",
+    "Inexperiencia": "Definimos experiencia como la facultad del ser humano de haber obtenido un conocimiento o habilidad a partir de una vivencia o situación. Tener esta Tara sintética dobla el coste de puntos de experiencia necesarios para subir de nivel.",
+    "Pérdida de recuerdos": "Recordar permite al ser humano retener y memorizar hechos, acciones y/o conversaciones pasados, así como acceder a datos y experiencias determinadas. Tener esta Tara sintética da desventaja a las pruebas de carácter intelectual, conocimientos o el Atributo SAB."
+  },
+  "talentos": {
+    "Afortunado": "En cada inicio de sesión de juego puedes gastar 1 PowerUp y realizar tres tiradas con el d20. Anota los dos resultados mayores en un papel. Durante el juego podrás cambiar el resultado de una tirada por uno de los anotados en el papel. Dicho valor sólo puede usarse una vez por sesión de juego.",
+    "Ataque certero": "Tus ataques se convierten en crítico con un resultado de 19-20.",
+    "Biomecánica": "Puedes instalarte un implante adicional sin coste de Alma.",
+    "Buena reputación": "Una combinación perfecta de personalidad arrolladora y buena suerte hacen que tus acciones siempre se vean de la mejor forma. Una vez por sesión de juego puedes tener una ventaja en una prueba de comunicación y, gastando 1 PowerUp, puedes evitar un conflicto armado o social de forma directa. Esta función del Talento sólo es factible una vez por sesión de juego.",
+    "Coraje": "Tienes una considerable fuerza de voluntad que te hace afrontar con estoicismo el peligro y ciertas situaciones que podrían dañar tu salud mental. Obtienes un +2 a la tirada de Sabiduría para saber si resultas afectado por la escena que estás viviendo.",
+    "Elegante": "El estilo es tu marca. Tus buenos trajes y tu distinción te ayudan en las interacciones sociales. Todas las pruebas de comunicación en reuniones, eventos y fiestas de la jet-set son realizadas con ventaja en virtud del exquisito aspecto físico del personaje.",
+    "Empatía mecánica": "Eres bueno con las máquinas, incluso cuando apenas conoces sus funciones. Cuando manipulas una máquina de la que ignoras su funcionamiento, la desventaja no te influye y puedes realizar la prueba sin modificadores positivos de Atributo o Habilidad. Si gastas 1 PowerUp, obtendrás la competencia en su funcionamiento y podrás aplicar la Habilidad correspondiente en próximos usos.",
+    "Ímpetu emprendedor": "Vives la vida con intensidad. Ganas un trasfondo adicional.",
+    "Lucha con X": "Sustituye X por un arma cuerpo a cuerpo o de fuego. Al usarla da un +1 al ataque y al daño. También anula la desventaja a usar simultáneamente dos armas de ese tipo, siempre que las reglas de combate con dos armas lo permitan.",
+    "Músculos de acero": "El personaje tiene una musculatura envidiable que le ayuda a reducir los efectos del retroceso causado por las armas de fuego. Adquiriendo este Talento el personaje anula la desventaja por Fuego Automático y la convierte en un modificador de -2. Además aumenta en +1 el daño en el combate cuerpo a cuerpo.",
+    "Manitas": "Las máquinas no tienen ningún secreto para ti. Eres un experto tanto añadiendo implantes como haciendo reparaciones. Puedes reparar cualquier cosa. Ganas un +2 a las pruebas de Hardware. En reparaciones de implantes, puedes gastar 1 PowerUp y reparar directamente el daño.",
+    "Mente Férrea": "Tienes la mente adiestrada para resistir cualquier intrusión. Los intentos de interrogatorio, intimidación, convencer o confundir siempre se realizan con desventaja. Gastando 1 PowerUp podrás ignorar cualquier primer ataque realizado por un Hielo Negro.",
+    "Pico de oro": "Eres muy hábil hablando, capaz de confundir o convencer a cualquiera. Cuando intentas convencer a alguien, realizas la prueba de CAR con ventaja. En el ámbito corporativo, puedes gastar 1 PowerUp para obtener un éxito directo en una negociación. Cualquier personaje que tenga la Tara sintética “Falta de empatía” no puede adquirir o usar este Talento.",
+    "Plugin": "Tienes un don para conectarte a las Constelaciones de nodos. En la primera conexión a un nodo realizas la prueba de Cyber con ventaja.",
+    "Red de contactos": "Dispones de una red muy amplia de contactos en todo el mundo. Si superas un CD-15 en Urban, Punk o Corporate (según el ambiente) encontrarás un contacto. Con 1 PowerUp tendrás éxito automático.",
+    "Sentido agudo": "Debes elegir entre uno de los cinco sentidos. Siempre que sea necesaria una prueba de Instintos o Sabiduría en que el sentido seleccionado sea el principal, podrás realizar la tirada con ventaja.",
+    "Sexto sentido": "Tu personaje tiene la habilidad de percibir aquellas situaciones que pueden resultar negativas o que entrañan algún peligro para tu salud e integridad. Gastando 1 PowerUp, el Arquitecto confirmará tus sospechas, aunque sin dar ningún tipo de detalle sobre qué tipo de peligros puedes encontrarte. Cualquier Clase que tenga una puntuación de 0 en Alma no puede adquirir o usar este Talento."
+  },
+  "limites": {
+    "trasfondo_lineas": 3,
+    "talentos_maximos": 5,
+    "seleccion_multiple": [
+      "manias",
+      "fobias",
+      "adicciones",
+      "talentos"
+    ]
+  },
+  "economia": {
+    "ingresos": [
+      "Trabajo",
+      "Comisión / misión",
+      "Reventa",
+      "Loot"
+    ],
+    "egresos": [
+      "Vida cotidiana",
+      "Compra de catálogo",
+      "Robo",
+      "Extorsión / mordida",
+      "Pago de deuda"
+    ],
+    "movimiento": {
+      "fecha": "",
+      "tipo": "ingreso",
+      "monto": 0,
+      "concepto": "",
+      "quien_pago": null,
+      "quien_cobro": null
+    }
+  },
+  "inventario_categorias": [
+    "implantes",
+    "programas",
+    "armas",
+    "accesorios",
+    "blindajes",
+    "terminales",
+    "medicare",
+    "drogas",
+    "vehiculos",
+    "varios",
+    "cotidiano"
+  ],
+  "arma_modelo": {
+    "catalogo_id": null,
+    "nombre": "",
+    "cantidad": 1,
+    "municion_restante": 0,
+    "condicion": null,
+    "caracteristicas_catalogo": {
+      "descripcion": null,
+      "alcance": null,
+      "impacto": null,
+      "tt": {
+        "tirada": null,
+        "municion": null
+      },
+      "rf": {
+        "tirada": null,
+        "municion": null
+      },
+      "fa": {
+        "tirada": null,
+        "municion": null
+      }
+    }
+  },
+  "ciudadanos": [
+    {
+      "identidad": {
+        "nombre_clave": "Inesa",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Toques",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Pacheco",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Codigo Toledo",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Raskol",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Tope",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Cyanura",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Xela",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Moikano",
+        "clase": null,
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 0,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    }
+  ]
+}

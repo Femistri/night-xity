@@ -1,0 +1,32 @@
+{
+  "identidad": {
+    "nombre_clave": "",
+    "clase": null,
+    "trasfondo": "",
+    "tara_sintetica": null,
+    "puntos_alma": 4,
+    "talentos": [],
+    "salud_mental": {
+      "manias": [],
+      "fobias": [],
+      "adicciones": []
+    }
+  },
+  "economia": {
+    "saldo_inicial": 0,
+    "movimientos": []
+  },
+  "inventario": {
+    "implantes": [],
+    "programas": [],
+    "armas": [],
+    "accesorios": [],
+    "blindajes": [],
+    "terminales": [],
+    "medicare": [],
+    "drogas": [],
+    "vehiculos": [],
+    "varios": [],
+    "cotidiano": []
+  }
+}

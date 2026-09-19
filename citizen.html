@@ -732,17 +732,18 @@ async function cargarDatosCitizenNet() {
         console.log("CITIZEN NET // DATOS CARGADOS");
         console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
         console.log("Objetos del catálogo:", catalogo.total);
+        console.log("Catálogo conectado correctamente:", catalogo.categorias);
+
+        const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
+        document.getElementById("citizen-name").textContent = nombre;
 
     } catch (error) {
         console.error("CITIZEN NET // ERROR DE DATOS", error);
     }
 }
-    const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
-    document.getElementById("citizen-name").textContent = nombre;
-    
+
 cargarDatosCitizenNet();
-</script>
-    
+</script>    
 </body>
 
 </html>

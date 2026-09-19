@@ -721,7 +721,26 @@
 
 </footer>
 
+<script>
+async function cargarDatosCitizenNet() {
+    try {
+        const [ciudadanos, catalogo] = await Promise.all([
+            fetch("Night_Xity_Citizen_Nucleo_v1.json").then(r => r.json()),
+            fetch("catalogo_night_xity_web_v1.json").then(r => r.json())
+        ]);
 
+        console.log("CITIZEN NET // DATOS CARGADOS");
+        console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
+        console.log("Objetos del catálogo:", catalogo.total);
+
+    } catch (error) {
+        console.error("CITIZEN NET // ERROR DE DATOS", error);
+    }
+}
+
+cargarDatosCitizenNet();
+</script>
+    
 </body>
 
 </html>

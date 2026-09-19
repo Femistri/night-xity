@@ -613,7 +613,24 @@
 
     </section>
 
+<section class="section">
+    <div class="section-title">SALUD MENTAL</div>
 
+    <div class="data-box">
+        <div class="label">MANÍAS</div>
+        <div class="value" id="citizen-manias">SIN REGISTRO</div>
+    </div>
+
+    <div class="data-box">
+        <div class="label">FOBIAS</div>
+        <div class="value" id="citizen-fobias">SIN REGISTRO</div>
+    </div>
+
+    <div class="data-box">
+        <div class="label">ADICCIONES</div>
+        <div class="value" id="citizen-addictions">SIN REGISTRO</div>
+    </div>
+</section>
 
     <!-- IMPLANTES -->
 
@@ -753,15 +770,17 @@
 <script>
 async function cargarDatosCitizenNet() {
     try {
-        const [ciudadanos, catalogo] = await Promise.all([
-            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=5").then(r => r.json()),
-            fetch("catalogo_night_xity_web_v1.json?v=5").then(r => r.json())
-        ]);
-
+       const [ciudadanos, catalogo, saludMental] = await Promise.all([
+    fetch("Night_Xity_Citizen_Nucleo_v1.json?v=6").then(r => r.json()),
+    fetch("catalogo_night_xity_web_v1.json?v=6").then(r => r.json()),
+    fetch("salud_mental_night_xity_v1.json?v=1").then(r => r.json())
+]);
         console.log("CITIZEN NET // DATOS CARGADOS");
         console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
         console.log("Objetos del catálogo:", catalogo.total);
         console.log("Catálogo conectado correctamente:", catalogo.categorias);
+        console.log("Manías:", saludMental.manias.length);
+console.log("Fobias:", saludMental.fobias.length);
 
         const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
         document.getElementById("citizen-name").textContent = nombre;

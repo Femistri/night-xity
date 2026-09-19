@@ -782,6 +782,8 @@ async function cargarDatosCitizenNet() {
         console.log("Manías:", saludMental.manias.length);
 console.log("Fobias:", saludMental.fobias.length);
 
+        const ciudadano = ciudadanos.ciudadanos[0];
+
      const maniasCiudadano = ciudadano.identidad.salud_mental?.manias || [];
 
 const maniasTexto = maniasCiudadano.map(numero => {

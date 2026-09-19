@@ -782,6 +782,15 @@ async function cargarDatosCitizenNet() {
         console.log("Manías:", saludMental.manias.length);
 console.log("Fobias:", saludMental.fobias.length);
 
+        const ciudadano = ciudadanos.ciudadanos[0];
+
+const maniasCiudadano = ciudadano.salud_mental?.manias || [];
+
+document.getElementById("citizen-manias").textContent =
+    maniasCiudadano.length > 0
+        ? maniasCiudadano.join(", ")
+        : "SIN REGISTRO";
+
         const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
         document.getElementById("citizen-name").textContent = nombre;
         

@@ -782,7 +782,7 @@ async function cargarDatosCitizenNet() {
         console.log("Manías:", saludMental.manias.length);
 console.log("Fobias:", saludMental.fobias.length);
 
-       const maniasCiudadano = ciudadano.salud_mental?.manias || [];
+     const maniasCiudadano = ciudadano.identidad.salud_mental?.manias || [];
 
 const maniasTexto = maniasCiudadano.map(numero => {
     const mania = saludMental.manias.find(item => item.d100 === numero);

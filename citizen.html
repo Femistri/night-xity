@@ -729,8 +729,8 @@
 async function cargarDatosCitizenNet() {
     try {
         const [ciudadanos, catalogo] = await Promise.all([
-            fetch("Night_Xity_Citizen_Nucleo_v1.json").then(r => r.json()),
-            fetch("catalogo_night_xity_web_v1.json").then(r => r.json())
+            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=4").then(r => r.json()),
+            fetch("catalogo_night_xity_web_v1.json?v=4").then(r => r.json())
         ]);
 
         console.log("CITIZEN NET // DATOS CARGADOS");

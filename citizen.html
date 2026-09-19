@@ -737,7 +737,9 @@ async function cargarDatosCitizenNet() {
         console.error("CITIZEN NET // ERROR DE DATOS", error);
     }
 }
-
+    const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
+    document.getElementById("citizen-name").textContent = nombre;
+    
 cargarDatosCitizenNet();
 </script>
     

@@ -118,7 +118,7 @@
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
-          "manias": [],
+          "manias": [1],
           "fobias": [],
           "adicciones": []
         }

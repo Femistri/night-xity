@@ -360,6 +360,11 @@
     <div class="label">TRASFONDO</div>
     <div class="value" id="citizen-background">SIN REGISTRO</div>
 </div>
+           <div class="data-box">
+    <div class="label">TARA SINTÉTICA</div>
+    <div class="value" id="citizen-tara">SIN REGISTRO</div>
+</div>
+            
         </div>
 
     </section>
@@ -759,6 +764,10 @@ document.getElementById("citizen-soul").textContent = alma;
 const trasfondo = ciudadanos.ciudadanos[0].identidad.trasfondo;
 document.getElementById("citizen-background").textContent =
     trasfondo || "SIN REGISTRO";
+        
+        const tara = ciudadanos.ciudadanos[0].identidad.tara_sintetica;
+document.getElementById("citizen-tara").textContent =
+    tara || "SIN REGISTRO";
         
     } catch (error) {
         console.error("CITIZEN NET // ERROR DE DATOS", error);

@@ -346,11 +346,20 @@
             </div>
 
 
-            <div class="data-box">
-                <div class="label">EMPLEADOR</div>
-                <div class="value">SIN REGISTRO</div>
-            </div>
+           <div class="data-box">
+    <div class="label">EMPLEADOR</div>
+    <div class="value">SIN REGISTRO</div>
+</div>
 
+<div class="data-box">
+    <div class="label">PUNTOS DE ALMA</div>
+    <div class="value" id="citizen-soul">SIN REGISTRO</div>
+</div>
+
+<div class="data-box">
+    <div class="label">TRASFONDO</div>
+    <div class="value" id="citizen-background">SIN REGISTRO</div>
+</div>
         </div>
 
     </section>
@@ -743,6 +752,13 @@ async function cargarDatosCitizenNet() {
         
 const clase = ciudadanos.ciudadanos[0].identidad.clase;
 document.getElementById("citizen-class").textContent = clase;
+
+        const alma = ciudadanos.ciudadanos[0].identidad.puntos_alma;
+document.getElementById("citizen-soul").textContent = alma;
+
+const trasfondo = ciudadanos.ciudadanos[0].identidad.trasfondo;
+document.getElementById("citizen-background").textContent =
+    trasfondo || "SIN REGISTRO";
         
     } catch (error) {
         console.error("CITIZEN NET // ERROR DE DATOS", error);

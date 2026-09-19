@@ -112,7 +112,7 @@
     {
       "identidad": {
         "nombre_clave": "Inesa",
-        "clase": null,
+        "clase": "Backup"
         "trasfondo": "",
         "tara_sintetica": null,
         "puntos_alma": 4,

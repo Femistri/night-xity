@@ -1,0 +1,1009 @@
+{
+  "version": "1.0",
+  "fuente": "La_Llamada_de_Cthulhu_100_Fobias_100_Manias.xlsx",
+  "nota": "Términos y orden d100 conservados de la fuente; descripciones en español según el archivo de trabajo.",
+  "manias": [
+    {
+      "d100": 1,
+      "termino": "Ablutomania",
+      "descripcion": "Compulsión por lavarse"
+    },
+    {
+      "d100": 2,
+      "termino": "Aboulomania",
+      "descripcion": "Indecisión patológica"
+    },
+    {
+      "d100": 3,
+      "termino": "Achluomania",
+      "descripcion": "Atracción excesiva por la oscuridad"
+    },
+    {
+      "d100": 4,
+      "termino": "Acromania",
+      "descripcion": "Obsesión o impulso hacia lugares altos"
+    },
+    {
+      "d100": 5,
+      "termino": "Agathomania",
+      "descripcion": "Amabilidad llevada a un grado patológico"
+    },
+    {
+      "d100": 6,
+      "termino": "Agromania",
+      "descripcion": "Deseo intenso de permanecer al aire libre"
+    },
+    {
+      "d100": 7,
+      "termino": "Aichmomania",
+      "descripcion": "Obsesión con objetos afilados o puntiagudos"
+    },
+    {
+      "d100": 8,
+      "termino": "Ailuromania",
+      "descripcion": "Afición anormal por los gatos"
+    },
+    {
+      "d100": 9,
+      "termino": "Algomania",
+      "descripcion": "Obsesión con el dolor"
+    },
+    {
+      "d100": 10,
+      "termino": "Alliomania",
+      "descripcion": "Obsesión con el ajo"
+    },
+    {
+      "d100": 11,
+      "termino": "Amaxomania",
+      "descripcion": "Obsesión con vehículos"
+    },
+    {
+      "d100": 12,
+      "termino": "Amenomania",
+      "descripcion": "Alegría irracional o permanente"
+    },
+    {
+      "d100": 13,
+      "termino": "Anthomania",
+      "descripcion": "Obsesión con las flores"
+    },
+    {
+      "d100": 14,
+      "termino": "Arithmomania",
+      "descripcion": "Preocupación obsesiva por números"
+    },
+    {
+      "d100": 15,
+      "termino": "Asoticamania",
+      "descripcion": "Tendencia a gastar de forma impulsiva"
+    },
+    {
+      "d100": 16,
+      "termino": "Automania",
+      "descripcion": "Gusto excesivo por la soledad"
+    },
+    {
+      "d100": 17,
+      "termino": "Balletomania",
+      "descripcion": "Afición anormal por el ballet"
+    },
+    {
+      "d100": 18,
+      "termino": "Bibliokleptomania",
+      "descripcion": "Impulso compulsivo a robar libros"
+    },
+    {
+      "d100": 19,
+      "termino": "Bibliomania",
+      "descripcion": "Obsesión con libros o lectura"
+    },
+    {
+      "d100": 20,
+      "termino": "Bruxomania",
+      "descripcion": "Impulso a rechinar los dientes"
+    },
+    {
+      "d100": 21,
+      "termino": "Cacodemomania",
+      "descripcion": "Creencia de estar habitado por un espíritu maligno"
+    },
+    {
+      "d100": 22,
+      "termino": "Callomania",
+      "descripcion": "Obsesión con la propia belleza"
+    },
+    {
+      "d100": 23,
+      "termino": "Cartacoethes",
+      "descripcion": "Impulso a encontrar mapas en todas partes"
+    },
+    {
+      "d100": 24,
+      "termino": "Catapedamania",
+      "descripcion": "Obsesión con saltar desde lugares altos"
+    },
+    {
+      "d100": 25,
+      "termino": "Cheimatomania",
+      "descripcion": "Deseo anormal por el frío o cosas frías"
+    },
+    {
+      "d100": 26,
+      "termino": "Choreomania",
+      "descripcion": "Frenesí o impulso incontrolable por bailar"
+    },
+    {
+      "d100": 27,
+      "termino": "Clinomania",
+      "descripcion": "Deseo excesivo de permanecer en cama"
+    },
+    {
+      "d100": 28,
+      "termino": "Coimetromania",
+      "descripcion": "Obsesión con los cementerios"
+    },
+    {
+      "d100": 29,
+      "termino": "Coloromania",
+      "descripcion": "Obsesión con un color concreto"
+    },
+    {
+      "d100": 30,
+      "termino": "Coulromania",
+      "descripcion": "Obsesión con los payasos"
+    },
+    {
+      "d100": 31,
+      "termino": "Countermania",
+      "descripcion": "Compulsión por enfrentarse a situaciones temidas"
+    },
+    {
+      "d100": 32,
+      "termino": "Dacnomania",
+      "descripcion": "Obsesión con matar"
+    },
+    {
+      "d100": 33,
+      "termino": "Demonomania",
+      "descripcion": "Creencia patológica de estar poseído por demonios"
+    },
+    {
+      "d100": 34,
+      "termino": "Dermatillomania",
+      "descripcion": "Impulso a pellizcar, rascar o manipular la piel"
+    },
+    {
+      "d100": 35,
+      "termino": "Dikemania",
+      "descripcion": "Obsesión por hacer que se cumpla la justicia"
+    },
+    {
+      "d100": 36,
+      "termino": "Dipsomania",
+      "descripcion": "Deseo anormal de alcohol"
+    },
+    {
+      "d100": 37,
+      "termino": "Doramania",
+      "descripcion": "Obsesión por poseer pieles"
+    },
+    {
+      "d100": 38,
+      "termino": "Doromania",
+      "descripcion": "Impulso obsesivo de hacer regalos"
+    },
+    {
+      "d100": 39,
+      "termino": "Drapetomania",
+      "descripcion": "Compulsión por escapar o huir"
+    },
+    {
+      "d100": 40,
+      "termino": "Ecdemiomania",
+      "descripcion": "Compulsión por vagar sin rumbo"
+    },
+    {
+      "d100": 41,
+      "termino": "Egomania",
+      "descripcion": "Autocentrismo o autoadoración irracional"
+    },
+    {
+      "d100": 42,
+      "termino": "Empleomania",
+      "descripcion": "Deseo insaciable de ocupar cargos"
+    },
+    {
+      "d100": 43,
+      "termino": "Enosimania",
+      "descripcion": "Creencia patológica de haber pecado"
+    },
+    {
+      "d100": 44,
+      "termino": "Epistemomania",
+      "descripcion": "Obsesión por adquirir conocimiento"
+    },
+    {
+      "d100": 45,
+      "termino": "Eremiomania",
+      "descripcion": "Compulsión por la quietud y el silencio"
+    },
+    {
+      "d100": 46,
+      "termino": "Etheromania",
+      "descripcion": "Deseo compulsivo de éter"
+    },
+    {
+      "d100": 47,
+      "termino": "Gamomania",
+      "descripcion": "Obsesión por formular propuestas matrimoniales extrañas"
+    },
+    {
+      "d100": 48,
+      "termino": "Geliomania",
+      "descripcion": "Compulsión incontrolable por reír"
+    },
+    {
+      "d100": 49,
+      "termino": "Goetomania",
+      "descripcion": "Obsesión con brujas y brujería"
+    },
+    {
+      "d100": 50,
+      "termino": "Graphomania",
+      "descripcion": "Obsesión por escribirlo todo"
+    },
+    {
+      "d100": 51,
+      "termino": "Gymnomania",
+      "descripcion": "Compulsión relacionada con la desnudez"
+    },
+    {
+      "d100": 52,
+      "termino": "Habromania",
+      "descripcion": "Tendencia a crear delirios agradables pese a la realidad"
+    },
+    {
+      "d100": 53,
+      "termino": "Helminthomania",
+      "descripcion": "Afición excesiva por gusanos"
+    },
+    {
+      "d100": 54,
+      "termino": "Hoplomania",
+      "descripcion": "Obsesión con armas de fuego"
+    },
+    {
+      "d100": 55,
+      "termino": "Hydromania",
+      "descripcion": "Deseo irracional de agua"
+    },
+    {
+      "d100": 56,
+      "termino": "Ichthyomania",
+      "descripcion": "Obsesión con los peces"
+    },
+    {
+      "d100": 57,
+      "termino": "Iconomania",
+      "descripcion": "Obsesión con iconos o retratos"
+    },
+    {
+      "d100": 58,
+      "termino": "Idolomania",
+      "descripcion": "Devoción u obsesión por un ídolo"
+    },
+    {
+      "d100": 59,
+      "termino": "Infomania",
+      "descripcion": "Acumulación compulsiva de datos y hechos"
+    },
+    {
+      "d100": 60,
+      "termino": "Klazomania",
+      "descripcion": "Impulso irracional a gritar"
+    },
+    {
+      "d100": 61,
+      "termino": "Kleptomania",
+      "descripcion": "Compulsión irracional por robar"
+    },
+    {
+      "d100": 62,
+      "termino": "Ligyromania",
+      "descripcion": "Impulso a producir ruidos fuertes o estridentes"
+    },
+    {
+      "d100": 63,
+      "termino": "Linonomania",
+      "descripcion": "Obsesión con hilos, cuerdas o cordones"
+    },
+    {
+      "d100": 64,
+      "termino": "Lotterymania",
+      "descripcion": "Deseo extremo de participar en loterías"
+    },
+    {
+      "d100": 65,
+      "termino": "Lypemania",
+      "descripcion": "Tendencia anormal hacia una melancolía profunda"
+    },
+    {
+      "d100": 66,
+      "termino": "Megalithomania",
+      "descripcion": "Ideas extrañas desencadenadas por círculos o piedras erguidas"
+    },
+    {
+      "d100": 67,
+      "termino": "Melomania",
+      "descripcion": "Obsesión con la música o una melodía"
+    },
+    {
+      "d100": 68,
+      "termino": "Metromania",
+      "descripcion": "Deseo insaciable de escribir versos"
+    },
+    {
+      "d100": 69,
+      "termino": "Misomania",
+      "descripcion": "Obsesión por odiar algo, alguien o algún grupo"
+    },
+    {
+      "d100": 70,
+      "termino": "Monomania",
+      "descripcion": "Obsesión anormal con una sola idea"
+    },
+    {
+      "d100": 71,
+      "termino": "Mythomania",
+      "descripcion": "Tendencia anormal a mentir o exagerar"
+    },
+    {
+      "d100": 72,
+      "termino": "Nosomania",
+      "descripcion": "Creencia delirante de padecer una enfermedad imaginaria"
+    },
+    {
+      "d100": 73,
+      "termino": "Notomania",
+      "descripcion": "Compulsión por registrarlo todo, por ejemplo mediante fotos"
+    },
+    {
+      "d100": 74,
+      "termino": "Onomamania",
+      "descripcion": "Obsesión con nombres de personas, lugares o cosas"
+    },
+    {
+      "d100": 75,
+      "termino": "Onomatomania",
+      "descripcion": "Deseo irresistible de repetir determinadas palabras"
+    },
+    {
+      "d100": 76,
+      "termino": "Onychotillomania",
+      "descripcion": "Compulsión por manipular o arrancar las uñas"
+    },
+    {
+      "d100": 77,
+      "termino": "Opsomania",
+      "descripcion": "Predilección obsesiva por un tipo de alimento"
+    },
+    {
+      "d100": 78,
+      "termino": "Paramania",
+      "descripcion": "Placer anormal por quejarse"
+    },
+    {
+      "d100": 79,
+      "termino": "Personamania",
+      "descripcion": "Compulsión por llevar máscaras"
+    },
+    {
+      "d100": 80,
+      "termino": "Phasmomania",
+      "descripcion": "Obsesión con fantasmas"
+    },
+    {
+      "d100": 81,
+      "termino": "Phonomania",
+      "descripcion": "Tendencia patológica al asesinato"
+    },
+    {
+      "d100": 82,
+      "termino": "Photomania",
+      "descripcion": "Deseo patológico de luz"
+    },
+    {
+      "d100": 83,
+      "termino": "Planomania",
+      "descripcion": "Deseo anormal de quebrantar normas sociales"
+    },
+    {
+      "d100": 84,
+      "termino": "Plutomania",
+      "descripcion": "Deseo obsesivo de riqueza"
+    },
+    {
+      "d100": 85,
+      "termino": "Pseudomania",
+      "descripcion": "Compulsión irracional por mentir"
+    },
+    {
+      "d100": 86,
+      "termino": "Pyromania",
+      "descripcion": "Compulsión por provocar incendios"
+    },
+    {
+      "d100": 87,
+      "termino": "Question-Asking Mania",
+      "descripcion": "Impulso compulsivo a hacer preguntas"
+    },
+    {
+      "d100": 88,
+      "termino": "Rhinotillexomania",
+      "descripcion": "Impulso compulsivo a hurgarse la nariz"
+    },
+    {
+      "d100": 89,
+      "termino": "Scribbleomania",
+      "descripcion": "Obsesión por garabatear o hacer dibujos repetitivos"
+    },
+    {
+      "d100": 90,
+      "termino": "Siderodromomania",
+      "descripcion": "Fascinación intensa por trenes y viajes ferroviarios"
+    },
+    {
+      "d100": 91,
+      "termino": "Sophomania",
+      "descripcion": "Creencia delirante de ser extraordinariamente inteligente"
+    },
+    {
+      "d100": 92,
+      "termino": "Technomania",
+      "descripcion": "Obsesión con tecnologías nuevas"
+    },
+    {
+      "d100": 93,
+      "termino": "Thanatomania",
+      "descripcion": "Creencia de estar bajo una maldición de muerte"
+    },
+    {
+      "d100": 94,
+      "termino": "Theomania",
+      "descripcion": "Creencia de ser una divinidad"
+    },
+    {
+      "d100": 95,
+      "termino": "Titillomaniac",
+      "descripcion": "Compulsión por rascarse"
+    },
+    {
+      "d100": 96,
+      "termino": "Tomomania",
+      "descripcion": "Predilección irracional por cirugías"
+    },
+    {
+      "d100": 97,
+      "termino": "Trichotillomania",
+      "descripcion": "Impulso de arrancarse el propio cabello"
+    },
+    {
+      "d100": 98,
+      "termino": "Typhlomania",
+      "descripcion": "Ceguera patológica"
+    },
+    {
+      "d100": 99,
+      "termino": "Xenomania",
+      "descripcion": "Obsesión con cosas extranjeras"
+    },
+    {
+      "d100": 100,
+      "termino": "Zoomania",
+      "descripcion": "Afición extrema por los animales"
+    }
+  ],
+  "fobias": [
+    {
+      "d100": 1,
+      "termino": "Ablutophobia",
+      "descripcion": "Miedo a lavarse o bañarse"
+    },
+    {
+      "d100": 2,
+      "termino": "Acrophobia",
+      "descripcion": "Miedo a las alturas"
+    },
+    {
+      "d100": 3,
+      "termino": "Aerophobia",
+      "descripcion": "Miedo a volar"
+    },
+    {
+      "d100": 4,
+      "termino": "Agoraphobia",
+      "descripcion": "Miedo a espacios abiertos, públicos o concurridos"
+    },
+    {
+      "d100": 5,
+      "termino": "Alektorophobia",
+      "descripcion": "Miedo a las gallinas"
+    },
+    {
+      "d100": 6,
+      "termino": "Alliumphobia",
+      "descripcion": "Miedo al ajo"
+    },
+    {
+      "d100": 7,
+      "termino": "Amaxophobia",
+      "descripcion": "Miedo a viajar o estar dentro de vehículos"
+    },
+    {
+      "d100": 8,
+      "termino": "Ancraophobia",
+      "descripcion": "Miedo al viento"
+    },
+    {
+      "d100": 9,
+      "termino": "Androphobia",
+      "descripcion": "Miedo a los hombres"
+    },
+    {
+      "d100": 10,
+      "termino": "Anglophobia",
+      "descripcion": "Miedo o rechazo a Inglaterra o a su cultura"
+    },
+    {
+      "d100": 11,
+      "termino": "Anthrophobia",
+      "descripcion": "Miedo a las flores"
+    },
+    {
+      "d100": 12,
+      "termino": "Apotemnophobia",
+      "descripcion": "Miedo a personas con amputaciones"
+    },
+    {
+      "d100": 13,
+      "termino": "Arachnophobia",
+      "descripcion": "Miedo a las arañas"
+    },
+    {
+      "d100": 14,
+      "termino": "Astraphobia",
+      "descripcion": "Miedo a los relámpagos"
+    },
+    {
+      "d100": 15,
+      "termino": "Atephobia",
+      "descripcion": "Miedo a ruinas o edificios arruinados"
+    },
+    {
+      "d100": 16,
+      "termino": "Aulophobia",
+      "descripcion": "Miedo a las flautas"
+    },
+    {
+      "d100": 17,
+      "termino": "Bacteriophobia",
+      "descripcion": "Miedo a las bacterias"
+    },
+    {
+      "d100": 18,
+      "termino": "Ballistophobia",
+      "descripcion": "Miedo a proyectiles o balas"
+    },
+    {
+      "d100": 19,
+      "termino": "Basophobia",
+      "descripcion": "Miedo a caer"
+    },
+    {
+      "d100": 20,
+      "termino": "Bibliophobia",
+      "descripcion": "Miedo a los libros"
+    },
+    {
+      "d100": 21,
+      "termino": "Botanophobia",
+      "descripcion": "Miedo a las plantas"
+    },
+    {
+      "d100": 22,
+      "termino": "Caligynephobia",
+      "descripcion": "Miedo a mujeres consideradas bellas"
+    },
+    {
+      "d100": 23,
+      "termino": "Cheimaphobia",
+      "descripcion": "Miedo al frío"
+    },
+    {
+      "d100": 24,
+      "termino": "Chronomentrophobia",
+      "descripcion": "Miedo a los relojes"
+    },
+    {
+      "d100": 25,
+      "termino": "Claustrophobia",
+      "descripcion": "Miedo a espacios confinados"
+    },
+    {
+      "d100": 26,
+      "termino": "Coulrophobia",
+      "descripcion": "Miedo a los payasos"
+    },
+    {
+      "d100": 27,
+      "termino": "Cynophobia",
+      "descripcion": "Miedo a los perros"
+    },
+    {
+      "d100": 28,
+      "termino": "Demonophobia",
+      "descripcion": "Miedo a espíritus o demonios"
+    },
+    {
+      "d100": 29,
+      "termino": "Demophobia",
+      "descripcion": "Miedo a las multitudes"
+    },
+    {
+      "d100": 30,
+      "termino": "Dentophobia",
+      "descripcion": "Miedo a los dentistas"
+    },
+    {
+      "d100": 31,
+      "termino": "Disposophobia",
+      "descripcion": "Miedo a desechar cosas; tendencia al acaparamiento"
+    },
+    {
+      "d100": 32,
+      "termino": "Doraphobia",
+      "descripcion": "Miedo a pieles o pelajes"
+    },
+    {
+      "d100": 33,
+      "termino": "Dromophobia",
+      "descripcion": "Miedo a cruzar calles"
+    },
+    {
+      "d100": 34,
+      "termino": "Ecclesiophobia",
+      "descripcion": "Miedo a iglesias"
+    },
+    {
+      "d100": 35,
+      "termino": "Eisoptrophobia",
+      "descripcion": "Miedo a los espejos"
+    },
+    {
+      "d100": 36,
+      "termino": "Enetophobia",
+      "descripcion": "Miedo a agujas o alfileres"
+    },
+    {
+      "d100": 37,
+      "termino": "Entomophobia",
+      "descripcion": "Miedo a los insectos"
+    },
+    {
+      "d100": 38,
+      "termino": "Felinophobia",
+      "descripcion": "Miedo a los gatos"
+    },
+    {
+      "d100": 39,
+      "termino": "Gephyrophobia",
+      "descripcion": "Miedo a cruzar puentes"
+    },
+    {
+      "d100": 40,
+      "termino": "Gerontophobia",
+      "descripcion": "Miedo a las personas mayores o a envejecer"
+    },
+    {
+      "d100": 41,
+      "termino": "Gynophobia",
+      "descripcion": "Miedo a las mujeres"
+    },
+    {
+      "d100": 42,
+      "termino": "Haemaphobia",
+      "descripcion": "Miedo a la sangre"
+    },
+    {
+      "d100": 43,
+      "termino": "Hamartophobia",
+      "descripcion": "Miedo a pecar"
+    },
+    {
+      "d100": 44,
+      "termino": "Haphophobia",
+      "descripcion": "Miedo al contacto físico"
+    },
+    {
+      "d100": 45,
+      "termino": "Herpetophobia",
+      "descripcion": "Miedo a los reptiles"
+    },
+    {
+      "d100": 46,
+      "termino": "Homichlophobia",
+      "descripcion": "Miedo a la niebla"
+    },
+    {
+      "d100": 47,
+      "termino": "Hoplophobia",
+      "descripcion": "Miedo a las armas de fuego"
+    },
+    {
+      "d100": 48,
+      "termino": "Hydrophobia",
+      "descripcion": "Miedo al agua"
+    },
+    {
+      "d100": 49,
+      "termino": "Hypnophobia",
+      "descripcion": "Miedo a dormir o a ser hipnotizado"
+    },
+    {
+      "d100": 50,
+      "termino": "Iatrophobia",
+      "descripcion": "Miedo a los médicos"
+    },
+    {
+      "d100": 51,
+      "termino": "Ichthyophobia",
+      "descripcion": "Miedo a los peces"
+    },
+    {
+      "d100": 52,
+      "termino": "Katsaridaphobia",
+      "descripcion": "Miedo a las cucarachas"
+    },
+    {
+      "d100": 53,
+      "termino": "Keraunophobia",
+      "descripcion": "Miedo a los truenos"
+    },
+    {
+      "d100": 54,
+      "termino": "Lachanophobia",
+      "descripcion": "Miedo a las verduras"
+    },
+    {
+      "d100": 55,
+      "termino": "Ligyrophobia",
+      "descripcion": "Miedo a ruidos fuertes"
+    },
+    {
+      "d100": 56,
+      "termino": "Limnophobia",
+      "descripcion": "Miedo a los lagos"
+    },
+    {
+      "d100": 57,
+      "termino": "Mechanophobia",
+      "descripcion": "Miedo a máquinas o maquinaria"
+    },
+    {
+      "d100": 58,
+      "termino": "Megalophobia",
+      "descripcion": "Miedo a cosas muy grandes"
+    },
+    {
+      "d100": 59,
+      "termino": "Merinthophobia",
+      "descripcion": "Miedo a ser atado o inmovilizado"
+    },
+    {
+      "d100": 60,
+      "termino": "Meteorophobia",
+      "descripcion": "Miedo a meteoros o meteoritos"
+    },
+    {
+      "d100": 61,
+      "termino": "Monophobia",
+      "descripcion": "Miedo a estar solo"
+    },
+    {
+      "d100": 62,
+      "termino": "Mysophobia",
+      "descripcion": "Miedo a suciedad o contaminación"
+    },
+    {
+      "d100": 63,
+      "termino": "Myxophobia",
+      "descripcion": "Miedo al limo o sustancias viscosas"
+    },
+    {
+      "d100": 64,
+      "termino": "Necrophobia",
+      "descripcion": "Miedo a cadáveres o cosas muertas"
+    },
+    {
+      "d100": 65,
+      "termino": "Octophobia",
+      "descripcion": "Miedo al número o figura 8"
+    },
+    {
+      "d100": 66,
+      "termino": "Odontophobia",
+      "descripcion": "Miedo a los dientes"
+    },
+    {
+      "d100": 67,
+      "termino": "Oneirophobia",
+      "descripcion": "Miedo a los sueños"
+    },
+    {
+      "d100": 68,
+      "termino": "Onomatophobia",
+      "descripcion": "Miedo a oír determinadas palabras"
+    },
+    {
+      "d100": 69,
+      "termino": "Ophidiophobia",
+      "descripcion": "Miedo a las serpientes"
+    },
+    {
+      "d100": 70,
+      "termino": "Ornithophobia",
+      "descripcion": "Miedo a las aves"
+    },
+    {
+      "d100": 71,
+      "termino": "Parasitophobia",
+      "descripcion": "Miedo a los parásitos"
+    },
+    {
+      "d100": 72,
+      "termino": "Pediophobia",
+      "descripcion": "Miedo a las muñecas"
+    },
+    {
+      "d100": 73,
+      "termino": "Phagophobia",
+      "descripcion": "Miedo a tragar, comer o ser devorado"
+    },
+    {
+      "d100": 74,
+      "termino": "Pharmacophobia",
+      "descripcion": "Miedo a los medicamentos"
+    },
+    {
+      "d100": 75,
+      "termino": "Phasmophobia",
+      "descripcion": "Miedo a los fantasmas"
+    },
+    {
+      "d100": 76,
+      "termino": "Phenogophobia",
+      "descripcion": "Miedo a la luz del día"
+    },
+    {
+      "d100": 77,
+      "termino": "Pogonophobia",
+      "descripcion": "Miedo a las barbas"
+    },
+    {
+      "d100": 78,
+      "termino": "Potamophobia",
+      "descripcion": "Miedo a los ríos"
+    },
+    {
+      "d100": 79,
+      "termino": "Potophobia",
+      "descripcion": "Miedo al alcohol o bebidas alcohólicas"
+    },
+    {
+      "d100": 80,
+      "termino": "Pyrophobia",
+      "descripcion": "Miedo al fuego"
+    },
+    {
+      "d100": 81,
+      "termino": "Rhabdophobia",
+      "descripcion": "Miedo a la magia"
+    },
+    {
+      "d100": 82,
+      "termino": "Scotophobia",
+      "descripcion": "Miedo a la oscuridad o la noche"
+    },
+    {
+      "d100": 83,
+      "termino": "Selenophobia",
+      "descripcion": "Miedo a la luna"
+    },
+    {
+      "d100": 84,
+      "termino": "Siderodromophobia",
+      "descripcion": "Miedo a viajar en tren"
+    },
+    {
+      "d100": 85,
+      "termino": "Siderophobia",
+      "descripcion": "Miedo a las estrellas"
+    },
+    {
+      "d100": 86,
+      "termino": "Stenophobia",
+      "descripcion": "Miedo a cosas o lugares estrechos"
+    },
+    {
+      "d100": 87,
+      "termino": "Symmetrophobia",
+      "descripcion": "Miedo a la simetría"
+    },
+    {
+      "d100": 88,
+      "termino": "Taphephobia",
+      "descripcion": "Miedo a ser enterrado vivo o a los cementerios"
+    },
+    {
+      "d100": 89,
+      "termino": "Taurophobia",
+      "descripcion": "Miedo a los toros"
+    },
+    {
+      "d100": 90,
+      "termino": "Telephonophobia",
+      "descripcion": "Miedo a los teléfonos"
+    },
+    {
+      "d100": 91,
+      "termino": "Teratophobia",
+      "descripcion": "Miedo a los monstruos"
+    },
+    {
+      "d100": 92,
+      "termino": "Thalassophobia",
+      "descripcion": "Miedo al mar"
+    },
+    {
+      "d100": 93,
+      "termino": "Tomophobia",
+      "descripcion": "Miedo a operaciones quirúrgicas"
+    },
+    {
+      "d100": 94,
+      "termino": "Triskadekaphobia",
+      "descripcion": "Miedo al número 13"
+    },
+    {
+      "d100": 95,
+      "termino": "Vestiphobia",
+      "descripcion": "Miedo a la ropa"
+    },
+    {
+      "d100": 96,
+      "termino": "Wiccaphobia",
+      "descripcion": "Miedo a brujas y brujería"
+    },
+    {
+      "d100": 97,
+      "termino": "Xanthophobia",
+      "descripcion": "Miedo al color amarillo o a la palabra “amarillo”"
+    },
+    {
+      "d100": 98,
+      "termino": "Xenoglossophobia",
+      "descripcion": "Miedo a lenguas extranjeras"
+    },
+    {
+      "d100": 99,
+      "termino": "Xenophobia",
+      "descripcion": "Miedo a desconocidos o extranjeros"
+    },
+    {
+      "d100": 100,
+      "termino": "Zoophobia",
+      "descripcion": "Miedo a los animales"
+    }
+  ]
+}

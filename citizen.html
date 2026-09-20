@@ -298,76 +298,105 @@
         }
 
 
-        /* =========================
-           SALUD MENTAL
-           ========================= */
+       <!-- =========================
+     SALUD MENTAL
+     ========================= -->
 
-        .mental-health {
-            grid-column: 1 / -1;
-        }
+<section class="panel mental-health">
 
+    <h2>SALUD MENTAL</h2>
 
-        .mental-health .item-info {
-            color: #aaa;
-            font-size: 14px;
-            line-height: 1.6;
-        }
+    <!-- MANÍAS -->
 
+    <div class="item">
 
-        .mental-health .item-info strong {
-            color: #eee;
-        }
+        <div class="item-name">
+            MANÍAS
+        </div>
 
+        <div class="item-info" id="citizen-manias">
+            SIN REGISTRO
+        </div>
 
-        @media (max-width: 700px) {
-
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .profile {
-                grid-column: auto;
-            }
-
-            .mental-health {
-                grid-column: auto;
-            }
-
-            .data {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-<header>
-
-    <div class="system">
-        NIGHT XITY // CITIZEN NET
     </div>
 
-    <h1>PERFIL CIUDADANO</h1>
 
-    <div class="citizen-id">
-        REGISTRO NX-2066-0001
+    <!-- FOBIAS -->
+
+    <div class="item">
+
+        <div class="item-name">
+            FOBIAS
+        </div>
+
+        <div class="item-info" id="citizen-fobias">
+            SIN REGISTRO
+        </div>
+
     </div>
 
-</header>
 
+    <!-- ADICCIONES -->
 
+    <div class="item">
 
-<main>
+        <div class="item-name">
+            ADICCIONES
+        </div>
 
+        <div class="item-info" id="citizen-addictions">
+            SIN REGISTRO
+        </div>
 
-<div class="grid">
+        <div style="margin-top:15px;">
 
+            <select
+                id="addiction-select"
+                style="
+                    width:100%;
+                    padding:10px;
+                    background:#111;
+                    color:#eee;
+                    border:1px solid #555;
+                    font-size:14px;
+                "
+            >
+                <option value="">
+                    + Añadir adicción
+                </option>
+            </select>
+
+        </div>
+
+        <div style="margin-top:10px;">
+
+            <button
+                id="addiction-add-button"
+                type="button"
+                style="
+                    padding:9px 14px;
+                    background:#111;
+                    color:#eee;
+                    border:1px solid #777;
+                    cursor:pointer;
+                "
+            >
+                AÑADIR
+            </button>
+
+        </div>
+
+        <div
+            id="citizen-addictions-selected"
+            style="
+                margin-top:15px;
+            "
+        >
+        </div>
+
+    </div>
+
+</section>
 
     <!-- =========================
          IDENTIDAD

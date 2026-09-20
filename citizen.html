@@ -488,7 +488,23 @@
 
     </section>
 
+<!-- =========================
+     TALENTOS
+     ========================= -->
 
+<section class="panel">
+
+    <h2>TALENTOS</h2>
+
+    <div class="item">
+
+        <div class="item-info" id="citizen-talents">
+            SIN REGISTRO
+        </div>
+
+    </div>
+
+</section>
 
     <!-- =========================
          SALUD MENTAL
@@ -1151,6 +1167,37 @@ async function cargarDatosCitizenNet() {
 
         document.getElementById("citizen-tara").textContent =
             identidad.tara_sintetica || "SIN REGISTRO";
+
+        /* =========================
+           TALENTOS
+           ========================= */
+
+        const talentosCiudadano =
+            Array.isArray(identidad.talentos)
+                ? identidad.talentos
+                : [];
+
+        const talentosTexto = talentosCiudadano.map(talento => {
+
+            const talentoCatalogo = saludMental.talentos?.[talento];
+
+            if (!talentoCatalogo) {
+                return `<strong>${talento}</strong><br>SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${talento}
+                </strong>
+                <br>
+                ${talentoCatalogo}
+            `;
+        });
+
+        document.getElementById("citizen-talents").innerHTML =
+            talentosTexto.length > 0
+                ? talentosTexto.join("<br><br>")
+                : "SIN REGISTRO";
 
 
         /* =========================

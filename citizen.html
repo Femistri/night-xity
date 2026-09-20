@@ -470,10 +470,17 @@
                 <div class="label">
                     TRASFONDO
                 </div>
+                
+<div class="data-box">
 
-                <div class="value" id="citizen-background">
-                    SIN REGISTRO
-                </div>
+    <div class="label">
+        TRASFONDO
+    </div>
+
+    <textarea class="value" id="citizen-background" rows="3"
+        placeholder="TRASFONDO DEL CIUDADANO"></textarea>
+
+</div>
 
             </div>
 
@@ -1157,8 +1164,8 @@ async function cargarDatosCitizenNet() {
      document.getElementById("citizen-soul").value =
     identidad.puntos_alma ?? "";
 
-        document.getElementById("citizen-background").textContent =
-            identidad.trasfondo || "SIN REGISTRO";
+        document.getElementById("citizen-background").value =
+    identidad.trasfondo || "";
 
         document.getElementById("citizen-tara").textContent =
             identidad.tara_sintetica || "SIN REGISTRO";

@@ -1197,6 +1197,39 @@ async function cargarDatosCitizenNet() {
                 ? implantesTexto.join("<br><br>")
                 : "SIN REGISTRO";
 
+                /* =========================
+           PROGRAMAS
+           ========================= */
+
+        const programasCiudadano =
+            Array.isArray(ciudadano.inventario?.programas)
+                ? ciudadano.inventario.programas
+                : [];
+
+        const programasTexto = programasCiudadano.map(id => {
+
+            const programa = catalogo.items?.find(
+                item => item.id === id
+            );
+
+            if (!programa) {
+                return `<strong>${id}</strong><br>SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${programa.nombre}
+                </strong>
+                <br>
+                ${programa.descripcion}
+            `;
+        });
+
+        document.getElementById("citizen-programs").innerHTML =
+            programasTexto.length > 0
+                ? programasTexto.join("<br><br>")
+                : "SIN REGISTRO";
+        
         /* =========================
            SALUD MENTAL
            ========================= */

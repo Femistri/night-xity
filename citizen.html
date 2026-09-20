@@ -454,9 +454,13 @@
                     PUNTOS DE ALMA
                 </div>
 
-                <div class="value" id="citizen-soul">
-                    SIN REGISTRO
-                </div>
+             <select class="value" id="citizen-soul">
+    <option value="4">4</option>
+    <option value="3">3</option>
+    <option value="2">2</option>
+    <option value="1">1</option>
+    <option value="0">0</option>
+</select>
 
             </div>
 
@@ -1150,8 +1154,8 @@ async function cargarDatosCitizenNet() {
        document.getElementById("citizen-class").value =
     identidad.clase || "";
 
-        document.getElementById("citizen-soul").textContent =
-            identidad.puntos_alma ?? "SIN REGISTRO";
+     document.getElementById("citizen-soul").value =
+    identidad.puntos_alma ?? "";
 
         document.getElementById("citizen-background").textContent =
             identidad.trasfondo || "SIN REGISTRO";

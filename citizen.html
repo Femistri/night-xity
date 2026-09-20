@@ -1179,7 +1179,7 @@ async function cargarDatosCitizenNet() {
 
         const talentosTexto = talentosCiudadano.map(talento => {
 
-            const talentoCatalogo = saludMental.talentos?.[talento];
+            const talentoCatalogo = ciudadanos.talentos?.[talento];
 
             if (!talentoCatalogo) {
                 return `<strong>${talento}</strong><br>SIN REGISTRO`;

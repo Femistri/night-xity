@@ -1238,9 +1238,15 @@ async function cargarDatosCitizenNet() {
 
         const adiccionesTexto = adiccionesCiudadano.map(adiccion => {
 
-            if (typeof adiccion === "string") {
-                return adiccion;
-            }
+           if (typeof adiccion === "string") {
+    const droga = drogasCatalogo.find(
+        item => item.id === adiccion
+    );
+
+    return droga
+        ? droga.nombre
+        : `ID ${adiccion} · SIN REGISTRO`;
+}
 
             if (typeof adiccion === "number") {
 

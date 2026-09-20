@@ -1083,156 +1083,198 @@
 
 
 <script>
-
 async function cargarDatosCitizenNet() {
-
     try {
 
         const [ciudadanos, catalogo, saludMental] = await Promise.all([
 
-            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=12")
+            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=13")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar Night_Xity_Citizen_Nucleo_v1.json"
                         );
                     }
-
                     return response.json();
                 }),
 
-            fetch("catalogo_night_xity_web_v1.json?v=7")
+            fetch("catalogo_night_xity_web_v1.json?v=8")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar catalogo_night_xity_web_v1.json"
                         );
                     }
-
                     return response.json();
                 }),
 
-            fetch("salud_mental_night_xity_v1.json?v=2")
+            fetch("salud_mental_night_xity_v1.json?v=3")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar salud_mental_night_xity_v1.json"
                         );
                     }
-
                     return response.json();
                 })
-
         ]);
 
-
-        /*
-         * =========================
-         * VERIFICACIÓN DE DATOS
-         * =========================
-         */
-
         console.log("CITIZEN NET // DATOS CARGADOS");
+        console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
+        console.log("Objetos del catálogo:", catalogo.total);
+        console.log("Manías:", saludMental.manias.length);
+        console.log("Fobias:", saludMental.fobias.length);
 
-        console.log(
-            "Ciudadanos:",
-            ciudadanos.ciudadanos.length
-        );
+        const ciudadano = ciudadanos.ciudadanos[0];
 
-        console.log(
-            "Objetos del catálogo:",
-            catalogo.total
-        );
+        if (!ciudadano || !ciudadano.identidad) {
+            throw new Error("No se encontró el ciudadano principal.");
+        }
 
-        console.log(
-            "Manías:",
-            saludMental.manias.length
-        );
+        const identidad = ciudadano.identidad;
 
-        console.log(
-            "Fobias:",
-            saludMental.fobias.length
-        );
-
-
-        /*
-         * =========================
-         * CIUDADANO ACTUAL
-         * =========================
-         */
-
-        const ciudadano =
-            ciudadanos.ciudadanos[0];
-
-
-        const identidad =
-            ciudadano.identidad;
-
-
-        /*
-         * =========================
-         * IDENTIDAD
-         * =========================
-         */
+        /* =========================
+           IDENTIDAD
+           ========================= */
 
         document.getElementById("citizen-name").textContent =
             identidad.nombre_clave || "SIN REGISTRO";
 
-
         document.getElementById("citizen-class").textContent =
             identidad.clase || "SIN REGISTRO";
-
 
         document.getElementById("citizen-soul").textContent =
             identidad.puntos_alma ?? "SIN REGISTRO";
 
-
         document.getElementById("citizen-background").textContent =
             identidad.trasfondo || "SIN REGISTRO";
-
 
         document.getElementById("citizen-tara").textContent =
             identidad.tara_sintetica || "SIN REGISTRO";
 
 
-        /*
-         * =========================
-         * SALUD MENTAL
-         * =========================
-         */
+        /* =========================
+           SALUD MENTAL
+           ========================= */
 
-        const salud =
-            identidad.salud_mental || {};
+        const salud = identidad.salud_mental || {};
 
 
-        /*
-         * MANÍAS
-         */
+        /* MANÍAS */
 
         const maniasCiudadano =
             Array.isArray(salud.manias)
                 ? salud.manias
                 : [];
 
+        const maniasTexto = maniasCiudadano.map(numero => {
 
-        const maniasTexto =
-            maniasCiudadano.map(numero => {
+            const mania = saludMental.manias.find(
+                item => Number(item.d100) === Number(numero)
+            );
 
-                const mania =
-                    saludMental.manias.find(
-                        item => Number(item.d100) === Number(numero)
-                    );
+            if (!mania) {
+                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+                </strong>
+                <br>
+                ${mania.descripcion}
+            `;
+        });
+
+        document.getElementById("citizen-manias").innerHTML =
+            maniasTexto.length > 0
+                ? maniasTexto.join("<br><br>")
+                : "SIN REGISTRO";
 
 
-                if (!mania) {
+        /* FOBIAS */
 
-                    return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
+        const fobiasCiudadano =
+            Array.isArray(salud.fobias)
+                ? salud.fobias
+                : [];
 
-                }
+        const fobiasTexto = fobiasCiudadano.map(numero => {
+
+            const fobia = saludMental.fobias.find(
+                item => Number(item.d100) === Number(numero)
+            );
+
+            if (!fobia) {
+                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
+                </strong>
+                <br>
+                ${fobia.descripcion}
+            `;
+        });
+
+        document.getElementById("citizen-fobias").innerHTML =
+            fobiasTexto.length > 0
+                ? fobiasTexto.join("<br><br>")
+                : "SIN REGISTRO";
 
 
-                return `
-                    <strong>
-                        ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
-                    </strong>
-                    <
+        /* ADICCIONES */
+
+        const adiccionesCiudadano =
+            Array.isArray(salud.adicciones)
+                ? salud.adicciones
+                : [];
+
+        const drogasCatalogo =
+            Array.isArray(catalogo.Drogas)
+                ? catalogo.Drogas
+                : [];
+
+        const adiccionesTexto = adiccionesCiudadano.map(adiccion => {
+
+            if (typeof adiccion === "string") {
+                return adiccion;
+            }
+
+            if (typeof adiccion === "number") {
+
+                const droga = drogasCatalogo.find(
+                    item => Number(item.id) === Number(adiccion)
+                );
+
+                return droga
+                    ? droga.nombre
+                    : `ID ${adiccion} · SIN REGISTRO`;
+            }
+
+            return "SIN REGISTRO";
+        });
+
+        document.getElementById("citizen-addictions").innerHTML =
+            adiccionesTexto.length > 0
+                ? adiccionesTexto.join("<br><br>")
+                : "SIN REGISTRO";
+
+
+        console.log("CITIZEN NET // IDENTIDAD CARGADA");
+        console.log("Ciudadano:", identidad.nombre_clave);
+        console.log("Clase:", identidad.clase);
+        console.log("Puntos de alma:", identidad.puntos_alma);
+
+    } catch (error) {
+
+        console.error(
+            "CITIZEN NET // ERROR DE DATOS",
+            error
+        );
+    }
+}
+
+cargarDatosCitizenNet();
+</script>

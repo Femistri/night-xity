@@ -552,10 +552,11 @@
                 FOBIAS
             </div>
 
-            <div class="item-info" id="citizen-fobias">
-                SIN REGISTRO
-            </div>
-
+           <details>
+    <summary>SELECCIONAR FOBIAS</summary>
+    <div class="item-info" id="citizen-fobias">
+    </div>
+</details>
         </div>
 
 
@@ -1441,14 +1442,24 @@ maniasContainer.innerHTML =
                 ? salud.fobias
                 : [];
 
-        const fobiasTexto = fobiasCiudadano.map(numero => {
+        const fobiasContainer =
+    document.getElementById("citizen-fobias");
 
-            const fobia = saludMental.fobias.find(
-                item => Number(item.d100) === Number(numero)
-            );
-
-            if (!fobia) {
-                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
+fobiasContainer.innerHTML =
+    saludMental.fobias.map(fobia => `
+        <label style="display:block; margin:8px 0;">
+            <input
+                type="checkbox"
+                value="${fobia.d100}"
+                ${fobiasCiudadano.includes(Number(fobia.d100)) ? "checked" : ""}
+            >
+            <strong>
+                ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
+            </strong>
+            <br>
+            <small>${fobia.descripcion}</small>
+        </label>
+    `).join("");
             }
 
             return `

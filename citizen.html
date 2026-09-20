@@ -1676,46 +1676,132 @@ const renderFobias = () => {
 renderFobias();   
         /* ADICCIONES */
 
+        /* ADICCIONES */
+
         const adiccionesCiudadano =
             Array.isArray(salud.adicciones)
                 ? salud.adicciones
                 : [];
 
-      const drogasCatalogo =
-    Array.isArray(catalogo.items)
-        ? catalogo.items.filter(item => item.categoria === "Drogas")
-        : [];
-        
-        const adiccionesTexto = adiccionesCiudadano.map(adiccion => {
+        const drogasCatalogo =
+            Array.isArray(catalogo.items)
+                ? catalogo.items.filter(
+                    item => item.categoria === "Drogas"
+                )
+                : [];
 
-           if (typeof adiccion === "string") {
-    const droga = drogasCatalogo.find(
-        item => item.id === adiccion
-    );
+        const adiccionesContainer =
+            document.getElementById("citizen-addictions");
 
-    return droga
-        ? droga.nombre
-        : `ID ${adiccion} · SIN REGISTRO`;
-}
+        const obtenerIdAdiccion = adiccion =>
+            String(adiccion);
 
-            if (typeof adiccion === "number") {
+        const renderAdicciones = () => {
 
-                const droga = drogasCatalogo.find(
-                    item => Number(item.id) === Number(adiccion)
+            const seleccionadas =
+                drogasCatalogo.filter(droga =>
+                    adiccionesCiudadano.includes(
+                        obtenerIdAdiccion(droga.id)
+                    )
                 );
 
-                return droga
-                    ? droga.nombre
-                    : `ID ${adiccion} · SIN REGISTRO`;
-            }
+            const disponibles =
+                drogasCatalogo.filter(droga =>
+                    !adiccionesCiudadano.includes(
+                        obtenerIdAdiccion(droga.id)
+                    )
+                );
 
-            return "SIN REGISTRO";
-        });
+            adiccionesContainer.innerHTML = `
 
-        document.getElementById("citizen-addictions").innerHTML =
-            adiccionesTexto.length > 0
-                ? adiccionesTexto.join("<br><br>")
-                : "SIN REGISTRO";
+                <div style="margin-bottom:16px;">
+
+                    <strong>
+                        SELECCIONADAS (${seleccionadas.length})
+                    </strong>
+
+                    ${
+                        seleccionadas.length > 0
+                            ? seleccionadas.map(droga => `
+                                <label style="display:block; margin:8px 0;">
+                                    <input
+                                        type="checkbox"
+                                        value="${droga.id}"
+                                        checked
+                                    >
+                                    <strong>
+                                        ${droga.nombre}
+                                    </strong>
+                                    <br>
+                                    <small>
+                                        ${droga.descripcion || "SIN DESCRIPCIÓN"}
+                                    </small>
+                                </label>
+                            `).join("")
+                            : `<div style="margin-top:8px;">NINGUNA</div>`
+                    }
+
+                </div>
+
+                <hr>
+
+                <div style="margin-top:16px;">
+
+                    <strong>
+                        TODAS LAS ADICCIONES
+                    </strong>
+
+                    ${
+                        disponibles.map(droga => `
+                            <label style="display:block; margin:8px 0;">
+                                <input
+                                    type="checkbox"
+                                    value="${droga.id}"
+                                >
+                                <strong>
+                                    ${droga.nombre}
+                                </strong>
+                                <br>
+                                <small>
+                                    ${droga.descripcion || "SIN DESCRIPCIÓN"}
+                                </small>
+                            </label>
+                        `).join("")
+                    }
+
+                </div>
+            `;
+
+            adiccionesContainer
+                .querySelectorAll('input[type="checkbox"]')
+                .forEach(checkbox => {
+
+                    checkbox.addEventListener("change", () => {
+
+                        const id = checkbox.value;
+
+                        if (checkbox.checked) {
+
+                            if (!adiccionesCiudadano.includes(id)) {
+                                adiccionesCiudadano.push(id);
+                            }
+
+                        } else {
+
+                            const indice =
+                                adiccionesCiudadano.indexOf(id);
+
+                            if (indice !== -1) {
+                                adiccionesCiudadano.splice(indice, 1);
+                            }
+                        }
+
+                        renderAdicciones();
+                    });
+                });
+        };
+
+        renderAdicciones();
 
 
         console.log("CITIZEN NET // IDENTIDAD CARGADA");

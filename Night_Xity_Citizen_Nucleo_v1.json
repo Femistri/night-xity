@@ -119,7 +119,7 @@
         "talentos": [],
         "salud_mental": {
           "manias": [1],
-          "fobias": [],
+          "fobias": [33],
           "adicciones": []
         }
       },

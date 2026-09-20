@@ -1513,25 +1513,93 @@ renderManias();
                 ? salud.fobias
                 : [];
 
-        const fobiasContainer =
+       const fobiasContainer =
     document.getElementById("citizen-fobias");
 
-fobiasContainer.innerHTML =
-    saludMental.fobias.map(fobia => `
-        <label style="display:block; margin:8px 0;">
-            <input
-                type="checkbox"
-                value="${fobia.d100}"
-                ${fobiasCiudadano.includes(Number(fobia.d100)) ? "checked" : ""}
-            >
-            <strong>
-                ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
-            </strong>
-            <br>
-            <small>${fobia.descripcion}</small>
-        </label>
-    `).join("");
-          
+const renderFobias = () => {
+
+    const seleccionadas = saludMental.fobias.filter(
+        fobia => fobiasCiudadano.includes(Number(fobia.d100))
+    );
+
+    const disponibles = saludMental.fobias.filter(
+        fobia => !fobiasCiudadano.includes(Number(fobia.d100))
+    );
+
+    fobiasContainer.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+            <strong>SELECCIONADAS (${seleccionadas.length})</strong>
+
+            ${
+                seleccionadas.length > 0
+                    ? seleccionadas.map(fobia => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${fobia.d100}"
+                                checked
+                            >
+                            <strong>
+                                ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
+                            </strong>
+                            <br>
+                            <small>${fobia.descripcion}</small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNA</div>`
+            }
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+            <strong>TODAS LAS FOBIAS</strong>
+
+            ${
+                disponibles.map(fobia => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${fobia.d100}"
+                        >
+                        <strong>
+                            ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
+                        </strong>
+                        <br>
+                        <small>${fobia.descripcion}</small>
+                    </label>
+                `).join("")
+            }
+        </div>
+    `;
+
+    fobiasContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const numero = Number(checkbox.value);
+
+                if (checkbox.checked) {
+                    if (!fobiasCiudadano.includes(numero)) {
+                        fobiasCiudadano.push(numero);
+                    }
+                } else {
+                    const indice = fobiasCiudadano.indexOf(numero);
+
+                    if (indice !== -1) {
+                        fobiasCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderFobias();
+            });
+        });
+};
+
+renderFobias();   
         /* ADICCIONES */
 
         const adiccionesCiudadano =

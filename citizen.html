@@ -298,107 +298,77 @@
         }
 
 
- <!-- =========================
-     SALUD MENTAL
-     ========================= -->
+        /* =========================
+           SALUD MENTAL
+           ========================= */
 
-<section class="panel mental-health">
+        .mental-health {
+            grid-column: 1 / -1;
+        }
 
-    <h2>SALUD MENTAL</h2>
 
-    <!-- MANÍAS -->
+        .mental-health .item-info {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
 
-    <div class="item">
 
-        <div class="item-name">
-            MANÍAS
-        </div>
+        .mental-health .item-info strong {
+            color: #eee;
+        }
 
-        <div class="item-info" id="citizen-manias">
-            SIN REGISTRO
-        </div>
 
+        @media (max-width: 700px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile {
+                grid-column: auto;
+            }
+
+            .mental-health {
+                grid-column: auto;
+            }
+
+            .data {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="system">
+        NIGHT XITY // CITIZEN NET
     </div>
 
+    <h1>PERFIL CIUDADANO</h1>
 
-    <!-- FOBIAS -->
-
-    <div class="item">
-
-        <div class="item-name">
-            FOBIAS
-        </div>
-
-        <div class="item-info" id="citizen-fobias">
-            SIN REGISTRO
-        </div>
-
+    <div class="citizen-id">
+        REGISTRO NX-2066-0001
     </div>
 
+</header>
 
-    <!-- ADICCIONES -->
 
-    <div class="item">
 
-        <div class="item-name">
-            ADICCIONES
-        </div>
+<main>
 
-        <div class="item-info" id="citizen-addictions">
-            SIN REGISTRO
-        </div>
 
-        <div style="margin-top:15px;">
+<div class="grid">
 
-            <select
-                id="addiction-select"
-                style="
-                    width:100%;
-                    padding:10px;
-                    background:#111;
-                    color:#eee;
-                    border:1px solid #555;
-                    font-size:14px;
-                "
-            >
-                <option value="">
-                    + Añadir adicción
-                </option>
-            </select>
 
-        </div>
-
-        <div style="margin-top:10px;">
-
-            <button
-                id="addiction-add-button"
-                type="button"
-                style="
-                    padding:9px 14px;
-                    background:#111;
-                    color:#eee;
-                    border:1px solid #777;
-                    cursor:pointer;
-                "
-            >
-                AÑADIR
-            </button>
-
-        </div>
-
-        <div
-            id="citizen-addictions-selected"
-            style="
-                margin-top:15px;
-            "
-        >
-        </div>
-
-    </div>
-
-</section>
-
-      
     <!-- =========================
          IDENTIDAD
          ========================= -->
@@ -1113,326 +1083,156 @@
 
 
 <script>
+
 async function cargarDatosCitizenNet() {
+
     try {
 
         const [ciudadanos, catalogo, saludMental] = await Promise.all([
 
-            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=13")
+            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=12")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar Night_Xity_Citizen_Nucleo_v1.json"
                         );
                     }
+
                     return response.json();
                 }),
 
-            fetch("catalogo_night_xity_web_v1.json?v=8")
+            fetch("catalogo_night_xity_web_v1.json?v=7")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar catalogo_night_xity_web_v1.json"
                         );
                     }
+
                     return response.json();
                 }),
 
-            fetch("salud_mental_night_xity_v1.json?v=3")
+            fetch("salud_mental_night_xity_v1.json?v=2")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(
                             "No se pudo cargar salud_mental_night_xity_v1.json"
                         );
                     }
+
                     return response.json();
                 })
+
         ]);
+
+
+        /*
+         * =========================
+         * VERIFICACIÓN DE DATOS
+         * =========================
+         */
 
         console.log("CITIZEN NET // DATOS CARGADOS");
 
-        const ciudadano = ciudadanos.ciudadanos[0];
+        console.log(
+            "Ciudadanos:",
+            ciudadanos.ciudadanos.length
+        );
 
-        if (!ciudadano || !ciudadano.identidad) {
-            throw new Error("No se encontró el ciudadano principal.");
-        }
+        console.log(
+            "Objetos del catálogo:",
+            catalogo.total
+        );
 
-        const identidad = ciudadano.identidad;
+        console.log(
+            "Manías:",
+            saludMental.manias.length
+        );
+
+        console.log(
+            "Fobias:",
+            saludMental.fobias.length
+        );
 
 
-        /* =========================
-           IDENTIDAD
-           ========================= */
+        /*
+         * =========================
+         * CIUDADANO ACTUAL
+         * =========================
+         */
+
+        const ciudadano =
+            ciudadanos.ciudadanos[0];
+
+
+        const identidad =
+            ciudadano.identidad;
+
+
+        /*
+         * =========================
+         * IDENTIDAD
+         * =========================
+         */
 
         document.getElementById("citizen-name").textContent =
             identidad.nombre_clave || "SIN REGISTRO";
 
+
         document.getElementById("citizen-class").textContent =
             identidad.clase || "SIN REGISTRO";
+
 
         document.getElementById("citizen-soul").textContent =
             identidad.puntos_alma ?? "SIN REGISTRO";
 
+
         document.getElementById("citizen-background").textContent =
             identidad.trasfondo || "SIN REGISTRO";
+
 
         document.getElementById("citizen-tara").textContent =
             identidad.tara_sintetica || "SIN REGISTRO";
 
 
-        /* =========================
-           SALUD MENTAL
-           ========================= */
+        /*
+         * =========================
+         * SALUD MENTAL
+         * =========================
+         */
 
-        const salud = identidad.salud_mental || {};
+        const salud =
+            identidad.salud_mental || {};
 
 
-        /* =========================
-           MANÍAS
-           ========================= */
+        /*
+         * MANÍAS
+         */
 
         const maniasCiudadano =
             Array.isArray(salud.manias)
                 ? salud.manias
                 : [];
 
-        const maniasTexto = maniasCiudadano.map(numero => {
 
-            const mania = saludMental.manias.find(
-                item => Number(item.d100) === Number(numero)
-            );
+        const maniasTexto =
+            maniasCiudadano.map(numero => {
 
-            if (!mania) {
-                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
-            }
-
-            return `
-                <strong>
-                    ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
-                </strong>
-                <br>
-                ${mania.descripcion}
-            `;
-        });
-
-        document.getElementById("citizen-manias").innerHTML =
-            maniasTexto.length > 0
-                ? maniasTexto.join("<br><br>")
-                : "SIN REGISTRO";
+                const mania =
+                    saludMental.manias.find(
+                        item => Number(item.d100) === Number(numero)
+                    );
 
 
-        /* =========================
-           FOBIAS
-           ========================= */
+                if (!mania) {
 
-        const fobiasCiudadano =
-            Array.isArray(salud.fobias)
-                ? salud.fobias
-                : [];
+                    return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
 
-        const fobiasTexto = fobiasCiudadano.map(numero => {
-
-            const fobia = saludMental.fobias.find(
-                item => Number(item.d100) === Number(numero)
-            );
-
-            if (!fobia) {
-                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
-            }
-
-            return `
-                <strong>
-                    ${String(fobia.d100).padStart(2, "0")} · ${fobia.termino}
-                </strong>
-                <br>
-                ${fobia.descripcion}
-            `;
-        });
-
-        document.getElementById("citizen-fobias").innerHTML =
-            fobiasTexto.length > 0
-                ? fobiasTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
-
-        /* =========================
-           ADICCIONES
-           ========================= */
-
-        const adiccionesCiudadano =
-            Array.isArray(salud.adicciones)
-                ? salud.adicciones
-                : [];
-
-        const drogasCatalogo =
-            Array.isArray(catalogo.Drogas)
-                ? catalogo.Drogas
-                : [];
-
-
-        /* CARGAR DROGAS EN EL SELECT */
-
-        const addictionSelect =
-            document.getElementById("addiction-select");
-
-        const addictionAddButton =
-            document.getElementById("addiction-add-button");
-
-        const addictionSelected =
-            document.getElementById("citizen-addictions-selected");
-
-
-        if (addictionSelect) {
-
-            drogasCatalogo.forEach(droga => {
-
-                const option =
-                    document.createElement("option");
-
-                option.value = droga.id;
-
-                option.textContent =
-                    droga.nombre;
-
-                addictionSelect.appendChild(option);
-            });
-        }
-
-
-        /* MOSTRAR ADICCIONES ACTUALES */
-
-        function mostrarAdicciones() {
-
-            if (!addictionSelected) {
-                return;
-            }
-
-            if (adiccionesCiudadano.length === 0) {
-
-                addictionSelected.innerHTML =
-                    "SIN ADICCIONES REGISTRADAS";
-
-                return;
-            }
-
-            addictionSelected.innerHTML =
-                adiccionesCiudadano.map(adiccion => {
-
-                    let nombre = adiccion;
-
-                    if (typeof adiccion === "number") {
-
-                        const droga =
-                            drogasCatalogo.find(
-                                item =>
-                                    Number(item.id) ===
-                                    Number(adiccion)
-                            );
-
-                        if (droga) {
-                            nombre = droga.nombre;
-                        }
-                    }
-
-                    return `
-                        <div style="
-                            margin-bottom:8px;
-                            padding:8px;
-                            border:1px solid #555;
-                        ">
-                            ${nombre}
-                        </div>
-                    `;
-
-                }).join("");
-        }
-
-
-        mostrarAdicciones();
-
-
-        /* AÑADIR ADICCIÓN */
-
-        if (addictionAddButton) {
-
-            addictionAddButton.addEventListener(
-                "click",
-                () => {
-
-                    const valor =
-                        addictionSelect.value;
-
-                    if (!valor) {
-                        return;
-                    }
-
-                    const numero =
-                        Number(valor);
-
-                    if (
-                        adiccionesCiudadano.includes(numero)
-                    ) {
-                        return;
-                    }
-
-                    adiccionesCiudadano.push(numero);
-
-                    mostrarAdicciones();
-
-                    addictionSelect.value = "";
-                }
-            );
-        }
-
-
-        /* =========================
-           MOSTRAR ADICCIONES
-           ========================= */
-
-        const adiccionesTexto =
-            adiccionesCiudadano.map(adiccion => {
-
-                if (typeof adiccion === "string") {
-                    return adiccion;
                 }
 
-                if (typeof adiccion === "number") {
 
-                    const droga =
-                        drogasCatalogo.find(
-                            item =>
-                                Number(item.id) ===
-                                Number(adiccion)
-                        );
-
-                    return droga
-                        ? droga.nombre
-                        : `ID ${adiccion} · SIN REGISTRO`;
-                }
-
-                return "SIN REGISTRO";
-            });
-
-
-        document.getElementById("citizen-addictions").innerHTML =
-            adiccionesTexto.length > 0
-                ? adiccionesTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
-
-        console.log(
-            "CITIZEN NET // IDENTIDAD CARGADA",
-            identidad.nombre_clave
-        );
-
-    } catch (error) {
-
-        console.error(
-            "CITIZEN NET // ERROR DE DATOS",
-            error
-        );
-    }
-}
-
-cargarDatosCitizenNet();
-</script>
+                return `
+                    <strong>
+                        ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+                    </strong>
+                    <

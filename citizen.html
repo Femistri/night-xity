@@ -1284,6 +1284,75 @@ async function cargarDatosCitizenNet() {
             armasTexto.length > 0
                 ? armasTexto.join("<br><br>")
                 : "SIN REGISTRO";
+
+                /* =========================
+           EQUIPO
+           ========================= */
+
+        const cargarEquipo = (campo, elementoId, categoria) => {
+
+            const inventario =
+                Array.isArray(ciudadano.inventario?.[campo])
+                    ? ciudadano.inventario[campo]
+                    : [];
+
+            const objetos = inventario.map(id => {
+
+                const objeto = catalogo.items?.find(
+                    item => item.id === id &&
+                           item.categoria === categoria
+                );
+
+                if (!objeto) {
+                    return `<strong>${id}</strong><br>SIN REGISTRO`;
+                }
+
+                return `
+                    <strong>
+                        ${objeto.nombre}
+                    </strong>
+                    <br>
+                    ${objeto.descripcion || "SIN DESCRIPCIÓN"}
+                    <br>
+                    COSTO: $${objeto.costo}
+                `;
+            });
+
+            document.getElementById(elementoId).innerHTML =
+                objetos.length > 0
+                    ? objetos.join("<br><br>")
+                    : "SIN REGISTRO";
+        };
+
+        cargarEquipo(
+            "accesorios",
+            "citizen-accessories",
+            "Accesorios"
+        );
+
+        cargarEquipo(
+            "blindajes",
+            "citizen-armor",
+            "Blindajes"
+        );
+
+        cargarEquipo(
+            "terminales",
+            "citizen-terminals",
+            "Terminales"
+        );
+
+        cargarEquipo(
+            "medicare",
+            "citizen-medicare",
+            "MediCare"
+        );
+
+        cargarEquipo(
+            "varios",
+            "citizen-misc",
+            "Varios"
+        );
         
         /* =========================
            SALUD MENTAL

@@ -116,7 +116,7 @@
         "trasfondo": "",
         "tara_sintetica": null,
         "puntos_alma": 4,
-        "talentos": [],
+        "talentos": ["Lucha con X"],
         "salud_mental": {
           "manias": [1],
           "fobias": [33],

@@ -1149,10 +1149,6 @@ async function cargarDatosCitizenNet() {
         ]);
 
         console.log("CITIZEN NET // DATOS CARGADOS");
-        console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
-        console.log("Objetos del catálogo:", catalogo.total);
-        console.log("Manías:", saludMental.manias.length);
-        console.log("Fobias:", saludMental.fobias.length);
 
         const ciudadano = ciudadanos.ciudadanos[0];
 
@@ -1161,6 +1157,7 @@ async function cargarDatosCitizenNet() {
         }
 
         const identidad = ciudadano.identidad;
+
 
         /* =========================
            IDENTIDAD
@@ -1189,7 +1186,9 @@ async function cargarDatosCitizenNet() {
         const salud = identidad.salud_mental || {};
 
 
-        /* MANÍAS */
+        /* =========================
+           MANÍAS
+           ========================= */
 
         const maniasCiudadano =
             Array.isArray(salud.manias)
@@ -1221,7 +1220,9 @@ async function cargarDatosCitizenNet() {
                 : "SIN REGISTRO";
 
 
-        /* FOBIAS */
+        /* =========================
+           FOBIAS
+           ========================= */
 
         const fobiasCiudadano =
             Array.isArray(salud.fobias)
@@ -1253,7 +1254,9 @@ async function cargarDatosCitizenNet() {
                 : "SIN REGISTRO";
 
 
-        /* ADICCIONES */
+        /* =========================
+           ADICCIONES
+           ========================= */
 
         const adiccionesCiudadano =
             Array.isArray(salud.adicciones)
@@ -1265,25 +1268,150 @@ async function cargarDatosCitizenNet() {
                 ? catalogo.Drogas
                 : [];
 
-        const adiccionesTexto = adiccionesCiudadano.map(adiccion => {
 
-            if (typeof adiccion === "string") {
-                return adiccion;
+        /* CARGAR DROGAS EN EL SELECT */
+
+        const addictionSelect =
+            document.getElementById("addiction-select");
+
+        const addictionAddButton =
+            document.getElementById("addiction-add-button");
+
+        const addictionSelected =
+            document.getElementById("citizen-addictions-selected");
+
+
+        if (addictionSelect) {
+
+            drogasCatalogo.forEach(droga => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = droga.id;
+
+                option.textContent =
+                    droga.nombre;
+
+                addictionSelect.appendChild(option);
+            });
+        }
+
+
+        /* MOSTRAR ADICCIONES ACTUALES */
+
+        function mostrarAdicciones() {
+
+            if (!addictionSelected) {
+                return;
             }
 
-            if (typeof adiccion === "number") {
+            if (adiccionesCiudadano.length === 0) {
 
-                const droga = drogasCatalogo.find(
-                    item => Number(item.id) === Number(adiccion)
-                );
+                addictionSelected.innerHTML =
+                    "SIN ADICCIONES REGISTRADAS";
 
-                return droga
-                    ? droga.nombre
-                    : `ID ${adiccion} · SIN REGISTRO`;
+                return;
             }
 
-            return "SIN REGISTRO";
-        });
+            addictionSelected.innerHTML =
+                adiccionesCiudadano.map(adiccion => {
+
+                    let nombre = adiccion;
+
+                    if (typeof adiccion === "number") {
+
+                        const droga =
+                            drogasCatalogo.find(
+                                item =>
+                                    Number(item.id) ===
+                                    Number(adiccion)
+                            );
+
+                        if (droga) {
+                            nombre = droga.nombre;
+                        }
+                    }
+
+                    return `
+                        <div style="
+                            margin-bottom:8px;
+                            padding:8px;
+                            border:1px solid #555;
+                        ">
+                            ${nombre}
+                        </div>
+                    `;
+
+                }).join("");
+        }
+
+
+        mostrarAdicciones();
+
+
+        /* AÑADIR ADICCIÓN */
+
+        if (addictionAddButton) {
+
+            addictionAddButton.addEventListener(
+                "click",
+                () => {
+
+                    const valor =
+                        addictionSelect.value;
+
+                    if (!valor) {
+                        return;
+                    }
+
+                    const numero =
+                        Number(valor);
+
+                    if (
+                        adiccionesCiudadano.includes(numero)
+                    ) {
+                        return;
+                    }
+
+                    adiccionesCiudadano.push(numero);
+
+                    mostrarAdicciones();
+
+                    addictionSelect.value = "";
+                }
+            );
+        }
+
+
+        /* =========================
+           MOSTRAR ADICCIONES
+           ========================= */
+
+        const adiccionesTexto =
+            adiccionesCiudadano.map(adiccion => {
+
+                if (typeof adiccion === "string") {
+                    return adiccion;
+                }
+
+                if (typeof adiccion === "number") {
+
+                    const droga =
+                        drogasCatalogo.find(
+                            item =>
+                                Number(item.id) ===
+                                Number(adiccion)
+                        );
+
+                    return droga
+                        ? droga.nombre
+                        : `ID ${adiccion} · SIN REGISTRO`;
+                }
+
+                return "SIN REGISTRO";
+            });
+
 
         document.getElementById("citizen-addictions").innerHTML =
             adiccionesTexto.length > 0
@@ -1291,10 +1419,10 @@ async function cargarDatosCitizenNet() {
                 : "SIN REGISTRO";
 
 
-        console.log("CITIZEN NET // IDENTIDAD CARGADA");
-        console.log("Ciudadano:", identidad.nombre_clave);
-        console.log("Clase:", identidad.clase);
-        console.log("Puntos de alma:", identidad.puntos_alma);
+        console.log(
+            "CITIZEN NET // IDENTIDAD CARGADA",
+            identidad.nombre_clave
+        );
 
     } catch (error) {
 

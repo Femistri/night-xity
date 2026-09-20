@@ -771,7 +771,7 @@
 async function cargarDatosCitizenNet() {
     try {
        const [ciudadanos, catalogo, saludMental] = await Promise.all([
-    fetch("Night_Xity_Citizen_Nucleo_v1.json?v=6").then(r => r.json()),
+   fetch("Night_Xity_Citizen_Nucleo_v1.json?v=11").then(r => r.json()),
     fetch("catalogo_night_xity_web_v1.json?v=6").then(r => r.json()),
     fetch("salud_mental_night_xity_v1.json?v=1").then(r => r.json())
 ]);

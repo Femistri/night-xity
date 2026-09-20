@@ -412,9 +412,12 @@
                     CLASE
                 </div>
 
-                <div class="value" id="citizen-class">
-                    SIN REGISTRO
-                </div>
+             <select class="value" id="citizen-class">
+    <option value="Link">Link</option>
+    <option value="Data">Data</option>
+    <option value="Microchip">Microchip</option>
+    <option value="Backup">Backup</option>
+</select>
 
             </div>
 
@@ -1144,8 +1147,8 @@ async function cargarDatosCitizenNet() {
         document.getElementById("citizen-name").textContent =
             identidad.nombre_clave || "SIN REGISTRO";
 
-        document.getElementById("citizen-class").textContent =
-            identidad.clase || "SIN REGISTRO";
+       document.getElementById("citizen-class").value =
+    identidad.clase || "";
 
         document.getElementById("citizen-soul").textContent =
             identidad.puntos_alma ?? "SIN REGISTRO";

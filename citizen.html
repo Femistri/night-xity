@@ -1415,30 +1415,24 @@ talentosContainer
                 ? salud.manias
                 : [];
 
-        const maniasTexto = maniasCiudadano.map(numero => {
+       const maniasContainer =
+    document.getElementById("citizen-manias");
 
-            const mania = saludMental.manias.find(
-                item => Number(item.d100) === Number(numero)
-            );
-
-            if (!mania) {
-                return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
-            }
-
-            return `
-                <strong>
-                    ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
-                </strong>
-                <br>
-                ${mania.descripcion}
-            `;
-        });
-
-        document.getElementById("citizen-manias").innerHTML =
-            maniasTexto.length > 0
-                ? maniasTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
+maniasContainer.innerHTML =
+    saludMental.manias.map(mania => `
+        <label style="display:block; margin:8px 0;">
+            <input
+                type="checkbox"
+                value="${mania.d100}"
+                ${maniasCiudadano.includes(Number(mania.d100)) ? "checked" : ""}
+            >
+            <strong>
+                ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+            </strong>
+            <br>
+            <small>${mania.descripcion}</small>
+        </label>
+    `).join("");
 
         /* FOBIAS */
 

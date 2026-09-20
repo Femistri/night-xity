@@ -539,8 +539,10 @@
                 MANÍAS
             </div>
 
-            <div class="item-info" id="citizen-manias">
-                SIN REGISTRO
+           <details>
+    <summary>SELECCIONAR MANÍAS</summary>
+    <div class="item-info" id="citizen-manias"></div>
+</details>
             </div>
 
         </div>
@@ -1419,21 +1421,90 @@ talentosContainer
        const maniasContainer =
     document.getElementById("citizen-manias");
 
-maniasContainer.innerHTML =
-    saludMental.manias.map(mania => `
-        <label style="display:block; margin:8px 0;">
-            <input
-                type="checkbox"
-                value="${mania.d100}"
-                ${maniasCiudadano.includes(Number(mania.d100)) ? "checked" : ""}
-            >
-            <strong>
-                ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
-            </strong>
-            <br>
-            <small>${mania.descripcion}</small>
-        </label>
-    `).join("");
+const renderManias = () => {
+
+    const seleccionadas = saludMental.manias.filter(
+        mania => maniasCiudadano.includes(Number(mania.d100))
+    );
+
+    const disponibles = saludMental.manias.filter(
+        mania => !maniasCiudadano.includes(Number(mania.d100))
+    );
+
+    maniasContainer.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+            <strong>SELECCIONADAS (${seleccionadas.length})</strong>
+
+            ${
+                seleccionadas.length > 0
+                    ? seleccionadas.map(mania => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${mania.d100}"
+                                checked
+                            >
+                            <strong>
+                                ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+                            </strong>
+                            <br>
+                            <small>${mania.descripcion}</small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNA</div>`
+            }
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+            <strong>TODAS LAS MANÍAS</strong>
+
+            ${
+                disponibles.map(mania => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${mania.d100}"
+                        >
+                        <strong>
+                            ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+                        </strong>
+                        <br>
+                        <small>${mania.descripcion}</small>
+                    </label>
+                `).join("")
+            }
+        </div>
+    `;
+
+    maniasContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const numero = Number(checkbox.value);
+
+                if (checkbox.checked) {
+                    if (!maniasCiudadano.includes(numero)) {
+                        maniasCiudadano.push(numero);
+                    }
+                } else {
+                    const indice = maniasCiudadano.indexOf(numero);
+
+                    if (indice !== -1) {
+                        maniasCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderManias();
+            });
+        });
+};
+
+renderManias();
 
         /* FOBIAS */
 

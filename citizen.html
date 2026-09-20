@@ -1247,6 +1247,38 @@ async function cargarDatosCitizenNet() {
             programasTexto.length > 0
                 ? programasTexto.join("<br><br>")
                 : "SIN REGISTRO";
+        /* =========================
+           ARMAS
+           ========================= */
+
+        const armasCiudadano =
+            Array.isArray(ciudadano.inventario?.armas)
+                ? ciudadano.inventario.armas
+                : [];
+
+        const armasTexto = armasCiudadano.map(id => {
+
+            const arma = catalogo.items?.find(
+                item => item.id === id
+            );
+
+            if (!arma) {
+                return `<strong>${id}</strong><br>SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${arma.nombre}
+                </strong>
+                <br>
+                ${arma.descripcion}
+            `;
+        });
+
+        document.getElementById("citizen-weapons").innerHTML =
+            armasTexto.length > 0
+                ? armasTexto.join("<br><br>")
+                : "SIN REGISTRO";
         
         /* =========================
            SALUD MENTAL

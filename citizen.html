@@ -1231,11 +1231,11 @@ async function cargarDatosCitizenNet() {
                 ? salud.adicciones
                 : [];
 
-        const drogasCatalogo =
-            Array.isArray(catalogo.Drogas)
-                ? catalogo.Drogas
-                : [];
-
+      const drogasCatalogo =
+    Array.isArray(catalogo.items)
+        ? catalogo.items.filter(item => item.categoria === "Drogas")
+        : [];
+        
         const adiccionesTexto = adiccionesCiudadano.map(adiccion => {
 
            if (typeof adiccion === "string") {

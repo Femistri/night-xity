@@ -1182,6 +1182,38 @@ async function cargarDatosCitizenNet() {
                 ? talentosTexto.join("<br><br>")
                 : "SIN REGISTRO";
 
+                /* =========================
+           IMPLANTES
+           ========================= */
+
+        const implantesCiudadano =
+            Array.isArray(ciudadano.inventario?.implantes)
+                ? ciudadano.inventario.implantes
+                : [];
+
+        const implantesTexto = implantesCiudadano.map(id => {
+
+            const implante = catalogo.items?.find(
+                item => item.id === id
+            );
+
+            if (!implante) {
+                return `<strong>${id}</strong><br>SIN REGISTRO`;
+            }
+
+            return `
+                <strong>
+                    ${implante.nombre}
+                </strong>
+                <br>
+                ${implante.descripcion}
+            `;
+        });
+
+        document.getElementById("citizen-implants").innerHTML =
+            implantesTexto.length > 0
+                ? implantesTexto.join("<br><br>")
+                : "SIN REGISTRO";
 
         /* =========================
            SALUD MENTAL

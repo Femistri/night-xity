@@ -514,11 +514,13 @@
 
     <div class="item">
 
+       <div class="item">
+    <details>
+        <summary>SELECCIONAR TALENTOS</summary>
         <div class="item-info" id="citizen-talents">
-            SIN REGISTRO
         </div>
-
-    </div>
+    </details>
+</div>
 
 </section>
 
@@ -1188,33 +1190,50 @@ taraContainer.innerHTML = Object.entries(taras).map(
            TALENTOS
            ========================= */
 
-        const talentosCiudadano =
-            Array.isArray(identidad.talentos)
-                ? identidad.talentos
-                : [];
+       const talentosCiudadano =
+    Array.isArray(identidad.talentos)
+        ? identidad.talentos
+        : [];
 
-        const talentosTexto = talentosCiudadano.map(talento => {
+const talentosCatalogo = ciudadanos.talentos || {};
+const talentosContainer =
+    document.getElementById("citizen-talents");
 
-            const talentoCatalogo = ciudadanos.talentos?.[talento];
-
-            if (!talentoCatalogo) {
-                return `<strong>${talento}</strong><br>SIN REGISTRO`;
-            }
-
-            return `
-                <strong>
-                    ${talento}
-                </strong>
+talentosContainer.innerHTML =
+    Object.entries(talentosCatalogo).map(
+        ([nombre, descripcion]) => `
+            <label style="display:block; margin:8px 0;">
+                <input
+                    type="checkbox"
+                    value="${nombre}"
+                    ${talentosCiudadano.includes(nombre) ? "checked" : ""}
+                >
+                <strong>${nombre}</strong>
                 <br>
-                ${talentoCatalogo}
-            `;
+                <small>${descripcion}</small>
+            </label>
+        `
+    ).join("");
+
+talentosContainer
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(checkbox => {
+
+        checkbox.addEventListener("change", () => {
+
+            const seleccionados =
+                talentosContainer
+                    .querySelectorAll(
+                        'input[type="checkbox"]:checked'
+                    );
+
+            if (seleccionados.length > 5) {
+                checkbox.checked = false;
+                alert("Máximo 5 talentos.");
+            }
         });
-
-        document.getElementById("citizen-talents").innerHTML =
-            talentosTexto.length > 0
-                ? talentosTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
+    });
+        
                 /* =========================
            IMPLANTES
            ========================= */

@@ -128,7 +128,13 @@
         "movimientos": []
       },
       "inventario": {
-        "implantes": [],
+        "implantes": [
+    "IMP-0013",
+    "IMP-0001",
+    "IMP-0003",
+    "IMP-0009",
+    "IMP-0020"
+],
         "programas": [],
         "armas": [],
         "accesorios": [],

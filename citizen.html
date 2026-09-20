@@ -174,6 +174,151 @@
         }
 
 
+        /* =========================
+           MAPA CORPORAL
+           ========================= */
+
+        .body-map-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+
+        .body-map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+
+        .implant-hotspot {
+            position: absolute;
+            z-index: 10;
+        }
+
+
+        /* POSICIONES CONFIRMADAS */
+
+        .eye-hotspot {
+            top: 7%;
+            left: 43.5%;
+        }
+
+
+        .neck-hotspot {
+            top: 14%;
+            left: 46.5%;
+        }
+
+
+        .right-arm-hotspot {
+            top: 37%;
+            left: 27%;
+        }
+
+
+        .left-arm-hotspot {
+            top: 37%;
+            left: 66.5%;
+        }
+
+
+        .torso-hotspot {
+            top: 27%;
+            left: 46.5%;
+        }
+
+
+        .abdomen-hotspot {
+            top: 35%;
+            left: 46.5%;
+        }
+
+
+        .right-leg-hotspot {
+            top: 68%;
+            left: 36%;
+        }
+
+
+        .left-leg-hotspot {
+            top: 68%;
+            left: 56%;
+        }
+
+
+        .implant-hotspot summary {
+            list-style: none;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: #111;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+
+        .implant-hotspot summary::-webkit-details-marker {
+            display: none;
+        }
+
+
+        .implant-card {
+            position: absolute;
+            top: 38px;
+            left: 0;
+            width: 240px;
+            padding: 18px;
+            background: #111;
+            border: 1px solid #777;
+            color: #eee;
+            text-align: left;
+            z-index: 20;
+        }
+
+
+        .implant-card h3 {
+            margin-top: 0;
+            font-size: 15px;
+            letter-spacing: 2px;
+        }
+
+
+        .implant-card p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           SALUD MENTAL
+           ========================= */
+
+        .mental-health {
+            grid-column: 1 / -1;
+        }
+
+
+        .mental-health .item-info {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+        .mental-health .item-info strong {
+            color: #eee;
+        }
+
+
         @media (max-width: 700px) {
 
             .grid {
@@ -184,108 +329,16 @@
                 grid-column: auto;
             }
 
+            .mental-health {
+                grid-column: auto;
+            }
+
+            .data {
+                grid-template-columns: 1fr;
+            }
+
         }
 
-   .body-map-container {
-    position: relative;
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-    overflow: hidden;
-}
-
-.body-map-image {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-        .implant-hotspot {
-    position: absolute;
-    z-index: 10;
-}
-
-.eye-hotspot {
-    top: 7%;
-    left: 43.5%;
-}
-
-        .neck-hotspot {
-    top: 14%;
-    left: 46.5%;
-}
-
-        .right-arm-hotspot {
-    top: 37%;
-    left: 27%;
-}
-        
-        .left-arm-hotspot {
-    top: 37%;
-    left: 66.5%;
-}
-        
-        .torso-hotspot {
-    top: 27%;
-    left: 46.5%;
-}
-
-.abdomen-hotspot {
-    top: 35%;
-    left: 46.5%;
-}
-
-        .right-leg-hotspot {
-    top: 68%;
-    left: 36%;
-}
-
-.left-leg-hotspot {
-    top: 68%;
-    left: 56%;
-}
-        
-.implant-hotspot summary {
-    list-style: none;
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    background: #111;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-}
-
-.implant-hotspot summary::-webkit-details-marker {
-    display: none;
-}
-
-.implant-card {
-    position: absolute;
-    top: 38px;
-    left: 0;
-    width: 240px;
-    padding: 18px;
-    background: #111;
-    border: 1px solid #777;
-    color: #eee;
-    text-align: left;
-    z-index: 20;
-}
-
-.implant-card h3 {
-    margin-top: 0;
-    font-size: 15px;
-    letter-spacing: 2px;
-}
-
-.implant-card p {
-    font-size: 13px;
-    line-height: 1.5;
-}
     </style>
 
 </head>
@@ -316,7 +369,9 @@
 <div class="grid">
 
 
-    <!-- IDENTIDAD -->
+    <!-- =========================
+         IDENTIDAD
+         ========================= -->
 
     <section class="panel profile">
 
@@ -324,73 +379,181 @@
 
         <div class="data">
 
+
             <div class="data-box">
-                <div class="label">NOMBRE</div>
-               <div class="value" id="citizen-name">CIUDADANO DE PRUEBA</div>
+
+                <div class="label">
+                    NOMBRE
+                </div>
+
+                <div class="value" id="citizen-name">
+                    CIUDADANO DE PRUEBA
+                </div>
+
             </div>
 
 
             <div class="data-box">
-                <div class="label">OCUPACIÓN</div>
-                <div class="value">TRABAJADOR INDEPENDIENTE</div>
+
+                <div class="label">
+                    OCUPACIÓN
+                </div>
+
+                <div class="value">
+                    TRABAJADOR INDEPENDIENTE
+                </div>
+
             </div>
-            
-<div class="data-box">
-    <div class="label">CLASE</div>
-    <div class="value" id="citizen-class">SIN REGISTRO</div>
-</div>
+
 
             <div class="data-box">
-                <div class="label">DISTRITO</div>
-                <div class="value">NIGHT XITY</div>
+
+                <div class="label">
+                    CLASE
+                </div>
+
+                <div class="value" id="citizen-class">
+                    SIN REGISTRO
+                </div>
+
             </div>
 
 
-           <div class="data-box">
-    <div class="label">EMPLEADOR</div>
-    <div class="value">SIN REGISTRO</div>
-</div>
+            <div class="data-box">
 
-<div class="data-box">
-    <div class="label">PUNTOS DE ALMA</div>
-    <div class="value" id="citizen-soul">SIN REGISTRO</div>
-</div>
+                <div class="label">
+                    DISTRITO
+                </div>
 
-<div class="data-box">
-    <div class="label">TRASFONDO</div>
-    <div class="value" id="citizen-background">SIN REGISTRO</div>
-</div>
-           <div class="data-box">
-    <div class="label">TARA SINTÉTICA</div>
-    <div class="value" id="citizen-tara">SIN REGISTRO</div>
-</div>
+                <div class="value">
+                    NIGHT XITY
+                </div>
 
-            <section class="panel">
-    <h2>SALUD MENTAL</h2>
+            </div>
 
-    <div class="item">
-        <div class="item-name">MANÍAS</div>
-        <div class="item-info">
-            SIN REGISTRO
-        </div>
-    </div>
-</section>
-            
+
+            <div class="data-box">
+
+                <div class="label">
+                    EMPLEADOR
+                </div>
+
+                <div class="value">
+                    SIN REGISTRO
+                </div>
+
+            </div>
+
+
+            <div class="data-box">
+
+                <div class="label">
+                    PUNTOS DE ALMA
+                </div>
+
+                <div class="value" id="citizen-soul">
+                    SIN REGISTRO
+                </div>
+
+            </div>
+
+
+            <div class="data-box">
+
+                <div class="label">
+                    TRASFONDO
+                </div>
+
+                <div class="value" id="citizen-background">
+                    SIN REGISTRO
+                </div>
+
+            </div>
+
+
+            <div class="data-box">
+
+                <div class="label">
+                    TARA SINTÉTICA
+                </div>
+
+                <div class="value" id="citizen-tara">
+                    SIN REGISTRO
+                </div>
+
+            </div>
+
+
         </div>
 
     </section>
 
 
 
-    <!-- ECONOMÍA -->
+    <!-- =========================
+         SALUD MENTAL
+         ========================= -->
+
+    <section class="panel mental-health">
+
+        <h2>SALUD MENTAL</h2>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                MANÍAS
+            </div>
+
+            <div class="item-info" id="citizen-manias">
+                SIN REGISTRO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                FOBIAS
+            </div>
+
+            <div class="item-info" id="citizen-fobias">
+                SIN REGISTRO
+            </div>
+
+        </div>
+
+
+        <div class="item">
+
+            <div class="item-name">
+                ADICCIONES
+            </div>
+
+            <div class="item-info" id="citizen-addictions">
+                SIN REGISTRO
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         ECONOMÍA
+         ========================= -->
 
     <section class="panel">
 
         <h2>ECONOMÍA</h2>
 
+
         <div class="label">
             SALDO DISPONIBLE
         </div>
+
 
         <div class="balance">
             $12,500
@@ -398,6 +561,7 @@
 
 
         <div class="item">
+
             <div class="item-name positive">
                 Salario mensual
             </div>
@@ -405,10 +569,12 @@
             <div class="item-info">
                 INGRESO +$20,000
             </div>
+
         </div>
 
 
         <div class="item">
+
             <div class="item-name negative">
                 Renta
             </div>
@@ -416,10 +582,12 @@
             <div class="item-info">
                 GASTO -$5,000
             </div>
+
         </div>
 
 
         <div class="item">
+
             <div class="item-name negative">
                 Alimentación
             </div>
@@ -427,216 +595,352 @@
             <div class="item-info">
                 GASTO -$2,500
             </div>
+
         </div>
 
     </section>
 
 
 
-    <!-- CUERPO -->
+    <!-- =========================
+         CUERPO
+         ========================= -->
 
     <section class="panel">
 
-        <h2>CUERPO // MODIFICACIONES</h2>
+        <h2>
+            CUERPO // MODIFICACIONES
+        </h2>
 
 
-    <div class="body-map-container">
-    <img
-        src="fdaca2c4-e64d-46b3-8f5d-a6a6941648a8.png"
-        alt="Mapa corporal de modificaciones de Night Xity"
-        class="body-map-image"
-    >
-        <details class="implant-hotspot eye-hotspot">
-        <summary>●</summary>
-
-        <div class="implant-card">
-            <h3>ÓPTICA XCATEC V.4</h3>
-
-            <p><strong>TIPO</strong><br>
-            Implante ocular</p>
-
-            <p><strong>ESTADO</strong><br>
-            ACTIVO</p>
-
-            <p><strong>FUNCIÓN</strong><br>
-            Visión nocturna + HUD</p>
-
-            <p><strong>VALOR</strong><br>
-            $12,400</p>
-        </div>
-
-    </details>
-
-    <details class="implant-hotspot neck-hotspot">
-
-        <summary>●</summary>
-
-        <div class="implant-card">
-
-            <h3>COLUMNA CERVICAL XCATEC</h3>
-
-            <p><strong>TIPO</strong><br>
-            Implante cervical</p>
-
-            <p><strong>ESTADO</strong><br>
-            ACTIVO</p>
-
-            <p><strong>FUNCIÓN</strong><br>
-            Conexión neuronal + estabilización</p>
-
-            <p><strong>VALOR</strong><br>
-            $18,700</p>
-
-        </div>
-
-    </details>
-<details class="implant-hotspot right-arm-hotspot">
-
-    <summary>●</summary>
-
-    <div class="implant-card">
-
-        <h3>BRAZO DERECHO XCATEC</h3>
-
-        <p><strong>TIPO</strong><br>
-        Prótesis biomecánica</p>
-
-        <p><strong>ESTADO</strong><br>
-        ACTIVO</p>
-
-        <p><strong>FUNCIÓN</strong><br>
-        Fuerza aumentada + respuesta motriz</p>
-
-        <p><strong>VALOR</strong><br>
-        $31,500</p>
-
-    </div>
-
-</details>
-
-        <details class="implant-hotspot left-arm-hotspot">
-
-    <summary>●</summary>
-
-    <div class="implant-card">
-
-        <h3>BRAZO IZQUIERDO XCATEC</h3>
-
-        <p><strong>TIPO</strong><br>
-        Implante biomecánico</p>
-
-        <p><strong>ESTADO</strong><br>
-        ACTIVO</p>
-
-        <p><strong>FUNCIÓN</strong><br>
-        Aumento de fuerza + asistencia motriz</p>
-
-        <p><strong>VALOR</strong><br>
-        $16,500</p>
-
-    </div>
-
-</details>
-
-        <details class="implant-hotspot torso-hotspot">
-
-    <summary>●</summary>
-
-    <div class="implant-card">
-
-        <h3>SISTEMA CARDIOPULMONAR XCATEC</h3>
-
-        <p><strong>TIPO</strong><br>
-        Modificación torácica</p>
-
-        <p><strong>ESTADO</strong><br>
-        ACTIVO</p>
-
-        <p><strong>FUNCIÓN</strong><br>
-        Optimización cardiopulmonar + resistencia</p>
-
-        <p><strong>VALOR</strong><br>
-        $24,800</p>
-
-    </div>
-
-</details>
+        <div class="body-map-container">
 
 
-<details class="implant-hotspot abdomen-hotspot">
+            <img
+                src="fdaca2c4-e64d-46b3-8f5d-a6a6941648a8.png"
+                alt="Mapa corporal de modificaciones de Night Xity"
+                class="body-map-image"
+            >
 
-    <summary>●</summary>
 
-    <div class="implant-card">
+            <!-- OJO -->
 
-        <h3>SISTEMA DIGESTIVO XCATEC</h3>
+            <details class="implant-hotspot eye-hotspot">
 
-        <p><strong>TIPO</strong><br>
-        Implante abdominal</p>
+                <summary>●</summary>
 
-        <p><strong>ESTADO</strong><br>
-        ACTIVO</p>
+                <div class="implant-card">
 
-        <p><strong>FUNCIÓN</strong><br>
-        Procesamiento metabólico + almacenamiento</p>
+                    <h3>
+                        ÓPTICA XCATEC V.4
+                    </h3>
 
-        <p><strong>VALOR</strong><br>
-        $21,600</p>
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Implante ocular
+                    </p>
 
-    </div>
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
 
-</details>
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Visión nocturna + HUD
+                    </p>
 
-        <details class="implant-hotspot right-leg-hotspot">
-    <summary>●</summary>
-    <div class="implant-card">
-        <h3>PIERNA DERECHA XCATEC</h3>
-        <p><strong>TIPO:</strong> Prótesis biomecánica</p>
-        <p><strong>ESTADO:</strong> ACTIVO</p>
-        <p><strong>FUNCIÓN:</strong> Fuerza aumentada + resistencia motriz</p>
-        <p><strong>VALOR:</strong> $28,900</p>
-    </div>
-</details>
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $12,400
+                    </p>
 
-<details class="implant-hotspot left-leg-hotspot">
-    <summary>●</summary>
-    <div class="implant-card">
-        <h3>PIERNA IZQUIERDA XCATEC</h3>
-        <p><strong>TIPO:</strong> Implante biomecánico</p>
-        <p><strong>ESTADO:</strong> ACTIVO</p>
-        <p><strong>FUNCIÓN:</strong> Asistencia motriz + estabilización</p>
-        <p><strong>VALOR:</strong> $19,800</p>
-    </div>
-</details>
-        
+                </div>
+
+            </details>
+
+
+
+            <!-- CUELLO -->
+
+            <details class="implant-hotspot neck-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        COLUMNA CERVICAL XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Implante cervical
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Conexión neuronal + estabilización
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $18,700
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- BRAZO DERECHO -->
+
+            <details class="implant-hotspot right-arm-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        BRAZO DERECHO XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Prótesis biomecánica
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Fuerza aumentada + respuesta motriz
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $31,500
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- BRAZO IZQUIERDO -->
+
+            <details class="implant-hotspot left-arm-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        BRAZO IZQUIERDO XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Implante biomecánico
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Aumento de fuerza + asistencia motriz
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $16,500
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- TORSO -->
+
+            <details class="implant-hotspot torso-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        SISTEMA CARDIOPULMONAR XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Modificación torácica
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Optimización cardiopulmonar + resistencia
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $24,800
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- ABDOMEN -->
+
+            <details class="implant-hotspot abdomen-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        SISTEMA DIGESTIVO XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Implante abdominal
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Procesamiento metabólico + almacenamiento
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $21,600
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- PIERNA DERECHA -->
+
+            <details class="implant-hotspot right-leg-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        PIERNA DERECHA XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Prótesis biomecánica
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Fuerza aumentada + resistencia motriz
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $28,900
+                    </p>
+
+                </div>
+
+            </details>
+
+
+
+            <!-- PIERNA IZQUIERDA -->
+
+            <details class="implant-hotspot left-leg-hotspot">
+
+                <summary>●</summary>
+
+                <div class="implant-card">
+
+                    <h3>
+                        PIERNA IZQUIERDA XCATEC
+                    </h3>
+
+                    <p>
+                        <strong>TIPO</strong><br>
+                        Implante biomecánico
+                    </p>
+
+                    <p>
+                        <strong>ESTADO</strong><br>
+                        ACTIVO
+                    </p>
+
+                    <p>
+                        <strong>FUNCIÓN</strong><br>
+                        Asistencia motriz + estabilización
+                    </p>
+
+                    <p>
+                        <strong>VALOR</strong><br>
+                        $19,800
+                    </p>
+
+                </div>
+
+            </details>
+
+
         </div>
 
     </section>
 
-<section class="section">
-    <div class="section-title">SALUD MENTAL</div>
 
-    <div class="data-box">
-        <div class="label">MANÍAS</div>
-        <div class="value" id="citizen-manias">SIN REGISTRO</div>
-    </div>
 
-    <div class="data-box">
-        <div class="label">FOBIAS</div>
-        <div class="value" id="citizen-fobias">SIN REGISTRO</div>
-    </div>
-
-    <div class="data-box">
-        <div class="label">ADICCIONES</div>
-        <div class="value" id="citizen-addictions">SIN REGISTRO</div>
-    </div>
-</section>
-
-    <!-- IMPLANTES -->
+    <!-- =========================
+         IMPLANTES
+         ========================= -->
 
     <section class="panel">
 
-        <h2>IMPLANTES</h2>
+        <h2>
+            IMPLANTES
+        </h2>
 
 
         <div class="item">
@@ -668,11 +972,15 @@
 
 
 
-    <!-- PROGRAMAS -->
+    <!-- =========================
+         PROGRAMAS
+         ========================= -->
 
     <section class="panel">
 
-        <h2>PROGRAMAS</h2>
+        <h2>
+            PROGRAMAS
+        </h2>
 
 
         <div class="item">
@@ -704,11 +1012,16 @@
 
 
 
-    <!-- EQUIPO -->
+    <!-- =========================
+         EQUIPO
+         ========================= -->
 
     <section class="panel">
 
-        <h2>EQUIPO</h2>
+        <h2>
+            EQUIPO
+        </h2>
+
 
         <div class="item">
 
@@ -767,64 +1080,159 @@
 
 </footer>
 
+
+
 <script>
+
 async function cargarDatosCitizenNet() {
+
     try {
-       const [ciudadanos, catalogo, saludMental] = await Promise.all([
-   fetch("Night_Xity_Citizen_Nucleo_v1.json?v=11").then(r => r.json()),
-    fetch("catalogo_night_xity_web_v1.json?v=6").then(r => r.json()),
-    fetch("salud_mental_night_xity_v1.json?v=1").then(r => r.json())
-]);
+
+        const [ciudadanos, catalogo, saludMental] = await Promise.all([
+
+            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=12")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            "No se pudo cargar Night_Xity_Citizen_Nucleo_v1.json"
+                        );
+                    }
+
+                    return response.json();
+                }),
+
+            fetch("catalogo_night_xity_web_v1.json?v=7")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            "No se pudo cargar catalogo_night_xity_web_v1.json"
+                        );
+                    }
+
+                    return response.json();
+                }),
+
+            fetch("salud_mental_night_xity_v1.json?v=2")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            "No se pudo cargar salud_mental_night_xity_v1.json"
+                        );
+                    }
+
+                    return response.json();
+                })
+
+        ]);
+
+
+        /*
+         * =========================
+         * VERIFICACIÓN DE DATOS
+         * =========================
+         */
+
         console.log("CITIZEN NET // DATOS CARGADOS");
-        console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
-        console.log("Objetos del catálogo:", catalogo.total);
-        console.log("Catálogo conectado correctamente:", catalogo.categorias);
-        console.log("Manías:", saludMental.manias.length);
-console.log("Fobias:", saludMental.fobias.length);
 
-        const ciudadano = ciudadanos.ciudadanos[0];
+        console.log(
+            "Ciudadanos:",
+            ciudadanos.ciudadanos.length
+        );
 
-     const maniasCiudadano = ciudadano.identidad.salud_mental?.manias || [];
+        console.log(
+            "Objetos del catálogo:",
+            catalogo.total
+        );
 
-const maniasTexto = maniasCiudadano.map(numero => {
-    const mania = saludMental.manias.find(item => item.d100 === numero);
+        console.log(
+            "Manías:",
+            saludMental.manias.length
+        );
 
-    if (!mania) return `D${numero} · SIN REGISTRO`;
+        console.log(
+            "Fobias:",
+            saludMental.fobias.length
+        );
 
-    return `${String(mania.d100).padStart(2, "0")} · ${mania.termino}<br>${mania.descripcion}`;
-});
 
-document.getElementById("citizen-manias").innerHTML =
-    maniasTexto.length > 0
-        ? maniasTexto.join("<br><br>")
-        : "SIN REGISTRO";
+        /*
+         * =========================
+         * CIUDADANO ACTUAL
+         * =========================
+         */
 
-        console.log("MANÍA EN PANTALLA:", document.getElementById("citizen-manias").innerHTML);
+        const ciudadano =
+            ciudadanos.ciudadanos[0];
 
-        const nombre = ciudadanos.ciudadanos[0].identidad.nombre_clave;
-        document.getElementById("citizen-name").textContent = nombre;
-        
-const clase = ciudadanos.ciudadanos[0].identidad.clase;
-document.getElementById("citizen-class").textContent = clase;
 
-        const alma = ciudadanos.ciudadanos[0].identidad.puntos_alma;
-document.getElementById("citizen-soul").textContent = alma;
+        const identidad =
+            ciudadano.identidad;
 
-const trasfondo = ciudadanos.ciudadanos[0].identidad.trasfondo;
-document.getElementById("citizen-background").textContent =
-    trasfondo || "SIN REGISTRO";
-        
-        const tara = ciudadanos.ciudadanos[0].identidad.tara_sintetica;
-document.getElementById("citizen-tara").textContent =
-    tara || "SIN REGISTRO";
-        
-    } catch (error) {
-        console.error("CITIZEN NET // ERROR DE DATOS", error);
-    }
-}
 
-cargarDatosCitizenNet();
-</script>    
-</body>
+        /*
+         * =========================
+         * IDENTIDAD
+         * =========================
+         */
 
-</html>
+        document.getElementById("citizen-name").textContent =
+            identidad.nombre_clave || "SIN REGISTRO";
+
+
+        document.getElementById("citizen-class").textContent =
+            identidad.clase || "SIN REGISTRO";
+
+
+        document.getElementById("citizen-soul").textContent =
+            identidad.puntos_alma ?? "SIN REGISTRO";
+
+
+        document.getElementById("citizen-background").textContent =
+            identidad.trasfondo || "SIN REGISTRO";
+
+
+        document.getElementById("citizen-tara").textContent =
+            identidad.tara_sintetica || "SIN REGISTRO";
+
+
+        /*
+         * =========================
+         * SALUD MENTAL
+         * =========================
+         */
+
+        const salud =
+            identidad.salud_mental || {};
+
+
+        /*
+         * MANÍAS
+         */
+
+        const maniasCiudadano =
+            Array.isArray(salud.manias)
+                ? salud.manias
+                : [];
+
+
+        const maniasTexto =
+            maniasCiudadano.map(numero => {
+
+                const mania =
+                    saludMental.manias.find(
+                        item => Number(item.d100) === Number(numero)
+                    );
+
+
+                if (!mania) {
+
+                    return `${String(numero).padStart(2, "0")} · SIN REGISTRO`;
+
+                }
+
+
+                return `
+                    <strong>
+                        ${String(mania.d100).padStart(2, "0")} · ${mania.termino}
+                    </strong>
+                    <

@@ -120,7 +120,7 @@
         "salud_mental": {
           "manias": [1],
           "fobias": [33],
-          "adicciones": []
+          "adicciones": ["DRG-0007"]
         }
       },
       "economia": {

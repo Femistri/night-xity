@@ -139,7 +139,13 @@
     "PRO-0006",
     "PRO-0008"
 ],
-        "armas": [],
+        "armas": [
+    "ARM-0004",
+    "ARM-0007",
+    "ARM-0012",
+    "ARM-0019",
+    "ARM-0003"
+],
         "accesorios": [],
         "blindajes": [],
         "terminales": [],

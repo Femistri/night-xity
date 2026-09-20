@@ -512,16 +512,17 @@
 
     <h2>TALENTOS</h2>
 
-    <div class="item">
+   <div class="item">
 
-       <div class="item">
     <details>
         <summary>SELECCIONAR TALENTOS</summary>
+
         <div class="item-info" id="citizen-talents">
         </div>
-    </details>
-</div>
 
+    </details>
+
+</div>
 </section>
 
     <!-- =========================
@@ -1193,46 +1194,122 @@ taraContainer.innerHTML = Object.entries(taras).map(
            TALENTOS
            ========================= */
 
-       const talentosCiudadano =
+      const talentosCiudadano =
     Array.isArray(identidad.talentos)
         ? identidad.talentos
         : [];
 
 const talentosCatalogo = ciudadanos.talentos || {};
+
 const talentosContainer =
     document.getElementById("citizen-talents");
 
-talentosContainer.innerHTML =
-    Object.entries(talentosCatalogo).map(
-        ([nombre, descripcion]) => `
-            <label style="display:block; margin:8px 0;">
-                <input
-                    type="checkbox"
-                    value="${nombre}"
-                    ${talentosCiudadano.includes(nombre) ? "checked" : ""}
-                >
-                <strong>${nombre}</strong>
-                <br>
-                <small>${descripcion}</small>
-            </label>
-        `
-    ).join("");
+const renderTalentos = () => {
 
-talentosContainer
-    .querySelectorAll('input[type="checkbox"]')
-    .forEach(checkbox => {
+    const seleccionados =
+        Object.entries(talentosCatalogo)
+            .filter(([nombre]) =>
+                talentosCiudadano.includes(nombre)
+            );
 
-        checkbox.addEventListener("change", () => {
+    const disponibles =
+        Object.entries(talentosCatalogo)
+            .filter(([nombre]) =>
+                !talentosCiudadano.includes(nombre)
+            );
 
-            const seleccionados =
-                talentosContainer
-                    .querySelectorAll(
-                        'input[type="checkbox"]:checked'
-                    );
+    talentosContainer.innerHTML = `
 
-            if (seleccionados.length > 5) {
-                checkbox.checked = false;
-                alert("Máximo 5 talentos.");
+        <div style="margin-bottom:16px;">
+
+            <strong>
+                SELECCIONADOS (${seleccionados.length})
+            </strong>
+
+            ${
+                seleccionados.length > 0
+                    ? seleccionados.map(
+                        ([nombre, descripcion]) => `
+                            <label style="display:block; margin:8px 0;">
+                                <input
+                                    type="checkbox"
+                                    value="${nombre}"
+                                    checked
+                                >
+                                <strong>${nombre}</strong>
+                                <br>
+                                <small>${descripcion}</small>
+                            </label>
+                        `
+                    ).join("")
+                    : `<div style="margin-top:8px;">NINGUNO</div>`
+            }
+
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+
+            <strong>
+                TODOS LOS TALENTOS
+            </strong>
+
+            ${
+                disponibles.map(
+                    ([nombre, descripcion]) => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${nombre}"
+                            >
+                            <strong>${nombre}</strong>
+                            <br>
+                            <small>${descripcion}</small>
+                        </label>
+                    `
+                ).join("")
+            }
+
+        </div>
+    `;
+
+    talentosContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const nombre = checkbox.value;
+
+                if (checkbox.checked) {
+
+                    if (talentosCiudadano.length >= 5) {
+                        checkbox.checked = false;
+                        alert("Máximo 5 talentos.");
+                        return;
+                    }
+
+                    if (!talentosCiudadano.includes(nombre)) {
+                        talentosCiudadano.push(nombre);
+                    }
+
+                } else {
+
+                    const indice =
+                        talentosCiudadano.indexOf(nombre);
+
+                    if (indice !== -1) {
+                        talentosCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderTalentos();
+            });
+        });
+};
+
+renderTalentos();
             }
         });
     });

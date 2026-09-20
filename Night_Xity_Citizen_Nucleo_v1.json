@@ -135,7 +135,10 @@
     "IMP-0009",
     "IMP-0020"
 ],
-        "programas": [],
+        "programas": [
+    "PRO-0006",
+    "PRO-0008"
+],
         "armas": [],
         "accesorios": [],
         "blindajes": [],

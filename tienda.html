@@ -397,7 +397,15 @@ const cargarTienda = async () => {
                         return;
                     }
 
-                   selectedProducts.innerHTML =
+                const totalSeleccion =
+    Array.from(seleccionados)
+        .reduce(
+            (total, seleccionado) =>
+                total + Number(seleccionado.dataset.price),
+            0
+        );
+
+selectedProducts.innerHTML =
     Array.from(seleccionados)
         .map(seleccionado => `
             <div class="item">
@@ -405,7 +413,12 @@ const cargarTienda = async () => {
                 — ${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS
             </div>
         `)
-        .join("");
+        .join("") +
+    `
+        <div class="item">
+            <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
+        </div>
+    `;
                     
                 });
 

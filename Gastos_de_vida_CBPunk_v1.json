@@ -1,0 +1,249 @@
+{
+  "proyecto": "Night Xity",
+  "archivo_fuente": "Gastos de vida CBPunk.xlsx",
+  "moneda": "Corpos",
+  "parametros": {
+    "Parametro": "Valor",
+    "Moneda": "Corpos",
+    "Salario_Minimo_Mensual": 675
+  },
+  "vivienda": [
+    {
+      "id": "VIV-001",
+      "habitantes": 1,
+      "costo_total": 250,
+      "costo_por_persona": 250,
+      "descripcion": "Casa digna para una persona"
+    },
+    {
+      "id": "VIV-002",
+      "habitantes": 2,
+      "costo_total": 350,
+      "costo_por_persona": 175,
+      "descripcion": "Casa compartida por dos habitantes"
+    },
+    {
+      "id": "VIV-003",
+      "habitantes": 3,
+      "costo_total": 450,
+      "costo_por_persona": 150,
+      "descripcion": "Casa compartida por tres habitantes"
+    },
+    {
+      "id": "VIV-004",
+      "habitantes": "variable",
+      "costo_total": 70,
+      "costo_por_persona": 70,
+      "descripcion": "Hacinamiento; costo mínimo por persona, minimo 5 personas"
+    }
+  ],
+  "gastos_obligatorios": [
+    {
+      "id": "CV-001",
+      "nombre": "Alimentación",
+      "costo": 205,
+      "frecuencia": "mensual",
+      "descripcion": "Alimentación suministrada por el programa"
+    },
+    {
+      "id": "CV-002",
+      "nombre": "Agua",
+      "costo": 85,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-003",
+      "nombre": "Energía eléctrica",
+      "costo": 45,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-004",
+      "nombre": "Calefacción / climatización",
+      "costo": 25,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-005",
+      "nombre": "Datos y comunicaciones",
+      "costo": 20,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-006",
+      "nombre": "Gastos médicos",
+      "costo": 25,
+      "frecuencia": "mensual",
+      "descripcion": "Aportación obligatoria, se utilice o no"
+    },
+    {
+      "id": "CV-007",
+      "nombre": "Aportación al sistema de salud",
+      "costo": 15,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-008",
+      "nombre": "Transporte público",
+      "costo": 25,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-009",
+      "nombre": "Bebidas",
+      "costo": 15,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-010",
+      "nombre": "Entretenimiento",
+      "costo": 10,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-011",
+      "nombre": "Reserva por inflación",
+      "costo": 11,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-012",
+      "nombre": "Ropa",
+      "costo": 8,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-013",
+      "nombre": "Productos de limpieza, higiene y repelente",
+      "costo": 11,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-014",
+      "nombre": "Impuesto por resiliencia climática",
+      "costo": 13,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-015",
+      "nombre": "Gastos de saneamiento",
+      "costo": 13,
+      "frecuencia": "mensual",
+      "descripcion": null
+    },
+    {
+      "id": "CV-016",
+      "nombre": "Gastos de drenaje y alcantarillado",
+      "costo": 17,
+      "frecuencia": "mensual",
+      "descripcion": null
+    }
+  ],
+  "gastos_opcionales": [
+    {
+      "id": "CV-017",
+      "nombre": "Desactivar publicidad",
+      "costo": 15.0,
+      "frecuencia": "mensual",
+      "capacidad_pasajeros": null
+    },
+    {
+      "id": "CV-018",
+      "nombre": "Aportación a servicios de emergencia",
+      "costo": 35.0,
+      "frecuencia": "mensual",
+      "capacidad_pasajeros": null
+    },
+    {
+      "id": "CV-019",
+      "nombre": "Renta de vehículo",
+      "costo": 9.0,
+      "frecuencia": "diaria",
+      "capacidad_pasajeros": 2.0
+    },
+    {
+      "id": "CV-020",
+      "nombre": "Energía / combustible del vehículo",
+      "costo": 3.0,
+      "frecuencia": "diaria",
+      "capacidad_pasajeros": null
+    },
+    {
+      "id": "CV-021",
+      "nombre": "Compra de catálogo",
+      "costo": null,
+      "frecuencia": "variable",
+      "capacidad_pasajeros": null
+    }
+  ],
+  "variables": [
+    {
+      "id": "CV-022",
+      "tipo": "variable",
+      "nombre": "Visita médica",
+      "costo": null,
+      "frecuencia": "por evento"
+    },
+    {
+      "id": "CV-023",
+      "tipo": "variable",
+      "nombre": "Medicamentos",
+      "costo": null,
+      "frecuencia": "variable"
+    },
+    {
+      "id": "CV-024",
+      "tipo": "variable",
+      "nombre": "Reparaciones de vivienda",
+      "costo": null,
+      "frecuencia": "por evento"
+    },
+    {
+      "id": "CV-025",
+      "tipo": "variable",
+      "nombre": "Mantenimiento de implantes",
+      "costo": null,
+      "frecuencia": "variable"
+    },
+    {
+      "id": "CV-026",
+      "tipo": "variable",
+      "nombre": "Mantenimiento de programas",
+      "costo": null,
+      "frecuencia": "variable"
+    },
+    {
+      "id": "CV-027",
+      "tipo": "variable",
+      "nombre": "Mantenimiento de armas",
+      "costo": null,
+      "frecuencia": "variable"
+    },
+    {
+      "id": "EV-001",
+      "tipo": "evento",
+      "nombre": "Atención para parto y primer mes de vida",
+      "costo": 1200.0,
+      "frecuencia": "por evento"
+    },
+    {
+      "id": "EV-002",
+      "tipo": "evento",
+      "nombre": "Muerte / funeral",
+      "costo": 1950.0,
+      "frecuencia": "por evento"
+    }
+  ]
+}

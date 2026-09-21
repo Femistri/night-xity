@@ -84,7 +84,27 @@
             color: #777;
             font-size: 13px;
         }
+        .select-item {
+            margin-top: 12px;
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
 
+        .select-item:hover {
+            border-color: #00ff9c;
+            color: #00ff9c;
+        }
+
+        .select-item.selected {
+            border-color: #00ff9c;
+            color: #00ff9c;
+        }
+        
         footer {
             border-top: 1px solid #333;
             text-align: center;
@@ -290,7 +310,7 @@ const cargarTienda = async () => {
                     return;
                 }
 
-                contenido.innerHTML = objetos
+                              contenido.innerHTML = objetos
                     .map(objeto => `
 
                         <div class="item">
@@ -308,11 +328,17 @@ const cargarTienda = async () => {
                                 CORPOS
                             </div>
 
+                            <button
+                                class="select-item"
+                                data-id="${objeto.id}"
+                            >
+                                SELECCIONAR
+                            </button>
+
                         </div>
 
                     `)
                     .join("");
-
             });
 
 

@@ -873,7 +873,7 @@
 async function cargarDatosCitizenNet() {
     try {
 
-        const [ciudadanos, catalogo, saludMental] = await Promise.all([
+      const [ciudadanos, catalogo, saludMental, gastosVida] = await Promise.all([
 
             fetch("Night_Xity_Citizen_Nucleo_v1.json?v=14")
                 .then(response => {
@@ -904,6 +904,16 @@ async function cargarDatosCitizenNet() {
                     }
                     return response.json();
                 })
+          ,
+fetch("Gastos_de_vida_CBPunk_v1.json?v=1")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(
+                "No se pudo cargar Gastos_de_vida_CBPunk_v1.json"
+            );
+        }
+        return response.json();
+    })
         ]);
 
         console.log("CITIZEN NET // DATOS CARGADOS");

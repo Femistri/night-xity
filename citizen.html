@@ -895,6 +895,24 @@ console.log("Gastos de vida:", gastosVida);
         
 document.getElementById("citizen-balance").textContent =
     `${ciudadano.economia?.saldo_inicial ?? 0} CORPOS`;
+
+        const economyContainer =
+    document.getElementById("citizen-economy");
+
+const gastosObligatorios =
+    gastosVida.gastos_obligatorios || [];
+
+economyContainer.innerHTML =
+    gastosObligatorios.map(gasto => `
+        <div class="item">
+            <div class="item-name negative">
+                ${gasto.Nombre}
+            </div>
+            <div class="item-info">
+                GASTO -${gasto.Costo} CORPOS
+            </div>
+        </div>
+    `).join("");
         
         /* =========================
            IDENTIDAD

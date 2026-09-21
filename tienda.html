@@ -84,6 +84,11 @@
             color: #777;
             font-size: 13px;
         }
+        .selection-total {
+    margin-top: 18px;
+    color: #00ff9c;
+    letter-spacing: 1px;
+}
         .select-item {
             margin-top: 12px;
             padding: 8px 14px;
@@ -415,7 +420,7 @@ selectedProducts.innerHTML =
         `)
         .join("") +
     `
-        <div class="item">
+       <div class="selection-total">
             <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
         </div>
     `;

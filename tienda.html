@@ -373,6 +373,41 @@ const cargarTienda = async () => {
             "TIENDA // CATÁLOGO CARGADO"
         );
 
+                const selectedProducts =
+            document.getElementById("selected-products");
+
+        document
+            .querySelectorAll(".select-item")
+            .forEach(boton => {
+
+                boton.addEventListener("click", () => {
+
+                    const seleccionados =
+                        document.querySelectorAll(
+                            ".select-item.selected"
+                        );
+
+                    if (!seleccionados.length) {
+
+                        selectedProducts.textContent =
+                            "NINGÚN PRODUCTO SELECCIONADO.";
+
+                        return;
+                    }
+
+                    selectedProducts.innerHTML =
+                        Array.from(seleccionados)
+                            .map(seleccionado => `
+                                <div class="item">
+                                    ${seleccionado.dataset.id}
+                                </div>
+                            `)
+                            .join("");
+
+                });
+
+            });
+        
         console.log(
             "Categorías:",
             Object.keys(categorias)

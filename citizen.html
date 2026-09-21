@@ -948,12 +948,15 @@ const renderMovimientos = (
                     </div>
 
                     <div class="item-info">
-                        ${
-                            gasto.costo !== null
-                                ? `GASTO -${gasto.costo} CORPOS`
-                                : "COSTO VARIABLE"
-                        }
-                    </div>
+    ${
+        gasto.costo !== null
+            ? `GASTO -${gasto.costo} CORPOS`
+            : "COSTO VARIABLE"
+    }
+    <br>
+    ${String(gasto.frecuencia || "").toUpperCase()}
+</div>
+
                 </div>
             `).join("")}
 

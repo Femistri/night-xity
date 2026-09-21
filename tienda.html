@@ -84,6 +84,21 @@
             color: #777;
             font-size: 13px;
         }
+        .remove-item {
+    margin-left: 12px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid #555;
+    color: #777;
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.remove-item:hover {
+    border-color: #ff5555;
+    color: #ff5555;
+}
         .selection-total {
     margin-top: 18px;
     color: #00ff9c;
@@ -413,10 +428,17 @@ const cargarTienda = async () => {
 selectedProducts.innerHTML =
     Array.from(seleccionados)
         .map(seleccionado => `
-            <div class="item">
-                <strong>${seleccionado.dataset.name}</strong>
-                — ${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS
-            </div>
+           <div class="item">
+    <strong>${seleccionado.dataset.name}</strong>
+    — ${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS
+    <button
+        class="remove-item"
+        data-id="${seleccionado.dataset.id}"
+    >
+        QUITAR
+    </button>
+</div>
+
         `)
         .join("") +
     `

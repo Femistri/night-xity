@@ -1465,6 +1465,98 @@ const renderImplantes = () => {
 };
 
 renderImplantes();
+
+        /* =========================
+   MAPA CORPORAL // IMPLANTES
+   ========================= */
+
+const zonasImplantes = {
+
+    "IMP-0001": ["ojos", "cuello", "torso"],
+    "IMP-0002": ["torso"],
+    "IMP-0003": ["brazo-derecho"],
+    "IMP-0004": ["brazo-derecho", "brazo-izquierdo"],
+    "IMP-0005": ["torso", "abdomen", "cabeza"],
+    "IMP-0006": ["abdomen"],
+    "IMP-0007": ["cuello"],
+    "IMP-0008": ["cuello"],
+    "IMP-0009": ["cuello"],
+    "IMP-0010": ["torso", "abdomen", "cabeza", "cuello"],
+    "IMP-0011": [
+        "torso",
+        "abdomen",
+        "cabeza",
+        "cuello",
+        "brazo-derecho",
+        "brazo-izquierdo",
+        "pierna-derecha",
+        "pierna-izquierda"
+    ],
+    "IMP-0012": ["cuello"],
+    "IMP-0013": ["cabeza", "cuello"],
+    "IMP-0014": [
+        "torso",
+        "abdomen",
+        "cabeza",
+        "cuello",
+        "brazo-derecho",
+        "brazo-izquierdo",
+        "pierna-derecha",
+        "pierna-izquierda"
+    ],
+    "IMP-0015": ["cuello"],
+    "IMP-0016": ["torso"],
+    "IMP-0017": ["cuello"],
+    "IMP-0018": ["cuello"],
+    "IMP-0019": ["ojos"],
+    "IMP-0020": ["pierna-derecha", "pierna-izquierda"],
+    "IMP-0021": [
+        "pierna-derecha",
+        "pierna-izquierda",
+        "brazo-derecho",
+        "brazo-izquierdo",
+        "ojos"
+    ],
+    "IMP-0022": ["cabeza"],
+    "IMP-0023": ["ojos"],
+    "IMP-0024": ["brazo-izquierdo"],
+    "IMP-0025": ["ojos"],
+    "IMP-0026": ["cuello"],
+    "IMP-0027": ["torso"],
+    "IMP-0028": ["abdomen"],
+    "IMP-0029": ["abdomen"],
+    "IMP-0030": ["cabeza"]
+};
+
+const actualizarMapaCorporal = () => {
+
+    document
+        .querySelectorAll(".implant-hotspot")
+        .forEach(hotspot => {
+            hotspot.classList.remove("active");
+        });
+
+    implantesCiudadano.forEach(id => {
+
+        const zonas = zonasImplantes[id] || [];
+
+        zonas.forEach(zona => {
+
+            const hotspot = document.querySelector(
+                `.implant-hotspot[data-zone="${zona}"]`
+            );
+
+            if (hotspot) {
+                hotspot.classList.add("active");
+            }
+
+        });
+
+    });
+
+};
+
+actualizarMapaCorporal();
                /* =========================
    PROGRAMAS
    ========================= */

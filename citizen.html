@@ -1317,39 +1317,129 @@ const renderTalentos = () => {
 
 renderTalentos();
      
-                /* =========================
-           IMPLANTES
-           ========================= */
+             /* =========================
+   IMPLANTES
+   ========================= */
 
-        const implantesCiudadano =
-            Array.isArray(ciudadano.inventario?.implantes)
-                ? ciudadano.inventario.implantes
-                : [];
+const implantesCiudadano =
+    Array.isArray(ciudadano.inventario?.implantes)
+        ? ciudadano.inventario.implantes
+        : [];
 
-        const implantesTexto = implantesCiudadano.map(id => {
+const implantesCatalogo =
+    Array.isArray(catalogo.items)
+        ? catalogo.items.filter(
+            item => item.categoria === "Implantes"
+        )
+        : [];
 
-            const implante = catalogo.items?.find(
-                item => item.id === id
-            );
+const implantesContainer =
+    document.getElementById("citizen-implants");
 
-            if (!implante) {
-                return `<strong>${id}</strong><br>SIN REGISTRO`;
+const renderImplantes = () => {
+
+    const seleccionados =
+        implantesCatalogo.filter(implante =>
+            implantesCiudadano.includes(implante.id)
+        );
+
+    const disponibles =
+        implantesCatalogo.filter(implante =>
+            !implantesCiudadano.includes(implante.id)
+        );
+
+    implantesContainer.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+
+            <strong>
+                SELECCIONADOS (${seleccionados.length}/6)
+            </strong>
+
+            ${
+                seleccionados.length > 0
+                    ? seleccionados.map(implante => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${implante.id}"
+                                checked
+                            >
+                            <strong>${implante.nombre}</strong>
+                            <br>
+                            <small>
+                                ${implante.descripcion || "SIN DESCRIPCIÓN"}
+                            </small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNO</div>`
             }
 
-            return `
-                <strong>
-                    ${implante.nombre}
-                </strong>
-                <br>
-                ${implante.descripcion}
-            `;
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+
+            <strong>
+                TODOS LOS IMPLANTES
+            </strong>
+
+            ${
+                disponibles.map(implante => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${implante.id}"
+                        >
+                        <strong>${implante.nombre}</strong>
+                        <br>
+                        <small>
+                            ${implante.descripcion || "SIN DESCRIPCIÓN"}
+                        </small>
+                    </label>
+                `).join("")
+            }
+
+        </div>
+    `;
+
+    implantesContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const id = checkbox.value;
+
+                if (checkbox.checked) {
+
+                    if (implantesCiudadano.length >= 6) {
+                        checkbox.checked = false;
+                        alert("Máximo 6 implantes.");
+                        return;
+                    }
+
+                    if (!implantesCiudadano.includes(id)) {
+                        implantesCiudadano.push(id);
+                    }
+
+                } else {
+
+                    const indice =
+                        implantesCiudadano.indexOf(id);
+
+                    if (indice !== -1) {
+                        implantesCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderImplantes();
+            });
         });
+};
 
-        document.getElementById("citizen-implants").innerHTML =
-            implantesTexto.length > 0
-                ? implantesTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
+renderImplantes();
                 /* =========================
            PROGRAMAS
            ========================= */

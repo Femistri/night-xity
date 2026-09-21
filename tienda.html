@@ -338,10 +338,12 @@ const cargarTienda = async () => {
                                 CORPOS
                             </div>
 
-                            <button
-                                class="select-item"
-                                data-id="${objeto.id}"
-                            >
+                          <button
+    class="select-item"
+    data-id="${objeto.id}"
+    data-name="${objeto.nombre}"
+    data-price="${objeto.costo}"
+>
                                 SELECCIONAR
                             </button>
 
@@ -395,15 +397,16 @@ const cargarTienda = async () => {
                         return;
                     }
 
-                    selectedProducts.innerHTML =
-                        Array.from(seleccionados)
-                            .map(seleccionado => `
-                                <div class="item">
-                                    ${seleccionado.dataset.id}
-                                </div>
-                            `)
-                            .join("");
-
+                   selectedProducts.innerHTML =
+    Array.from(seleccionados)
+        .map(seleccionado => `
+            <div class="item">
+                <strong>${seleccionado.dataset.name}</strong>
+                — ${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS
+            </div>
+        `)
+        .join("");
+                    
                 });
 
             });

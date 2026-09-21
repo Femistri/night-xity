@@ -1566,39 +1566,130 @@ const renderProgramas = () => {
 
 renderProgramas();
         
-        /* =========================
-           ARMAS
-           ========================= */
+      /* =========================
+   ARMAS
+   ========================= */
 
-        const armasCiudadano =
-            Array.isArray(ciudadano.inventario?.armas)
-                ? ciudadano.inventario.armas
-                : [];
+const armasCiudadano =
+    Array.isArray(ciudadano.inventario?.armas)
+        ? ciudadano.inventario.armas
+        : [];
 
-        const armasTexto = armasCiudadano.map(id => {
+const armasCatalogo =
+    Array.isArray(catalogo.items)
+        ? catalogo.items.filter(
+            item => item.categoria === "Armas"
+        )
+        : [];
 
-            const arma = catalogo.items?.find(
-                item => item.id === id
-            );
+const armasContainer =
+    document.getElementById("citizen-weapons");
 
-            if (!arma) {
-                return `<strong>${id}</strong><br>SIN REGISTRO`;
+const renderArmas = () => {
+
+    const seleccionadas =
+        armasCatalogo.filter(arma =>
+            armasCiudadano.includes(arma.id)
+        );
+
+    const disponibles =
+        armasCatalogo.filter(arma =>
+            !armasCiudadano.includes(arma.id)
+        );
+
+    armasContainer.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+
+            <strong>
+                SELECCIONADAS (${seleccionadas.length}/6)
+            </strong>
+
+            ${
+                seleccionadas.length > 0
+                    ? seleccionadas.map(arma => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${arma.id}"
+                                checked
+                            >
+                            <strong>${arma.nombre}</strong>
+                            <br>
+                            <small>
+                                ${arma.descripcion || "SIN DESCRIPCIÓN"}
+                            </small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNA</div>`
             }
 
-            return `
-                <strong>
-                    ${arma.nombre}
-                </strong>
-                <br>
-                ${arma.descripcion}
-            `;
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+
+            <strong>
+                TODAS LAS ARMAS
+            </strong>
+
+            ${
+                disponibles.map(arma => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${arma.id}"
+                        >
+                        <strong>${arma.nombre}</strong>
+                        <br>
+                        <small>
+                            ${arma.descripcion || "SIN DESCRIPCIÓN"}
+                        </small>
+                    </label>
+                `).join("")
+            }
+
+        </div>
+    `;
+
+    armasContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const id = checkbox.value;
+
+                if (checkbox.checked) {
+
+                    if (armasCiudadano.length >= 6) {
+                        checkbox.checked = false;
+                        alert("Máximo 6 armas.");
+                        return;
+                    }
+
+                    if (!armasCiudadano.includes(id)) {
+                        armasCiudadano.push(id);
+                    }
+
+                } else {
+
+                    const indice =
+                        armasCiudadano.indexOf(id);
+
+                    if (indice !== -1) {
+                        armasCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderArmas();
+            });
         });
+};
 
-        document.getElementById("citizen-weapons").innerHTML =
-            armasTexto.length > 0
-                ? armasTexto.join("<br><br>")
-                : "SIN REGISTRO";
-
+renderArmas();
+        
                 /* =========================
            EQUIPO
            ========================= */

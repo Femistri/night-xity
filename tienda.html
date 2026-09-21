@@ -341,7 +341,7 @@ const cargarTienda = async () => {
                     .join("");
             });
 
-        document
+               document
             .querySelectorAll(".select-item")
             .forEach(boton => {
 
@@ -349,14 +349,16 @@ const cargarTienda = async () => {
 
                     boton.classList.toggle("selected");
 
-                    boton.textContent =
-                        boton.classList.contains("selected")
-                            ? "SELECCIONADO"
-                            : "SELECCIONAR";
+                    if (boton.classList.contains("selected")) {
+                        boton.textContent = "SELECCIONADO";
+                    } else {
+                        boton.textContent = "SELECCIONAR";
+                    }
 
                 });
 
             });
+        
         console.log(
             "TIENDA // CATÁLOGO CARGADO"
         );

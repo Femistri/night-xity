@@ -908,17 +908,80 @@ document.getElementById("citizen-balance").textContent =
 const gastosObligatorios =
     gastosVida.gastos_obligatorios || [];
 
-economyContainer.innerHTML =
-    gastosObligatorios.map(gasto => `
-        <div class="item">
-            <div class="item-name negative">
-                ${gasto.nombre}
-            </div>
-            <div class="item-info">
-                GASTO -${gasto.costo} CORPOS
-            </div>
-        </div>
-    `).join("");
+const gastosOpcionales =
+    gastosVida.gastos_opcionales || [];
+
+const gastosVariables =
+    gastosVida.variables?.filter(
+        gasto => gasto.tipo === "variable"
+    ) || [];
+
+const gastosEventos =
+    gastosVida.variables?.filter(
+        gasto => gasto.tipo === "evento"
+    ) || [];
+
+const renderMovimientos = (
+    gastos,
+    titulo
+) => {
+
+    if (!gastos.length) {
+        return `
+            <details>
+                <summary>${titulo}</summary>
+                <div class="item-info">
+                    SIN REGISTROS
+                </div>
+            </details>
+        `;
+    }
+
+    return `
+        <details>
+            <summary>${titulo}</summary>
+
+            ${gastos.map(gasto => `
+                <div class="item">
+                    <div class="item-name negative">
+                        ${gasto.nombre}
+                    </div>
+
+                    <div class="item-info">
+                        ${
+                            gasto.costo !== null
+                                ? `GASTO -${gasto.costo} CORPOS`
+                                : "COSTO VARIABLE"
+                        }
+                    </div>
+                </div>
+            `).join("")}
+
+        </details>
+    `;
+};
+
+economyContainer.innerHTML = `
+    ${renderMovimientos(
+        gastosObligatorios,
+        "OBLIGATORIOS"
+    )}
+
+    ${renderMovimientos(
+        gastosOpcionales,
+        "OPCIONALES"
+    )}
+
+    ${renderMovimientos(
+        gastosVariables,
+        "VARIABLES"
+    )}
+
+    ${renderMovimientos(
+        gastosEventos,
+        "EVENTOS"
+    )}
+`;
         
         /* =========================
            IDENTIDAD

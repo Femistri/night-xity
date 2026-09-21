@@ -1690,75 +1690,166 @@ const renderArmas = () => {
 
 renderArmas();
         
-                /* =========================
-           EQUIPO
-           ========================= */
+              /* =========================
+   EQUIPO
+   ========================= */
 
-        const cargarEquipo = (campo, elementoId, categoria) => {
+const renderEquipo = (
+    campo,
+    elementoId,
+    categoria,
+    nombreCategoria
+) => {
 
-            const inventario =
-                Array.isArray(ciudadano.inventario?.[campo])
-                    ? ciudadano.inventario[campo]
-                    : [];
+    const inventario =
+        Array.isArray(ciudadano.inventario?.[campo])
+            ? ciudadano.inventario[campo]
+            : [];
 
-            const objetos = inventario.map(id => {
+    const catalogoCategoria =
+        Array.isArray(catalogo.items)
+            ? catalogo.items.filter(
+                item => item.categoria === categoria
+            )
+            : [];
 
-                const objeto = catalogo.items?.find(
-                    item => item.id === id &&
-                           item.categoria === categoria
-                );
+    const seleccionados =
+        catalogoCategoria.filter(objeto =>
+            inventario.includes(objeto.id)
+        );
 
-                if (!objeto) {
-                    return `<strong>${id}</strong><br>SIN REGISTRO`;
+    const disponibles =
+        catalogoCategoria.filter(objeto =>
+            !inventario.includes(objeto.id)
+        );
+
+    const container =
+        document.getElementById(elementoId);
+
+    container.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+
+            <strong>
+                SELECCIONADOS (${seleccionados.length})
+            </strong>
+
+            ${
+                seleccionados.length > 0
+                    ? seleccionados.map(objeto => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${objeto.id}"
+                                checked
+                            >
+                            <strong>${objeto.nombre}</strong>
+                            <br>
+                            <small>
+                                ${objeto.descripcion || "SIN DESCRIPCIÓN"}
+                            </small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNO</div>`
+            }
+
+        </div>
+
+        <hr>
+
+        <div style="margin-top:16px;">
+
+            <strong>
+                TODOS LOS ${nombreCategoria}
+            </strong>
+
+            ${
+                disponibles.map(objeto => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${objeto.id}"
+                        >
+                        <strong>${objeto.nombre}</strong>
+                        <br>
+                        <small>
+                            ${objeto.descripcion || "SIN DESCRIPCIÓN"}
+                        </small>
+                    </label>
+                `).join("")
+            }
+
+        </div>
+    `;
+
+    container
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const id = checkbox.value;
+
+                if (checkbox.checked) {
+
+                    if (!inventario.includes(id)) {
+                        inventario.push(id);
+                    }
+
+                } else {
+
+                    const indice =
+                        inventario.indexOf(id);
+
+                    if (indice !== -1) {
+                        inventario.splice(indice, 1);
+                    }
                 }
 
-                return `
-                    <strong>
-                        ${objeto.nombre}
-                    </strong>
-                    <br>
-                    ${objeto.descripcion || "SIN DESCRIPCIÓN"}
-                    <br>
-                    COSTO: $${objeto.costo}
-                `;
+                renderEquipo(
+                    campo,
+                    elementoId,
+                    categoria,
+                    nombreCategoria
+                );
             });
+        });
+};
 
-            document.getElementById(elementoId).innerHTML =
-                objetos.length > 0
-                    ? objetos.join("<br><br>")
-                    : "SIN REGISTRO";
-        };
+renderEquipo(
+    "accesorios",
+    "citizen-accessories",
+    "Accesorios",
+    "ACCESORIOS"
+);
 
-        cargarEquipo(
-            "accesorios",
-            "citizen-accessories",
-            "Accesorios"
-        );
+renderEquipo(
+    "blindajes",
+    "citizen-armor",
+    "Blindajes",
+    "BLINDAJES"
+);
 
-        cargarEquipo(
-            "blindajes",
-            "citizen-armor",
-            "Blindajes"
-        );
+renderEquipo(
+    "terminales",
+    "citizen-terminals",
+    "Terminales",
+    "TERMINALES"
+);
 
-        cargarEquipo(
-            "terminales",
-            "citizen-terminals",
-            "Terminales"
-        );
+renderEquipo(
+    "medicare",
+    "citizen-medicare",
+    "MediCare",
+    "MEDICARE"
+);
 
-        cargarEquipo(
-            "medicare",
-            "citizen-medicare",
-            "MediCare"
-        );
-
-        cargarEquipo(
-            "varios",
-            "citizen-misc",
-            "Varios"
-        );
-        
+renderEquipo(
+    "varios",
+    "citizen-misc",
+    "Varios",
+    "VARIOS"
+);
         /* =========================
            SALUD MENTAL
            ========================= */

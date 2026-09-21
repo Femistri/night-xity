@@ -1441,38 +1441,130 @@ const renderImplantes = () => {
 };
 
 renderImplantes();
-                /* =========================
-           PROGRAMAS
-           ========================= */
+               /* =========================
+   PROGRAMAS
+   ========================= */
 
-        const programasCiudadano =
-            Array.isArray(ciudadano.inventario?.programas)
-                ? ciudadano.inventario.programas
-                : [];
+const programasCiudadano =
+    Array.isArray(ciudadano.inventario?.programas)
+        ? ciudadano.inventario.programas
+        : [];
 
-        const programasTexto = programasCiudadano.map(id => {
+const programasCatalogo =
+    Array.isArray(catalogo.items)
+        ? catalogo.items.filter(
+            item => item.categoria === "Programas"
+        )
+        : [];
 
-            const programa = catalogo.items?.find(
-                item => item.id === id
-            );
+const programasContainer =
+    document.getElementById("citizen-programs");
 
-            if (!programa) {
-                return `<strong>${id}</strong><br>SIN REGISTRO`;
+const renderProgramas = () => {
+
+    const seleccionados =
+        programasCatalogo.filter(programa =>
+            programasCiudadano.includes(programa.id)
+        );
+
+    const disponibles =
+        programasCatalogo.filter(programa =>
+            !programasCiudadano.includes(programa.id)
+        );
+
+    programasContainer.innerHTML = `
+
+        <div style="margin-bottom:16px;">
+
+            <strong>
+                SELECCIONADOS (${seleccionados.length}/6)
+            </strong>
+
+            ${
+                seleccionados.length > 0
+                    ? seleccionados.map(programa => `
+                        <label style="display:block; margin:8px 0;">
+                            <input
+                                type="checkbox"
+                                value="${programa.id}"
+                                checked
+                            >
+                            <strong>${programa.nombre}</strong>
+                            <br>
+                            <small>
+                                ${programa.descripcion || "SIN DESCRIPCIÓN"}
+                            </small>
+                        </label>
+                    `).join("")
+                    : `<div style="margin-top:8px;">NINGUNO</div>`
             }
 
-            return `
-                <strong>
-                    ${programa.nombre}
-                </strong>
-                <br>
-                ${programa.descripcion}
-            `;
-        });
+        </div>
 
-        document.getElementById("citizen-programs").innerHTML =
-            programasTexto.length > 0
-                ? programasTexto.join("<br><br>")
-                : "SIN REGISTRO";
+        <hr>
+
+        <div style="margin-top:16px;">
+
+            <strong>
+                TODOS LOS PROGRAMAS
+            </strong>
+
+            ${
+                disponibles.map(programa => `
+                    <label style="display:block; margin:8px 0;">
+                        <input
+                            type="checkbox"
+                            value="${programa.id}"
+                        >
+                        <strong>${programa.nombre}</strong>
+                        <br>
+                        <small>
+                            ${programa.descripcion || "SIN DESCRIPCIÓN"}
+                        </small>
+                    </label>
+                `).join("")
+            }
+
+        </div>
+    `;
+
+    programasContainer
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(checkbox => {
+
+            checkbox.addEventListener("change", () => {
+
+                const id = checkbox.value;
+
+                if (checkbox.checked) {
+
+                    if (programasCiudadano.length >= 6) {
+                        checkbox.checked = false;
+                        alert("Máximo 6 programas.");
+                        return;
+                    }
+
+                    if (!programasCiudadano.includes(id)) {
+                        programasCiudadano.push(id);
+                    }
+
+                } else {
+
+                    const indice =
+                        programasCiudadano.indexOf(id);
+
+                    if (indice !== -1) {
+                        programasCiudadano.splice(indice, 1);
+                    }
+                }
+
+                renderProgramas();
+            });
+        });
+};
+
+renderProgramas();
+        
         /* =========================
            ARMAS
            ========================= */

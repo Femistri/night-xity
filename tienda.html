@@ -398,6 +398,26 @@ const cargarTienda = async () => {
                 const selectedProducts =
             document.getElementById("selected-products");
 
+        selectedProducts.addEventListener("click", evento => {
+
+    const botonQuitar =
+        evento.target.closest(".remove-item");
+
+    if (!botonQuitar) {
+        return;
+    }
+
+    const botonProducto =
+        document.querySelector(
+            `.select-item[data-id="${botonQuitar.dataset.id}"]`
+        );
+
+    if (botonProducto) {
+        botonProducto.click();
+    }
+
+});
+        
         document
             .querySelectorAll(".select-item")
             .forEach(boton => {

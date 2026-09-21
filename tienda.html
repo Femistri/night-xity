@@ -215,6 +215,130 @@
 
 </footer>
 
+    <script>
+
+const cargarTienda = async () => {
+
+    try {
+
+        const response =
+            await fetch("catalogo_night_xity_web_v1.json?v=1");
+
+        if (!response.ok) {
+            throw new Error(
+                "No se pudo cargar el catálogo."
+            );
+        }
+
+        const catalogo =
+            await response.json();
+
+        const categorias = catalogo.categorias || {};
+
+        const mapaCategorias = {
+            "IMPLANTES": "Implantes",
+            "PROGRAMAS": "Programas",
+            "ARMAS": "Armas",
+            "ACCESORIOS": "Accesorios",
+            "BLINDAJES": "Blindajes",
+            "TERMINALES": "Terminales",
+            "MEDICARE": "MediCare",
+            "DROGAS": "Drogas",
+            "VEHÍCULOS": "Vehiculos",
+            "VARIOS": "Varios",
+            "COTIDIANO": "Cotidiano"
+        };
+
+
+        document
+            .querySelectorAll("details")
+            .forEach(detalle => {
+
+                const nombreVisible =
+                    detalle
+                        .querySelector("summary")
+                        ?.textContent
+                        .trim();
+
+                const categoria =
+                    mapaCategorias[nombreVisible];
+
+                if (!categoria) {
+                    return;
+                }
+
+                const objetos =
+                    Array.isArray(categorias[categoria])
+                        ? categorias[categoria]
+                            .filter(objeto =>
+                                objeto.costo !== null
+                            )
+                        : [];
+
+                const contenido =
+                    detalle.querySelector(".category-content");
+
+                if (!contenido) {
+                    return;
+                }
+
+                if (!objetos.length) {
+
+                    contenido.innerHTML =
+                        "SIN PRODUCTOS DISPONIBLES.";
+
+                    return;
+                }
+
+                contenido.innerHTML = objetos
+                    .map(objeto => `
+
+                        <div class="item">
+
+                            <div class="item-name">
+                                ${objeto.nombre}
+                            </div>
+
+                            <div class="item-info">
+                                ${objeto.descripcion || "SIN DESCRIPCIÓN"}
+                            </div>
+
+                            <div class="item-price">
+                                ${objeto.costo.toLocaleString("es-MX")}
+                                CORPOS
+                            </div>
+
+                        </div>
+
+                    `)
+                    .join("");
+
+            });
+
+
+        console.log(
+            "TIENDA // CATÁLOGO CARGADO"
+        );
+
+        console.log(
+            "Categorías:",
+            Object.keys(categorias)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "TIENDA // ERROR DE CATÁLOGO",
+            error
+        );
+
+    }
+
+};
+
+cargarTienda();
+
+</script>
 
 </body>
 

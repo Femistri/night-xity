@@ -528,6 +528,17 @@ selectedProducts.innerHTML =
             : "SALDO SUFICIENTE"
     }
 </div>
+
+${
+    totalSeleccion <= ciudadanoActivo.economia.saldo_inicial
+        ? `
+            <button class="buy-button">
+                COMPRAR
+            </button>
+          `
+        : ""
+}
+
     `;
                     
                 });

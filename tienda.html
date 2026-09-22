@@ -111,6 +111,18 @@
     color: #00ff9c;
     letter-spacing: 1px;
 }
+
+        .selection-status {
+    margin-top: 10px;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.selection-status.insufficient {
+    color: #ff5555;
+}
+        
+        
         .select-item {
             margin-top: 12px;
             padding: 8px 14px;
@@ -501,9 +513,21 @@ selectedProducts.innerHTML =
         `)
         .join("") +
     `
-       <div class="selection-total">
-            <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
-        </div>
+      <div class="selection-total">
+    <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
+</div>
+
+<div class="selection-status ${
+    totalSeleccion > ciudadanoActivo.economia.saldo_inicial
+        ? "insufficient"
+        : ""
+}">
+    ${
+        totalSeleccion > ciudadanoActivo.economia.saldo_inicial
+            ? "SALDO INSUFICIENTE"
+            : "SALDO SUFICIENTE"
+    }
+</div>
     `;
                     
                 });

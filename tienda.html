@@ -121,7 +121,22 @@
 .selection-status.insufficient {
     color: #ff5555;
 }
-        
+
+        .buy-button {
+    margin-top: 15px;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid #00ff9c;
+    color: #00ff9c;
+    cursor: pointer;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.buy-button:hover {
+    background: #00ff9c;
+    color: #0b0d0e;
+}
         
         .select-item {
             margin-top: 12px;
@@ -458,6 +473,16 @@ const mapaCategorias = {
         return;
     }
 
+            const botonComprar =
+    evento.target.closest(".buy-button");
+
+if (botonComprar) {
+    botonComprar.textContent =
+        "OPERACIÓN VALIDADA";
+    botonComprar.disabled = true;
+    return;
+}
+            
     const botonProducto =
         document.querySelector(
             `.select-item[data-id="${botonQuitar.dataset.id}"]`

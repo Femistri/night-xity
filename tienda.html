@@ -99,6 +99,13 @@
     border-color: #ff5555;
     color: #ff5555;
 }
+        .citizen-balance {
+    margin-bottom: 25px;
+    color: #00ff9c;
+    font-size: 12px;
+    letter-spacing: 2px;
+    line-height: 1.8;
+}
         .selection-total {
     margin-top: 18px;
     color: #00ff9c;
@@ -245,9 +252,14 @@
 
     </section>
 
-        <section class="panel">
-            
-            <h2>SELECCIÓN ACTUAL</h2>
+      <section class="panel">
+
+    <div class="citizen-balance">
+        <div>CIUDADANO ACTIVO: INESA</div>
+        <div id="citizen-balance">SALDO DISPONIBLE: CARGANDO...</div>
+    </div>
+
+    <h2>SELECCIÓN ACTUAL</h2>
 
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
@@ -283,9 +295,36 @@ const cargarTienda = async () => {
         const catalogo =
             await response.json();
 
-        const categorias = catalogo.categorias || {};
+      const categorias = catalogo.categorias || {};
 
-        const mapaCategorias = {
+const citizenResponse =
+    await fetch("Night_Xity_Citizen_Nucleo_v1.json?v=1");
+
+if (!citizenResponse.ok) {
+    throw new Error(
+        "No se pudo cargar el núcleo ciudadano."
+    );
+}
+
+const citizenData =
+    await citizenResponse.json();
+
+const ciudadanoActivo =
+    citizenData.ciudadanos.find(
+        ciudadano =>
+            ciudadano.identidad.nombre_clave === "Inesa"
+    );
+
+if (!ciudadanoActivo) {
+    throw new Error(
+        "No se encontró el ciudadano activo."
+    );
+}
+
+document.getElementById("citizen-balance").textContent =
+    `SALDO DISPONIBLE: ${ciudadanoActivo.economia.saldo_inicial.toLocaleString("es-MX")} CORPOS`;
+
+const mapaCategorias = {
             "IMPLANTES": "Implantes",
             "PROGRAMAS": "Programas",
             "ARMAS": "Armas",

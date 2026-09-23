@@ -572,7 +572,14 @@ const mapaCategorias = {
             "OPERACIÓN VALIDADA";
 
         botonComprar.disabled = true;
+document
+    .querySelectorAll(".select-item.selected")
+    .forEach(producto => {
+        producto.classList.remove("selected");
+    });
 
+document.getElementById("selected-products").innerHTML = "";
+        
         return;
 
     const botonQuitar =

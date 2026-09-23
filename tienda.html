@@ -523,12 +523,20 @@ const mapaCategorias = {
             transacciones
         );
 
-        const estadoCiudadano = {
-            ciudadano: ciudadanoActivo.identidad.nombre_clave,
-            saldo: ciudadanoActivo.economia.saldo_inicial - totalCompra,
-            inventario: ciudadanoActivo.inventario,
-            movimientos: transacciones
-        };
+      const estadoAnterior =
+    JSON.parse(
+        localStorage.getItem("nightXityEstadoInesa")
+    ) || {};
+
+const estadoCiudadano = {
+    ciudadano: ciudadanoActivo.identidad.nombre_clave,
+    saldo: ciudadanoActivo.economia.saldo_inicial - totalCompra,
+    inventario: ciudadanoActivo.inventario,
+    movimientos: [
+        ...(estadoAnterior.movimientos || []),
+        ...transacciones
+    ]
+};
 
               transacciones.forEach(transaccion => {
 

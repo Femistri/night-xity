@@ -510,10 +510,35 @@ const mapaCategorias = {
 
         });
 
-               console.log(
+        console.log(
             "NIGHT XITY // TRANSACCIONES GENERADAS",
             transacciones
         );
+
+        const estadoCiudadano = {
+            ciudadano: ciudadanoActivo.identidad.nombre_clave,
+            saldo: ciudadanoActivo.economia.saldo_inicial - totalCompra,
+            inventario: ciudadanoActivo.inventory,
+            movimientos: transacciones
+        };
+
+        transacciones.forEach(transaccion => {
+
+            const categoriaInventario =
+                Object.keys(estadoCiudadano.inventario)
+                    .find(categoria =>
+                        Array.isArray(
+                            estadoCiudadano.inventario[categoria]
+                        )
+                    );
+
+            console.log(
+                "NIGHT XITY // INVENTARIO",
+                categoriaInventario,
+                transaccion
+            );
+
+        });
 
         ciudadanoActivo.economia.saldo_inicial -=
             totalCompra;
@@ -526,13 +551,17 @@ const mapaCategorias = {
                     .toLocaleString("es-MX")
             } CORPOS`;
 
+        localStorage.setItem(
+            "nightXityEstadoInesa",
+            JSON.stringify(estadoCiudadano)
+        );
+
         botonComprar.textContent =
             "OPERACIÓN VALIDADA";
 
         botonComprar.disabled = true;
 
         return;
-    }
 
     const botonQuitar =
         evento.target.closest(".remove-item");

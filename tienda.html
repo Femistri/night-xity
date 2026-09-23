@@ -405,14 +405,13 @@ const mapaCategorias = {
                     return;
                 }
 
-                const objetos =
-                    Array.isArray(categorias[categoria])
-                        ? categorias[categoria]
-                            .filter(objeto =>
-                                objeto.costo !== null
-                            )
-                        : [];
-
+               const objetos =
+    Array.isArray(categorias[categoria])
+        ? categorias[categoria]
+            .filter(objeto =>
+                typeof objeto.costo === "number"
+            )
+        : [];
                 const contenido =
                     detalle.querySelector(".category-content");
 

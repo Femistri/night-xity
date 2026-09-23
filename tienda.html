@@ -492,31 +492,39 @@ const mapaCategorias = {
             return;
         }
 
-        ciudadanoActivo.economia.saldo_inicial -=
-            totalCompra;
+        const transacciones = [];
 
-        document.getElementById(
-            "citizen-balance"
-        ).textContent =
-            `SALDO DISPONIBLE: ${
-                ciudadanoActivo.economia.saldo_inicial
-                    .toLocaleString("es-MX")
-            } CORPOS`;
+        seleccionados.forEach(seleccionado => {
 
-        botonComprar.textContent =
-            "OPERACIÓN VALIDADA";
+            transacciones.push({
+                id: `TX-${Date.now()}-${seleccionado.dataset.id}`,
+                fecha: new Date().toISOString().slice(0, 10),
+                ciudadano: ciudadanoActivo.identidad.nombre_clave,
+                tipo: "COMPRA",
+                catalogo_id: seleccionado.dataset.id,
+                nombre: seleccionado.dataset.name,
+                cantidad: 1,
+                precio_unitario: Number(seleccionado.dataset.price),
+                monto_total: Number(seleccionado.dataset.price)
+            });
 
-        botonComprar.disabled = true;
+        });
+
+        console.log(
+            "NIGHT XITY // TRANSACCIONES GENERADAS",
+            transacciones
+        );
 
         return;
     }
-const botonQuitar =
-    evento.target.closest(".remove-item");
 
-if (!botonQuitar) {
-    return;
-}
-            
+    const botonQuitar =
+        evento.target.closest(".remove-item");
+
+    if (!botonQuitar) {
+        return;
+    }
+
     const botonProducto =
         document.querySelector(
             `.select-item[data-id="${botonQuitar.dataset.id}"]`

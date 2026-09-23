@@ -364,6 +364,10 @@ try {
 
 if (estadoGuardado) {
     
+  if (
+    estadoGuardado &&
+    typeof estadoGuardado.saldo === "number"
+) {
     ciudadanoActivo.economia.saldo_inicial =
         estadoGuardado.saldo;
 }

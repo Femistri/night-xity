@@ -530,24 +530,28 @@ const mapaCategorias = {
             movimientos: transacciones
         };
 
-        transacciones.forEach(transaccion => {
+              transacciones.forEach(transaccion => {
 
             const categoriaInventario =
-                Object.keys(estadoCiudadano.inventario)
-                    .find(categoria =>
-                        Array.isArray(
-                            estadoCiudadano.inventario[categoria]
-                        )
-                    );
+                transaccion.categoria;
 
-            console.log(
-                "NIGHT XITY // INVENTARIO",
-                categoriaInventario,
-                transaccion
+            if (
+                !estadoCiudadano.inventario[
+                    categoriaInventario
+                ]
+            ) {
+                estadoCiudadano.inventario[
+                    categoriaInventario
+                ] = [];
+            }
+
+            estadoCiudadano.inventario[
+                categoriaInventario
+            ].push(
+                transaccion.catalogo_id
             );
 
         });
-
         ciudadanoActivo.economia.saldo_inicial -=
             totalCompra;
 

@@ -348,9 +348,19 @@ if (!ciudadanoActivo) {
     );
 }
 
+const estadoGuardado =
+    JSON.parse(
+        localStorage.getItem("nightXityEstadoInesa")
+    );
+
+if (estadoGuardado) {
+    ciudadanoActivo.economia.saldo_inicial =
+        estadoGuardado.saldo;
+}
+
 document.getElementById("citizen-balance").textContent =
     `SALDO DISPONIBLE: ${ciudadanoActivo.economia.saldo_inicial.toLocaleString("es-MX")} CORPOS`;
-
+        
 const mapaCategorias = {
             "IMPLANTES": "Implantes",
             "PROGRAMAS": "Programas",

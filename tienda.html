@@ -494,7 +494,15 @@ const mapaCategorias = {
 
         const transacciones = [];
 
-        seleccionados.forEach(seleccionado => {
+              seleccionados.forEach(seleccionado => {
+
+            const objetoCatalogo =
+                Object.values(categorias)
+                    .flat()
+                    .find(
+                        objeto =>
+                            objeto.id === seleccionado.dataset.id
+                    );
 
             transacciones.push({
                 id: `TX-${Date.now()}-${seleccionado.dataset.id}`,
@@ -502,6 +510,7 @@ const mapaCategorias = {
                 ciudadano: ciudadanoActivo.identidad.nombre_clave,
                 tipo: "COMPRA",
                 catalogo_id: seleccionado.dataset.id,
+                categoria: objetoCatalogo.categoria.toLowerCase(),
                 nombre: seleccionado.dataset.name,
                 cantidad: 1,
                 precio_unitario: Number(seleccionado.dataset.price),
@@ -509,7 +518,6 @@ const mapaCategorias = {
             });
 
         });
-
         console.log(
             "NIGHT XITY // TRANSACCIONES GENERADAS",
             transacciones

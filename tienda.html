@@ -348,12 +348,22 @@ if (!ciudadanoActivo) {
     );
 }
 
-const estadoGuardado =
-    JSON.parse(
-        localStorage.getItem("nightXityEstadoInesa")
+let estadoGuardado = null;
+
+try {
+    estadoGuardado =
+        JSON.parse(
+            localStorage.getItem("nightXityEstadoInesa")
+        );
+} catch (error) {
+    console.warn(
+        "NIGHT XITY // ESTADO LOCAL INVÁLIDO",
+        error
     );
+}
 
 if (estadoGuardado) {
+    
     ciudadanoActivo.economia.saldo_inicial =
         estadoGuardado.saldo;
 }

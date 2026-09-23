@@ -464,53 +464,52 @@ const mapaCategorias = {
                 const selectedProducts =
             document.getElementById("selected-products");
 
-        selectedProducts.addEventListener("click", evento => {
+                selectedProducts.addEventListener("click", evento => {
 
-  const botonComprar =
-    evento.target.closest(".buy-button");
+    const botonComprar =
+        evento.target.closest(".buy-button");
 
-if (botonComprar) {
+    if (botonComprar) {
 
-    const seleccionados =
-        document.querySelectorAll(
-            ".select-item.selected"
-        );
-
-    const totalCompra =
-        Array.from(seleccionados)
-            .reduce(
-                (total, seleccionado) =>
-                    total +
-                    Number(seleccionado.dataset.price),
-                0
+        const seleccionados =
+            document.querySelectorAll(
+                ".select-item.selected"
             );
 
-    if (
-        totalCompra >
-        ciudadanoActivo.economia.saldo_inicial
-    ) {
+        const totalCompra =
+            Array.from(seleccionados)
+                .reduce(
+                    (total, seleccionado) =>
+                        total +
+                        Number(seleccionado.dataset.price),
+                    0
+                );
+
+        if (
+            totalCompra >
+            ciudadanoActivo.economia.saldo_inicial
+        ) {
+            return;
+        }
+
+        ciudadanoActivo.economia.saldo_inicial -=
+            totalCompra;
+
+        document.getElementById(
+            "citizen-balance"
+        ).textContent =
+            `SALDO DISPONIBLE: ${
+                ciudadanoActivo.economia.saldo_inicial
+                    .toLocaleString("es-MX")
+            } CORPOS`;
+
+        botonComprar.textContent =
+            "OPERACIÓN VALIDADA";
+
+        botonComprar.disabled = true;
+
         return;
     }
-
-    ciudadanoActivo.economia.saldo_inicial -=
-        totalCompra;
-
-    document.getElementById(
-        "citizen-balance"
-    ).textContent =
-        `SALDO DISPONIBLE: ${
-            ciudadanoActivo.economia.saldo_inicial
-                .toLocaleString("es-MX")
-        } CORPOS`;
-
-    botonComprar.textContent =
-        "OPERACIÓN VALIDADA";
-
-    botonComprar.disabled = true;
-
-    return;
-}
-
 const botonQuitar =
     evento.target.closest(".remove-item");
 

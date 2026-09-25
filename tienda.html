@@ -489,21 +489,45 @@ const mapaCategorias = {
                     0
                 );
 
-        if (
+               if (
             totalCompra >
-            ciudadanoActivo.economia.saldo_inicial
+            estadoEconomico.saldo_actual
         ) {
             return;
         }
 
-        ciudadanoActivo.economia.saldo_inicial -=
-            totalCompra;
+        const objetosSeleccionados =
+            Array.from(seleccionados).map(seleccionado => {
+
+                const id = seleccionado.dataset.id;
+
+                return Object.values(categorias)
+                    .flat()
+                    .find(objeto => objeto.id === id);
+
+            });
+
+        if (
+            objetosSeleccionados.some(objeto => !objeto)
+        ) {
+            console.error(
+                "TIENDA // No se encontró uno de los productos seleccionados."
+            );
+            return;
+        }
+
+        objetosSeleccionados.forEach(objeto => {
+            MotorEconomico.registrarCompra(
+                estadoEconomico,
+                objeto
+            );
+        });
 
         document.getElementById(
             "citizen-balance"
         ).textContent =
             `SALDO DISPONIBLE: ${
-                ciudadanoActivo.economia.saldo_inicial
+                estadoEconomico.saldo_actual
                     .toLocaleString("es-MX")
             } CORPOS`;
 
@@ -511,7 +535,6 @@ const mapaCategorias = {
             "OPERACIÓN VALIDADA";
 
         botonComprar.disabled = true;
-
         return;
     }
 const botonQuitar =

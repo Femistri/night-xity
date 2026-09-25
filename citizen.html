@@ -1633,7 +1633,8 @@ const renderEquipo = (
     campo,
     elementoId,
     categoria,
-    nombreCategoria
+    nombreCategoria,
+    fuenteInventario = ciudadano.inventario
 ) => {
 
     const inventario =
@@ -1755,7 +1756,8 @@ renderEquipo(
     "accesorios",
     "citizen-accessories",
     "Accesorios",
-    "ACCESORIOS"
+    "ACCESORIOS",
+    estadoEconomico?.inventario
 );
 
 renderEquipo(

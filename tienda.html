@@ -470,7 +470,7 @@ const mapaCategorias = {
 
                 selectedProducts.addEventListener("click", evento => {
 
-   const botonComprar =
+const botonComprar =
     evento.target.closest(".buy-button");
 
 if (botonComprar) {
@@ -480,30 +480,61 @@ if (botonComprar) {
             ".select-item.selected"
         );
 
-    const totalCompra =
+    if (!seleccionados.length) {
+        return;
+    }
+
+    const objetosSeleccionados =
         Array.from(seleccionados)
-            .reduce(
-                (total, seleccionado) =>
-                    total +
-                    Number(seleccionado.dataset.price),
-                0
+            .map(seleccionado =>
+                Object.values(categorias)
+                    .flat()
+                    .find(
+                        objeto =>
+                            objeto.id ===
+                            seleccionado.dataset.id
+                    )
             );
 
     if (
+        objetosSeleccionados.some(
+            objeto => !objeto
+        )
+    ) {
+        console.error(
+            "TIENDA // No se encontró uno de los productos seleccionados en el catálogo."
+        );
+        return;
+    }
+
+    const totalCompra =
+        objetosSeleccionados.reduce(
+            (total, objeto) =>
+                total + Number(objeto.costo),
+            0
+        );
+
+    if (
         totalCompra >
-        ciudadanoActivo.economia.saldo_inicial
+        estadoEconomico.saldo_actual
     ) {
         return;
     }
 
-    ciudadanoActivo.economia.saldo_inicial -=
-        totalCompra;
+    objetosSeleccionados.forEach(objeto => {
+
+        MotorEconomico.registrarCompra(
+            estadoEconomico,
+            objeto
+        );
+
+    });
 
     document.getElementById(
         "citizen-balance"
     ).textContent =
         `SALDO DISPONIBLE: ${
-            ciudadanoActivo.economia.saldo_inicial
+            estadoEconomico.saldo_actual
                 .toLocaleString("es-MX")
         } CORPOS`;
 

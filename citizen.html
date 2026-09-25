@@ -899,8 +899,23 @@ console.log("Gastos de vida:", gastosVida);
 
         const identidad = ciudadano.identidad;
         
+const estadoEconomicoGuardado =
+    localStorage.getItem(
+        `nightXity_economia_${identidad.nombre_clave}`
+    );
+
+const estadoEconomico =
+    estadoEconomicoGuardado
+        ? JSON.parse(estadoEconomicoGuardado)
+        : null;
+
+const saldoActual =
+    estadoEconomico?.saldo_actual
+        ?? ciudadano.economia?.saldo_inicial
+        ?? 0;
+
 document.getElementById("citizen-balance").textContent =
-    `${ciudadano.economia?.saldo_inicial ?? 0} CORPOS`;
+    `${saldoActual.toLocaleString("es-MX")} CORPOS`;
 
         const economyContainer =
     document.getElementById("citizen-economy");

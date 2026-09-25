@@ -1386,11 +1386,9 @@ const programasCiudadano =
         ? ciudadano.inventario.programas
         : [];
 
-const programasCatalogo =
-    Array.isArray(catalogo.items)
-        ? catalogo.items.filter(
-            item => item.categoria === "Programas"
-        )
+const programasCiudadano =
+    Array.isArray(estadoEconomico?.inventario?.programas)
+        ? estadoEconomico.inventario.programas
         : [];
 
 const programasContainer =

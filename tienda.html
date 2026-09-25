@@ -530,19 +530,23 @@ if (botonComprar) {
 
     });
 
-    document.getElementById(
-        "citizen-balance"
-    ).textContent =
-        `SALDO DISPONIBLE: ${
-            estadoEconomico.saldo_actual
-                .toLocaleString("es-MX")
-        } CORPOS`;
+   document.getElementById(
+    "citizen-balance"
+).textContent =
+    `SALDO DISPONIBLE: ${
+        estadoEconomico.saldo_actual
+            .toLocaleString("es-MX")
+    } CORPOS`;
 
-    botonComprar.textContent =
-        "OPERACIÓN VALIDADA";
+localStorage.setItem(
+    `nightXity_economia_${estadoEconomico.ciudadano}`,
+    JSON.stringify(estadoEconomico)
+);
 
-    botonComprar.disabled = true;
+botonComprar.textContent =
+    "OPERACIÓN VALIDADA";
 
+botonComprar.disabled = true;
     return;
 }
                     

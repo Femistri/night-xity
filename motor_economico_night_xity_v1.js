@@ -44,6 +44,68 @@ const MotorEconomico = {
                 varios: [...(inventarioBase.varios || [])],
                 cotidiano: [...(inventarioBase.cotidiano || [])]
             }
+                };
+    },
+
+    registrarCompra(estado, objeto, cantidad = 1) {
+
+        if (!estado || !objeto) {
+            throw new Error("Faltan datos para registrar la compra.");
+        }
+
+        if (typeof objeto.costo !== "number") {
+            throw new Error("El objeto no tiene un costo válido.");
+        }
+
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
+            throw new Error("La cantidad debe ser un número entero mayor que cero.");
+        }
+
+        const montoTotal = objeto.costo * cantidad;
+
+        if (montoTotal > estado.saldo_actual) {
+            throw new Error("Saldo insuficiente.");
+        }
+
+        estado.saldo_actual -= montoTotal;
+
+        const movimiento = {
+            fecha: new Date().toISOString(),
+            tipo: "egreso",
+            subtipo: "COMPRA",
+            monto: montoTotal,
+            concepto: objeto.nombre,
+            catalogo_id: objeto.id,
+            cantidad: cantidad,
+            precio_unitario: objeto.costo,
+            quien_pago: estado.ciudadano,
+            quien_cobro: "TIENDA"
         };
+
+        estado.movimientos.push(movimiento);
+
+        const categoriaInventario = {
+            "Programas": "programas",
+            "Implantes": "implantes",
+            "Armas": "armas",
+            "Accesorios": "accesorios",
+            "Blindajes": "blindajes",
+            "Terminales": "terminales",
+            "MediCare": "medicare",
+            "Drogas": "drogas",
+            "Vehiculos": "vehiculos",
+            "Varios": "varios",
+            "Cotidiano": "cotidiano"
+        }[objeto.categoria];
+
+        if (!categoriaInventario) {
+            throw new Error("Categoría de inventario no reconocida.");
+        }
+
+        for (let i = 0; i < cantidad; i++) {
+            estado.inventario[categoriaInventario].push(objeto.id);
+        }
+
+        return estado;
     }
 };

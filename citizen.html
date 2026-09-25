@@ -1817,11 +1817,12 @@ const renderDrogasInventario = () => {
         Object.entries(cantidades)
             .map(([id, cantidad]) => {
 
-                const droga =
-                    drogasCatalogo.find(
-                        item => item.id === id
-                    );
-
+             const droga =
+    catalogo.items.find(
+        item =>
+            item.id === id &&
+            item.categoria === "Drogas"
+    );
                 if (!droga) {
                     return `
                         <div class="item">

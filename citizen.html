@@ -1382,13 +1382,15 @@ actualizarMapaCorporal();
    ========================= */
 
 const programasCiudadano =
-    Array.isArray(ciudadano.inventario?.programas)
-        ? ciudadano.inventario.programas
-        : [];
-
-const programasCiudadano =
     Array.isArray(estadoEconomico?.inventario?.programas)
         ? estadoEconomico.inventario.programas
+        : [];
+
+const programasCatalogo =
+    Array.isArray(catalogo.items)
+        ? catalogo.items.filter(
+            item => item.categoria === "Programas"
+        )
         : [];
 
 const programasContainer =

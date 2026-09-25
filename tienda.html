@@ -470,74 +470,52 @@ const mapaCategorias = {
 
                 selectedProducts.addEventListener("click", evento => {
 
-    const botonComprar =
-        evento.target.closest(".buy-button");
+   const botonComprar =
+    evento.target.closest(".buy-button");
 
-    if (botonComprar) {
+if (botonComprar) {
 
-        const seleccionados =
-            document.querySelectorAll(
-                ".select-item.selected"
+    const seleccionados =
+        document.querySelectorAll(
+            ".select-item.selected"
+        );
+
+    const totalCompra =
+        Array.from(seleccionados)
+            .reduce(
+                (total, seleccionado) =>
+                    total +
+                    Number(seleccionado.dataset.price),
+                0
             );
 
-        const totalCompra =
-            Array.from(seleccionados)
-                .reduce(
-                    (total, seleccionado) =>
-                        total +
-                        Number(seleccionado.dataset.price),
-                    0
-                );
-
-               if (
-            totalCompra >
-            estadoEconomico.saldo_actual
-        ) {
-            return;
-        }
-
-        const objetosSeleccionados =
-            Array.from(seleccionados).map(seleccionado => {
-
-                const id = seleccionado.dataset.id;
-
-                return Object.values(categorias)
-                    .flat()
-                    .find(objeto => objeto.id === id);
-
-            });
-
-        if (
-            objetosSeleccionados.some(objeto => !objeto)
-        ) {
-            console.error(
-                "TIENDA // No se encontró uno de los productos seleccionados."
-            );
-            return;
-        }
-
-        objetosSeleccionados.forEach(objeto => {
-            MotorEconomico.registrarCompra(
-                estadoEconomico,
-                objeto
-            );
-        });
-
-        document.getElementById(
-            "citizen-balance"
-        ).textContent =
-            `SALDO DISPONIBLE: ${
-                estadoEconomico.saldo_actual
-                    .toLocaleString("es-MX")
-            } CORPOS`;
-
-        botonComprar.textContent =
-            "OPERACIÓN VALIDADA";
-
-        botonComprar.disabled = true;
+    if (
+        totalCompra >
+        ciudadanoActivo.economia.saldo_inicial
+    ) {
         return;
     }
-const botonQuitar =
+
+    ciudadanoActivo.economia.saldo_inicial -=
+        totalCompra;
+
+    document.getElementById(
+        "citizen-balance"
+    ).textContent =
+        `SALDO DISPONIBLE: ${
+            ciudadanoActivo.economia.saldo_inicial
+                .toLocaleString("es-MX")
+        } CORPOS`;
+
+    botonComprar.textContent =
+        "OPERACIÓN VALIDADA";
+
+    botonComprar.disabled = true;
+
+    return;
+}
+                    
+                    const botonQuitar =
     evento.target.closest(".remove-item");
 
 if (!botonQuitar) {

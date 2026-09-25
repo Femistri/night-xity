@@ -808,14 +808,23 @@
         </div>
     </details>
 
-    <details>
-        <summary>VARIOS</summary>
-        <div class="item">
-            <div class="item-info" id="citizen-misc">
-                SIN REGISTRO
-            </div>
+  <details>
+    <summary>VARIOS</summary>
+    <div class="item">
+        <div class="item-info" id="citizen-misc">
+            SIN REGISTRO
         </div>
-    </details>
+    </div>
+</details>
+
+<details>
+    <summary>DROGAS</summary>
+    <div class="item">
+        <div class="item-info" id="citizen-drugs">
+            SIN REGISTRO
+        </div>
+    </div>
+</details>
 
 </section>
 
@@ -1776,6 +1785,78 @@ renderEquipo(
     "Varios",
     "VARIOS"
 );
+
+/* =========================
+   DROGAS // INVENTARIO
+   ========================= */
+
+const drogasInventario =
+    Array.isArray(estadoEconomico?.inventario?.drogas)
+        ? estadoEconomico.inventario.drogas
+        : [];
+
+const drogasInventarioContainer =
+    document.getElementById("citizen-drugs");
+
+const renderDrogasInventario = () => {
+
+    if (!drogasInventario.length) {
+        drogasInventarioContainer.innerHTML =
+            "SIN REGISTRO";
+        return;
+    }
+
+    const cantidades = {};
+
+    drogasInventario.forEach(id => {
+        cantidades[id] =
+            (cantidades[id] || 0) + 1;
+    });
+
+    const drogasPoseidas =
+        Object.entries(cantidades)
+            .map(([id, cantidad]) => {
+
+                const droga =
+                    drogasCatalogo.find(
+                        item => item.id === id
+                    );
+
+                if (!droga) {
+                    return `
+                        <div class="item">
+                            <div class="item-name">
+                                ${id}
+                            </div>
+                            <div class="item-info">
+                                REGISTRO NO ENCONTRADO
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="item">
+                        <div class="item-name">
+                            ${droga.nombre}
+                        </div>
+
+                        <div class="item-info">
+                            CANTIDAD: ${cantidad}
+                            <br>
+                            ${droga.descripcion || "SIN DESCRIPCIÓN"}
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+
+    drogasInventarioContainer.innerHTML =
+        drogasPoseidas;
+};
+
+renderDrogasInventario();
+        
         /* =========================
            SALUD MENTAL
            ========================= */

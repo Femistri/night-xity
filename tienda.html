@@ -598,17 +598,45 @@ if (botonComprar) {
         return;
     }
 
-    const objetosSeleccionados =
-        Array.from(seleccionados)
-            .map(seleccionado =>
+   const gastosCatalogo = [
+    ...(gastosVida.gastos_obligatorios || []),
+    ...(gastosVida.gastos_opcionales || []),
+    ...(gastosVida.variables || [])
+];
+
+const objetosSeleccionados =
+    Array.from(seleccionados)
+        .map(seleccionado => {
+
+            const objetoCatalogo =
                 Object.values(categorias)
                     .flat()
                     .find(
                         objeto =>
                             objeto.id ===
                             seleccionado.dataset.id
-                    )
-            );
+                    );
+
+            if (objetoCatalogo) {
+                return objetoCatalogo;
+            }
+
+            const gasto =
+                gastosCatalogo.find(
+                    objeto =>
+                        objeto.id ===
+                        seleccionado.dataset.id
+                );
+
+            if (!gasto) {
+                return null;
+            }
+
+            return {
+                ...gasto,
+                categoria: "Cotidiano"
+            };
+        });
 
     if (
         objetosSeleccionados.some(

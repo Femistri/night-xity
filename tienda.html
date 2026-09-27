@@ -339,6 +339,18 @@ const cargarTienda = async () => {
 
       const categorias = catalogo.categorias || {};
 
+const gastosResponse =
+    await fetch("Gastos_de_vida_CBPunk_v1.json?v=1");
+
+if (!gastosResponse.ok) {
+    throw new Error(
+        "No se pudieron cargar los gastos de vida."
+    );
+}
+
+const gastosVida =
+    await gastosResponse.json();
+        
 const citizenResponse =
     await fetch("Night_Xity_Citizen_Nucleo_v1.json?v=1");
 
@@ -401,14 +413,87 @@ const mapaCategorias = {
                     return;
                 }
 
-                const objetos =
-                    Array.isArray(categorias[categoria])
-                        ? categorias[categoria]
-                            .filter(objeto =>
-                                objeto.costo !== null
-                            )
-                        : [];
+              if (nombreVisible === "SERVICIOS / GASTOS") {
 
+    const gastosObligatorios =
+        gastosVida.gastos_obligatorios || [];
+
+    const gastosOpcionales =
+        gastosVida.gastos_opcionales || [];
+
+    const gastosVariables =
+        gastosVida.variables?.filter(
+            gasto => gasto.tipo === "variable"
+        ) || [];
+
+    const gastosEventos =
+        gastosVida.variables?.filter(
+            gasto => gasto.tipo === "evento"
+        ) || [];
+
+    const grupos = [
+        ["OBLIGATORIOS", gastosObligatorios],
+        ["OPCIONALES", gastosOpcionales],
+        ["VARIABLES", gastosVariables],
+        ["EVENTOS", gastosEventos]
+    ];
+
+    const contenido =
+        detalle.querySelector(".category-content");
+
+    contenido.innerHTML =
+        grupos.map(([titulo, gastos]) => `
+
+            <div class="item">
+                <div class="item-name">
+                    ${titulo}
+                </div>
+
+                ${
+                    gastos.length
+                        ? gastos.map(gasto => `
+
+                            <div class="item-info"
+                                 style="margin-top:10px;">
+
+                                <strong>
+                                    ${gasto.nombre}
+                                </strong>
+
+                                <br>
+
+                                ${
+                                    gasto.costo !== null
+                                        ? `${Number(gasto.costo).toLocaleString("es-MX")} CORPOS`
+                                        : "COSTO VARIABLE"
+                                }
+
+                                <br>
+
+                                ${String(
+                                    gasto.frecuencia || ""
+                                ).toUpperCase()}
+
+                            </div>
+
+                        `).join("")
+                        : "SIN REGISTROS"
+                }
+
+            </div>
+
+        `).join("");
+
+    return;
+}
+
+const objetos =
+    Array.isArray(categorias[categoria])
+        ? categorias[categoria]
+            .filter(objeto =>
+                objeto.costo !== null
+            )
+        : [];
                 const contenido =
                     detalle.querySelector(".category-content");
 

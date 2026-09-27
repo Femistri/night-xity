@@ -1552,16 +1552,12 @@ const armasCatalogo =
 const armasContainer =
     document.getElementById("citizen-weapons");
 
+
 const renderArmas = () => {
 
-    const seleccionadas =
+    const poseidas =
         armasCatalogo.filter(arma =>
             armasCiudadano.includes(arma.id)
-        );
-
-    const disponibles =
-        armasCatalogo.filter(arma =>
-            !armasCiudadano.includes(arma.id)
         );
 
     armasContainer.innerHTML = `
@@ -1569,17 +1565,18 @@ const renderArmas = () => {
         <div style="margin-bottom:16px;">
 
             <strong>
-                SELECCIONADAS (${seleccionadas.length}/10)
+                POSEÍDAS (${poseidas.length})
             </strong>
 
             ${
-                seleccionadas.length > 0
-                    ? seleccionadas.map(arma => `
-                        <label style="display:block; margin:8px 0;">
+                poseidas.length > 0
+                    ? poseidas.map(arma => `
+                        <label style="display:block; margin:8px 0; opacity:0.85;">
                             <input
                                 type="checkbox"
                                 value="${arma.id}"
                                 checked
+                                disabled
                             >
                             <strong>${arma.nombre}</strong>
                             <br>
@@ -1592,70 +1589,12 @@ const renderArmas = () => {
             }
 
         </div>
-
-        <hr>
-
-        <div style="margin-top:16px;">
-
-            <strong>
-                TODAS LAS ARMAS
-            </strong>
-
-            ${
-                disponibles.map(arma => `
-                    <label style="display:block; margin:8px 0;">
-                        <input
-                            type="checkbox"
-                            value="${arma.id}"
-                        >
-                        <strong>${arma.nombre}</strong>
-                        <br>
-                        <small>
-                            ${arma.descripcion || "SIN DESCRIPCIÓN"}
-                        </small>
-                    </label>
-                `).join("")
-            }
-
-        </div>
     `;
-
-    armasContainer
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach(checkbox => {
-
-            checkbox.addEventListener("change", () => {
-
-                const id = checkbox.value;
-
-                if (checkbox.checked) {
-
-                    if (armasCiudadano.length >= 10) {
-                        checkbox.checked = false;
-                        alert("Máximo 10 armas.");
-                        return;
-                    }
-
-                    if (!armasCiudadano.includes(id)) {
-                        armasCiudadano.push(id);
-                    }
-
-                } else {
-
-                    const indice =
-                        armasCiudadano.indexOf(id);
-
-                    if (indice !== -1) {
-                        armasCiudadano.splice(indice, 1);
-                    }
-                }
-
-                renderArmas();
-            });
-        });
 };
 
 renderArmas();
+
+
         
               /* =========================
    EQUIPO

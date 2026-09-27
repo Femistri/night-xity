@@ -441,26 +441,26 @@ const mapaCategorias = {
     const contenido =
         detalle.querySelector(".category-content");
 
-    contenido.innerHTML =
-        grupos.map(([titulo, gastos]) => `
+  contenido.innerHTML =
+    grupos.map(([titulo, gastos]) => `
 
-            <div class="item">
-                <div class="item-name">
-                    ${titulo}
-                </div>
+        <details>
 
-                ${
-                    gastos.length
-                        ? gastos.map(gasto => `
+            <summary>
+                ${titulo}
+            </summary>
 
-                            <div class="item-info"
-                                 style="margin-top:10px;">
+            ${
+                gastos.length
+                    ? gastos.map(gasto => `
 
-                                <strong>
-                                    ${gasto.nombre}
-                                </strong>
+                        <div class="item">
 
-                                <br>
+                            <div class="item-name">
+                                ${gasto.nombre}
+                            </div>
+
+                            <div class="item-info">
 
                                 ${
                                     gasto.costo !== null
@@ -476,14 +476,15 @@ const mapaCategorias = {
 
                             </div>
 
-                        `).join("")
-                        : "SIN REGISTROS"
-                }
+                        </div>
 
-            </div>
+                    `).join("")
+                    : `<div class="item-info">SIN REGISTROS</div>`
+            }
 
-        `).join("");
+        </details>
 
+    `).join("");
     return;
 }
 

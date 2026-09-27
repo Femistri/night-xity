@@ -1430,14 +1430,9 @@ const programasContainer =
 
 const renderProgramas = () => {
 
-    const seleccionados =
+    const poseidos =
         programasCatalogo.filter(programa =>
             programasCiudadano.includes(programa.id)
-        );
-
-    const disponibles =
-        programasCatalogo.filter(programa =>
-            !programasCiudadano.includes(programa.id)
         );
 
     programasContainer.innerHTML = `
@@ -1445,17 +1440,18 @@ const renderProgramas = () => {
         <div style="margin-bottom:16px;">
 
             <strong>
-                SELECCIONADOS (${seleccionados.length}/6)
+                POSEÍDOS (${poseidos.length})
             </strong>
 
             ${
-                seleccionados.length > 0
-                    ? seleccionados.map(programa => `
-                        <label style="display:block; margin:8px 0;">
+                poseidos.length > 0
+                    ? poseidos.map(programa => `
+                        <label style="display:block; margin:8px 0; opacity:0.85;">
                             <input
                                 type="checkbox"
                                 value="${programa.id}"
                                 checked
+                                disabled
                             >
                             <strong>${programa.nombre}</strong>
                             <br>
@@ -1468,70 +1464,11 @@ const renderProgramas = () => {
             }
 
         </div>
-
-        <hr>
-
-        <div style="margin-top:16px;">
-
-            <strong>
-                TODOS LOS PROGRAMAS
-            </strong>
-
-            ${
-                disponibles.map(programa => `
-                    <label style="display:block; margin:8px 0;">
-                        <input
-                            type="checkbox"
-                            value="${programa.id}"
-                        >
-                        <strong>${programa.nombre}</strong>
-                        <br>
-                        <small>
-                            ${programa.descripcion || "SIN DESCRIPCIÓN"}
-                        </small>
-                    </label>
-                `).join("")
-            }
-
-        </div>
     `;
-
-    programasContainer
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach(checkbox => {
-
-            checkbox.addEventListener("change", () => {
-
-                const id = checkbox.value;
-
-                if (checkbox.checked) {
-
-                    if (programasCiudadano.length >= 6) {
-                        checkbox.checked = false;
-                        alert("Máximo 6 programas.");
-                        return;
-                    }
-
-                    if (!programasCiudadano.includes(id)) {
-                        programasCiudadano.push(id);
-                    }
-
-                } else {
-
-                    const indice =
-                        programasCiudadano.indexOf(id);
-
-                    if (indice !== -1) {
-                        programasCiudadano.splice(indice, 1);
-                    }
-                }
-
-                renderProgramas();
-            });
-        });
 };
 
 renderProgramas();
+
         
       /* =========================
    ARMAS

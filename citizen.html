@@ -845,6 +845,7 @@
 </footer>
 
 
+<script src="motor_economico_night_xity_v1.js"></script>
 
 <script>
 async function cargarDatosCitizenNet() {
@@ -906,23 +907,54 @@ console.log("Gastos de vida:", gastosVida);
             throw new Error("No se encontró el ciudadano principal.");
         }
 
-        const identidad = ciudadano.identidad;
-        
+      const identidad = ciudadano.identidad;
+
+const claveEconomia =
+    `nightXity_economia_${identidad.nombre_clave}`;
+
 const estadoEconomicoGuardado =
-    localStorage.getItem(
-        `nightXity_economia_${identidad.nombre_clave}`
-    );
+    localStorage.getItem(claveEconomia);
 
 const estadoEconomico =
     estadoEconomicoGuardado
         ? JSON.parse(estadoEconomicoGuardado)
-        : null;
+        : MotorEconomico.crearEstadoInicial(ciudadano);
+
+const categoriasInventario = [
+    "implantes",
+    "programas",
+    "armas",
+    "accesorios",
+    "blindajes",
+    "terminales",
+    "medicare",
+    "drogas",
+    "vehiculos",
+    "varios",
+    "cotidiano"
+];
+
+categoriasInventario.forEach(categoria => {
+    if (!Array.isArray(estadoEconomico.inventario?.[categoria])) {
+        estadoEconomico.inventario[categoria] = [];
+    }
+});
+
+const guardarEstadoEconomico = () => {
+    localStorage.setItem(
+        claveEconomia,
+        JSON.stringify(estadoEconomico)
+    );
+};
+
+if (!estadoEconomicoGuardado) {
+    guardarEstadoEconomico();
+}
 
 const saldoActual =
     estadoEconomico?.saldo_actual
         ?? ciudadano.economia?.saldo_inicial
         ?? 0;
-
 document.getElementById("citizen-balance").textContent =
     `${saldoActual.toLocaleString("es-MX")} CORPOS`;
 
@@ -1633,14 +1665,12 @@ const renderEquipo = (
     campo,
     elementoId,
     categoria,
-    nombreCategoria,
-    fuenteInventario =
-        estadoEconomico?.inventario || ciudadano.inventario
+    nombreCategoria
 ) => {
 
     const inventario =
-        Array.isArray(fuenteInventario?.[campo])
-            ? fuenteInventario[campo]
+        Array.isArray(estadoEconomico?.inventario?.[campo])
+            ? estadoEconomico.inventario[campo]
             : [];
 
     const catalogoCategoria =
@@ -1743,12 +1773,14 @@ const renderEquipo = (
                     }
                 }
 
-                renderEquipo(
-                    campo,
-                    elementoId,
-                    categoria,
-                    nombreCategoria
-                );
+guardarEstadoEconomico();
+
+renderEquipo(
+    campo,
+    elementoId,
+    categoria,
+    nombreCategoria
+);
             });
         });
 };

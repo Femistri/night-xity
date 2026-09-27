@@ -1215,14 +1215,9 @@ const implantesContainer =
 
 const renderImplantes = () => {
 
-    const seleccionados =
+    const poseidos =
         implantesCatalogo.filter(implante =>
             implantesCiudadano.includes(implante.id)
-        );
-
-    const disponibles =
-        implantesCatalogo.filter(implante =>
-            !implantesCiudadano.includes(implante.id)
         );
 
     implantesContainer.innerHTML = `
@@ -1230,17 +1225,18 @@ const renderImplantes = () => {
         <div style="margin-bottom:16px;">
 
             <strong>
-                SELECCIONADOS (${seleccionados.length}/6)
+                POSEÍDOS (${poseidos.length})
             </strong>
 
             ${
-                seleccionados.length > 0
-                    ? seleccionados.map(implante => `
-                        <label style="display:block; margin:8px 0;">
+                poseidos.length > 0
+                    ? poseidos.map(implante => `
+                        <label style="display:block; margin:8px 0; opacity:0.85;">
                             <input
                                 type="checkbox"
                                 value="${implante.id}"
                                 checked
+                                disabled
                             >
                             <strong>${implante.nombre}</strong>
                             <br>
@@ -1253,71 +1249,12 @@ const renderImplantes = () => {
             }
 
         </div>
-
-        <hr>
-
-        <div style="margin-top:16px;">
-
-            <strong>
-                TODOS LOS IMPLANTES
-            </strong>
-
-            ${
-                disponibles.map(implante => `
-                    <label style="display:block; margin:8px 0;">
-                        <input
-                            type="checkbox"
-                            value="${implante.id}"
-                        >
-                        <strong>${implante.nombre}</strong>
-                        <br>
-                        <small>
-                            ${implante.descripcion || "SIN DESCRIPCIÓN"}
-                        </small>
-                    </label>
-                `).join("")
-            }
-
-        </div>
     `;
-
-    implantesContainer
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach(checkbox => {
-
-            checkbox.addEventListener("change", () => {
-
-                const id = checkbox.value;
-
-                if (checkbox.checked) {
-
-                    if (implantesCiudadano.length >= 6) {
-                        checkbox.checked = false;
-                        alert("Máximo 6 implantes.");
-                        return;
-                    }
-
-                    if (!implantesCiudadano.includes(id)) {
-                        implantesCiudadano.push(id);
-                    }
-
-                } else {
-
-                    const indice =
-                        implantesCiudadano.indexOf(id);
-
-                    if (indice !== -1) {
-                        implantesCiudadano.splice(indice, 1);
-                    }
-                }
-                renderImplantes();
-                actualizarMapaCorporal();
-            });
-        });
 };
 
 renderImplantes();
 
+        
         /* =========================
    MAPA CORPORAL // IMPLANTES
    ========================= */

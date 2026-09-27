@@ -454,7 +454,7 @@ const mapaCategorias = {
                 gastos.length
                     ? gastos.map(gasto => `
 
-                        <div class="item">
+                                              <div class="item">
 
                             <div class="item-name">
                                 ${gasto.nombre}
@@ -476,8 +476,22 @@ const mapaCategorias = {
 
                             </div>
 
-                        </div>
+                            ${
+                                gasto.costo !== null
+                                    ? `
+                                        <button
+                                            class="select-item"
+                                            data-id="${gasto.id}"
+                                            data-name="${gasto.nombre}"
+                                            data-price="${gasto.costo}"
+                                        >
+                                            SELECCIONAR
+                                        </button>
+                                    `
+                                    : ""
+                            }
 
+                        </div>
                     `).join("")
                     : `<div class="item-info">SIN REGISTROS</div>`
             }

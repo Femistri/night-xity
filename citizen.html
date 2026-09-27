@@ -1680,14 +1680,9 @@ const renderEquipo = (
             )
             : [];
 
-    const seleccionados =
+    const poseidos =
         catalogoCategoria.filter(objeto =>
             inventario.includes(objeto.id)
-        );
-
-    const disponibles =
-        catalogoCategoria.filter(objeto =>
-            !inventario.includes(objeto.id)
         );
 
     const container =
@@ -1698,17 +1693,18 @@ const renderEquipo = (
         <div style="margin-bottom:16px;">
 
             <strong>
-                SELECCIONADOS (${seleccionados.length})
+                POSEÍDOS (${poseidos.length})
             </strong>
 
             ${
-                seleccionados.length > 0
-                    ? seleccionados.map(objeto => `
-                        <label style="display:block; margin:8px 0;">
+                poseidos.length > 0
+                    ? poseidos.map(objeto => `
+                        <label style="display:block; margin:8px 0; opacity:0.85;">
                             <input
                                 type="checkbox"
                                 value="${objeto.id}"
                                 checked
+                                disabled
                             >
                             <strong>${objeto.nombre}</strong>
                             <br>
@@ -1721,76 +1717,16 @@ const renderEquipo = (
             }
 
         </div>
-
-        <hr>
-
-        <div style="margin-top:16px;">
-
-            <strong>
-                TODOS LOS ${nombreCategoria}
-            </strong>
-
-            ${
-                disponibles.map(objeto => `
-                    <label style="display:block; margin:8px 0;">
-                        <input
-                            type="checkbox"
-                            value="${objeto.id}"
-                        >
-                        <strong>${objeto.nombre}</strong>
-                        <br>
-                        <small>
-                            ${objeto.descripcion || "SIN DESCRIPCIÓN"}
-                        </small>
-                    </label>
-                `).join("")
-            }
-
-        </div>
     `;
-
-    container
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach(checkbox => {
-
-            checkbox.addEventListener("change", () => {
-
-                const id = checkbox.value;
-
-                if (checkbox.checked) {
-
-                    if (!inventario.includes(id)) {
-                        inventario.push(id);
-                    }
-
-                } else {
-
-                    const indice =
-                        inventario.indexOf(id);
-
-                    if (indice !== -1) {
-                        inventario.splice(indice, 1);
-                    }
-                }
-
-guardarEstadoEconomico();
-
-renderEquipo(
-    campo,
-    elementoId,
-    categoria,
-    nombreCategoria
-);
-            });
-        });
 };
+    
 
 renderEquipo(
     "accesorios",
     "citizen-accessories",
     "Accesorios",
-    "ACCESORIOS",
-    estadoEconomico?.inventario
+    "ACCESORIOS"
+   
 );
 
 renderEquipo(

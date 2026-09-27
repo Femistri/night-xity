@@ -1591,6 +1591,7 @@ const drogasInventario =
 const drogasInventarioContainer =
     document.getElementById("citizen-drugs");
 
+
 const renderDrogasInventario = () => {
 
     if (!drogasInventario.length) {
@@ -1610,12 +1611,13 @@ const renderDrogasInventario = () => {
         Object.entries(cantidades)
             .map(([id, cantidad]) => {
 
-             const droga =
-    catalogo.items.find(
-        item =>
-            item.id === id &&
-            item.categoria === "Drogas"
-    );
+                const droga =
+                    catalogo.items.find(
+                        item =>
+                            item.id === id &&
+                            item.categoria === "Drogas"
+                    );
+
                 if (!droga) {
                     return `
                         <div class="item">
@@ -1650,6 +1652,80 @@ const renderDrogasInventario = () => {
 };
 
 renderDrogasInventario();
+
+
+/* =========================
+   VEHÍCULOS
+   ========================= */
+
+const vehiculosInventario =
+    Array.isArray(estadoEconomico?.inventario?.vehiculos)
+        ? estadoEconomico.inventario.vehiculos
+        : [];
+
+const vehiculosContainer =
+    document.getElementById("citizen-vehicles");
+
+const renderVehiculosInventario = () => {
+
+    if (!vehiculosInventario.length) {
+        vehiculosContainer.innerHTML =
+            "SIN REGISTRO";
+        return;
+    }
+
+    const cantidades = {};
+
+    vehiculosInventario.forEach(id => {
+        cantidades[id] =
+            (cantidades[id] || 0) + 1;
+    });
+
+    const vehiculosPoseidos =
+        Object.entries(cantidades)
+            .map(([id, cantidad]) => {
+
+                const vehiculo =
+                    catalogo.items.find(
+                        item =>
+                            item.id === id &&
+                            item.categoria === "Vehiculos"
+                    );
+
+                if (!vehiculo) {
+                    return `
+                        <div class="item">
+                            <div class="item-name">
+                                ${id}
+                            </div>
+                            <div class="item-info">
+                                REGISTRO NO ENCONTRADO
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="item">
+                        <div class="item-name">
+                            ${vehiculo.nombre}
+                        </div>
+
+                        <div class="item-info">
+                            CANTIDAD: ${cantidad}
+                            <br>
+                            ${vehiculo.descripcion || "SIN DESCRIPCIÓN"}
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+
+    vehiculosContainer.innerHTML =
+        vehiculosPoseidos;
+};
+
+renderVehiculosInventario();
         
         /* =========================
            SALUD MENTAL

@@ -1634,12 +1634,13 @@ const renderEquipo = (
     elementoId,
     categoria,
     nombreCategoria,
-    fuenteInventario = ciudadano.inventario
+    fuenteInventario =
+        estadoEconomico?.inventario || ciudadano.inventario
 ) => {
 
     const inventario =
-        Array.isArray(ciudadano.inventario?.[campo])
-            ? ciudadano.inventario[campo]
+        Array.isArray(fuenteInventario?.[campo])
+            ? fuenteInventario[campo]
             : [];
 
     const catalogoCategoria =

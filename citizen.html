@@ -1743,6 +1743,79 @@ const renderVehiculosInventario = () => {
 };
 
 renderVehiculosInventario();
+
+/* =========================
+   VIDA COTIDIANA
+   ========================= */
+
+const cotidianoInventario =
+    Array.isArray(estadoEconomico?.inventario?.cotidiano)
+        ? estadoEconomico.inventario.cotidiano
+        : [];
+
+const cotidianoContainer =
+    document.getElementById("citizen-cotidiano");
+
+const renderCotidianoInventario = () => {
+
+    if (!cotidianoInventario.length) {
+        cotidianoContainer.innerHTML =
+            "SIN REGISTRO";
+        return;
+    }
+
+    const cantidades = {};
+
+    cotidianoInventario.forEach(id => {
+        cantidades[id] =
+            (cantidades[id] || 0) + 1;
+    });
+
+    const cotidianoPoseido =
+        Object.entries(cantidades)
+            .map(([id, cantidad]) => {
+
+                const objeto =
+                    catalogo.items.find(
+                        item =>
+                            item.id === id &&
+                            item.categoria === "Cotidiano"
+                    );
+
+                if (!objeto) {
+                    return `
+                        <div class="item">
+                            <div class="item-name">
+                                ${id}
+                            </div>
+                            <div class="item-info">
+                                REGISTRO NO ENCONTRADO
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="item">
+                        <div class="item-name">
+                            ${objeto.nombre}
+                        </div>
+
+                        <div class="item-info">
+                            CANTIDAD: ${cantidad}
+                            <br>
+                            ${objeto.descripcion || "SIN DESCRIPCIÓN"}
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+
+    cotidianoContainer.innerHTML =
+        cotidianoPoseido;
+};
+
+renderCotidianoInventario();
         
         /* =========================
            SALUD MENTAL

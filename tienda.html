@@ -664,13 +664,26 @@ esGastoVida: true
         return;
     }
 
-    const totalCompra =
-        objetosSeleccionados.reduce(
-            (total, objeto) =>
-                total + Number(objeto.costo),
-            0
-        );
+   const costosValidos =
+    objetosSeleccionados.every(objeto =>
+        typeof objeto.costo === "number" &&
+        Number.isFinite(objeto.costo) &&
+        objeto.costo >= 0
+    );
 
+if (!costosValidos) {
+    console.error(
+        "TIENDA // Operación cancelada: uno o más costos no son válidos."
+    );
+    return;
+}
+
+const totalCompra =
+    objetosSeleccionados.reduce(
+        (total, objeto) =>
+            total + objeto.costo,
+        0
+    );
     if (
         totalCompra >
         estadoEconomico.saldo_actual

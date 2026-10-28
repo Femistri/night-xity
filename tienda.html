@@ -648,7 +648,8 @@ const objetosSeleccionados =
 
             return {
                 ...gasto,
-                categoria: "Cotidiano"
+           categoria: "Cotidiano",
+esGastoVida: true
             };
         });
 
@@ -680,7 +681,7 @@ const objetosSeleccionados =
    objetosSeleccionados.forEach(objeto => {
 
     const esGastoVida =
-        objeto.categoria === "Cotidiano";
+    objeto.esGastoVida === true;
 
     if (esGastoVida) {
 

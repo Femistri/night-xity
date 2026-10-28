@@ -773,19 +773,19 @@ selectedProducts.innerHTML =
 </div>
 
 <div class="selection-status ${
-    totalSeleccion > ciudadanoActivo.economia.saldo_inicial
+    totalSeleccion > window.estadoEconomico.saldo_actual
         ? "insufficient"
         : ""
 }">
     ${
-        totalSeleccion > ciudadanoActivo.economia.saldo_inicial
+        totalSeleccion > window.estadoEconomico.saldo_actual
             ? "SALDO INSUFICIENTE"
             : "SALDO SUFICIENTE"
     }
 </div>
 
 ${
-    totalSeleccion <= ciudadanoActivo.economia.saldo_inicial
+    totalSeleccion <= window.estadoEconomico.saldo_actual
         ? `
             <button class="buy-button">
                 COMPRAR

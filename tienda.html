@@ -374,12 +374,26 @@ if (!ciudadanoActivo) {
         "No se encontró el ciudadano activo."
     );
 }
-       window.estadoEconomico =
-    MotorEconomico.crearEstadoInicial(ciudadanoActivo);
+      const claveEconomia =
+    `nightXity_economia_${ciudadanoActivo.identidad.nombre_clave}`;
+
+const estadoEconomicoGuardado =
+    localStorage.getItem(claveEconomia);
+
+window.estadoEconomico =
+    estadoEconomicoGuardado
+        ? JSON.parse(estadoEconomicoGuardado)
+        : MotorEconomico.crearEstadoInicial(ciudadanoActivo);
+
+if (!estadoEconomicoGuardado) {
+    localStorage.setItem(
+        claveEconomia,
+        JSON.stringify(window.estadoEconomico)
+    );
+}
 
 document.getElementById("citizen-balance").textContent =
-    `SALDO DISPONIBLE: ${ciudadanoActivo.economia.saldo_inicial.toLocaleString("es-MX")} CORPOS`;
-
+    `SALDO DISPONIBLE: ${window.estadoEconomico.saldo_actual.toLocaleString("es-MX")} CORPOS`;
 const mapaCategorias = {
             "IMPLANTES": "Implantes",
             "PROGRAMAS": "Programas",

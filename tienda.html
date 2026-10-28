@@ -677,15 +677,28 @@ const objetosSeleccionados =
         return;
     }
 
-    objetosSeleccionados.forEach(objeto => {
+   objetosSeleccionados.forEach(objeto => {
+
+    const esGastoVida =
+        objeto.categoria === "Cotidiano";
+
+    if (esGastoVida) {
+
+        MotorEconomico.registrarGastoVida(
+            estadoEconomico,
+            objeto
+        );
+
+    } else {
 
         MotorEconomico.registrarCompra(
             estadoEconomico,
             objeto
         );
 
-    });
+    }
 
+});
    document.getElementById(
     "citizen-balance"
 ).textContent =

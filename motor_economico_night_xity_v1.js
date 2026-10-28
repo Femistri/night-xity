@@ -60,6 +60,23 @@ const MotorEconomico = {
         if (!Number.isInteger(cantidad) || cantidad < 1) {
             throw new Error("La cantidad debe ser un número entero mayor que cero.");
         }
+         const categoriaInventario = {
+            "Programas": "programas",
+            "Implantes": "implantes",
+            "Armas": "armas",
+            "Accesorios": "accesorios",
+            "Blindajes": "blindajes",
+            "Terminales": "terminales",
+            "MediCare": "medicare",
+            "Drogas": "drogas",
+            "Vehiculos": "vehiculos",
+            "Varios": "varios",
+            "Cotidiano": "cotidiano"
+        }[objeto.categoria];
+
+        if (!categoriaInventario) {
+            throw new Error("Categoría de inventario no reconocida.");
+        }
 
         const montoTotal = objeto.costo * cantidad;
 
@@ -84,23 +101,7 @@ const MotorEconomico = {
 
         estado.movimientos.push(movimiento);
 
-        const categoriaInventario = {
-            "Programas": "programas",
-            "Implantes": "implantes",
-            "Armas": "armas",
-            "Accesorios": "accesorios",
-            "Blindajes": "blindajes",
-            "Terminales": "terminales",
-            "MediCare": "medicare",
-            "Drogas": "drogas",
-            "Vehiculos": "vehiculos",
-            "Varios": "varios",
-            "Cotidiano": "cotidiano"
-        }[objeto.categoria];
-
-        if (!categoriaInventario) {
-            throw new Error("Categoría de inventario no reconocida.");
-        }
+       
 
         for (let i = 0; i < cantidad; i++) {
             estado.inventario[categoriaInventario].push(objeto.id);

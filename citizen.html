@@ -988,6 +988,64 @@ const saldoActual =
 document.getElementById("citizen-balance").textContent =
     `${saldoActual.toLocaleString("es-MX")} CORPOS`;
 
+
+const historialEconomicoContainer =
+    document.getElementById("citizen-economic-history");
+
+const movimientosEconomicos =
+    Array.isArray(estadoEconomico?.movimientos)
+        ? [...estadoEconomico.movimientos].reverse()
+        : [];
+
+if (movimientosEconomicos.length === 0) {
+
+    historialEconomicoContainer.innerHTML =
+        "SIN MOVIMIENTOS REGISTRADOS";
+
+} else {
+
+    historialEconomicoContainer.innerHTML =
+        movimientosEconomicos.map(movimiento => {
+
+            const esGastoVida =
+                movimiento.subtipo === "COSTO_DE_VIDA";
+
+            const tipoMovimiento =
+                esGastoVida
+                    ? "GASTO DE VIDA"
+                    : movimiento.subtipo === "COMPRA"
+                        ? "COMPRA COMERCIAL"
+                        : movimiento.subtipo || "MOVIMIENTO";
+
+            const fechaMovimiento =
+                movimiento.fecha
+                    ? new Date(movimiento.fecha).toLocaleString("es-MX")
+                    : "FECHA NO DISPONIBLE";
+
+            const montoMovimiento =
+                Number(movimiento.monto || 0)
+                    .toLocaleString("es-MX");
+
+            return `
+                <div class="item">
+                    <div class="item-name">
+                        ${movimiento.concepto || "SIN CONCEPTO"}
+                    </div>
+
+                    <div class="item-info">
+                        ${tipoMovimiento}
+                        <br>
+                        MONTO: ${montoMovimiento} CORPOS
+                        <br>
+                        ${fechaMovimiento}
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+}
+
+        
         const economyContainer =
     document.getElementById("citizen-economy");
 

@@ -106,6 +106,38 @@ const MotorEconomico = {
             estado.inventario[categoriaInventario].push(objeto.id);
         }
 
+           return estado;
+    },
+
+    registrarGastoVida(estado, gasto) {
+
+        if (!estado || !gasto) {
+            throw new Error("Faltan datos para registrar el gasto.");
+        }
+
+        if (typeof gasto.costo !== "number" || gasto.costo < 0) {
+            throw new Error("El gasto no tiene un costo válido.");
+        }
+
+        if (gasto.costo > estado.saldo_actual) {
+            throw new Error("Saldo insuficiente.");
+        }
+
+        estado.saldo_actual -= gasto.costo;
+
+        estado.movimientos.push({
+            fecha: new Date().toISOString(),
+            tipo: "egreso",
+            subtipo: "COSTO_DE_VIDA",
+            monto: gasto.costo,
+            concepto: gasto.nombre,
+            catalogo_id: gasto.id,
+            cantidad: 1,
+            precio_unitario: gasto.costo,
+            quien_pago: estado.ciudadano,
+            quien_cobro: "TIENDA"
+        });
+
         return estado;
     }
 };

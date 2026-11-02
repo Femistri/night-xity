@@ -370,17 +370,58 @@ if (!citizenResponse.ok) {
 const citizenData =
     await citizenResponse.json();
 
+const claveCiudadanoActivo = "nightXity_ciudadano_activo";
+
+const ciudadanoGuardado =
+    localStorage.getItem(claveCiudadanoActivo);
+
 const ciudadanoActivo =
     citizenData.ciudadanos.find(
         ciudadano =>
+            ciudadano.identidad.nombre_clave === ciudadanoGuardado
+    ) ||
+    citizenData.ciudadanos.find(
+        ciudadano =>
             ciudadano.identidad.nombre_clave === "Inesa"
-    );
+    ) ||
+    citizenData.ciudadanos[0];
 
 if (!ciudadanoActivo) {
     throw new Error(
-        "No se encontró el ciudadano activo."
+        "No se encontró ningún ciudadano."
     );
 }
+
+localStorage.setItem(
+    claveCiudadanoActivo,
+    ciudadanoActivo.identidad.nombre_clave
+);
+
+const selectorCiudadano =
+    document.getElementById("ciudadano-selector");
+
+selectorCiudadano.innerHTML = "";
+
+citizenData.ciudadanos.forEach(ciudadano => {
+    const opcion = document.createElement("option");
+
+    opcion.value = ciudadano.identidad.nombre_clave;
+    opcion.textContent = ciudadano.identidad.nombre_clave;
+
+    selectorCiudadano.appendChild(opcion);
+});
+
+selectorCiudadano.value =
+    ciudadanoActivo.identidad.nombre_clave;
+
+selectorCiudadano.addEventListener("change", () => {
+    localStorage.setItem(
+        claveCiudadanoActivo,
+        selectorCiudadano.value
+    );
+
+    location.reload();
+});
       const claveEconomia =
     `nightXity_economia_${ciudadanoActivo.identidad.nombre_clave}`;
 

@@ -1558,67 +1558,16 @@ const armasCiudadano =
         ? estadoEconomico.inventario.armas
         : [];
 
-const armasCatalogo =
-    Array.isArray(catalogo.items)
-        ? catalogo.items.filter(
-            item => item.categoria === "Armas"
-        )
-        : [];
-
-const armasContainer =
-    document.getElementById("citizen-weapons");
-
-
-const renderArmas = () => {
-
-    const poseidas =
-        armasCatalogo.filter(arma =>
-            armasCiudadano.includes(arma.id)
-        );
-
-    armasContainer.innerHTML = `
-
-        <div style="margin-bottom:16px;">
-
-            <strong>
-                POSEÍDAS (${poseidas.length})
-            </strong>
-
-            ${
-                poseidas.length > 0
-                    ? poseidas.map(arma => `
-                        <label style="display:block; margin:8px 0; opacity:0.85;">
-                            <input
-                                type="checkbox"
-                                value="${arma.id}"
-                                checked
-                                disabled
-                            >
-                            <strong>${arma.nombre}</strong>
-                            <br>
-                            <small>
-                                ${arma.descripcion || "SIN DESCRIPCIÓN"}
-                            </small>
-                        </label>
-                    `).join("")
-                    : `<div style="margin-top:8px;">NINGUNA</div>`
-            }
-
-        </div>
-    `;
-};
-
-renderArmas();
-
-
 /* =========================
-   INVENTARIO INDIVIDUAL
+   INVENTARIO Y ARMAS
    ========================= */
 
 const inventarioDetallado =
     Array.isArray(estadoEconomico.inventario_detallado)
         ? estadoEconomico.inventario_detallado
         : [];
+
+/* INVENTARIO: LISTA GENERAL */
 
 const inventarioDetalladoContainer =
     document.getElementById("citizen-inventory-detailed");
@@ -1627,12 +1576,50 @@ const renderInventarioDetallado = () => {
 
     if (inventarioDetallado.length === 0) {
         inventarioDetalladoContainer.innerHTML =
-            "SIN REGISTROS INDIVIDUALES";
+            "SIN OBJETOS REGISTRADOS";
         return;
     }
 
     inventarioDetalladoContainer.innerHTML =
         inventarioDetallado.map(objeto => {
+
+            const articulo = catalogo.items.find(
+                item => item.id === objeto.catalogo_id
+            );
+
+            return `
+                <div class="item">
+                    <strong>${objeto.nombre || "OBJETO SIN NOMBRE"}</strong>
+                    <br>
+                    <small>
+                        ${articulo?.descripcion || "SIN DESCRIPCIÓN"}
+                    </small>
+                </div>
+            `;
+        }).join("");
+};
+
+renderInventarioDetallado();
+
+
+/* ARMAS: FICHAS INDIVIDUALES */
+
+const armasContainer =
+    document.getElementById("citizen-weapons");
+
+const renderArmas = () => {
+
+    const armasPoseidas = inventarioDetallado.filter(
+        objeto => objeto.categoria === "Armas"
+    );
+
+    if (armasPoseidas.length === 0) {
+        armasContainer.innerHTML = "SIN ARMAS REGISTRADAS";
+        return;
+    }
+
+    armasContainer.innerHTML =
+        armasPoseidas.map(objeto => {
 
             const fecha = objeto.fecha_adquisicion
                 ? new Date(objeto.fecha_adquisicion)
@@ -1645,7 +1632,7 @@ const renderInventarioDetallado = () => {
             return `
                 <div class="item">
                     <div class="item-name">
-                        ${objeto.nombre || "OBJETO SIN NOMBRE"}
+                        ${objeto.nombre || "ARMA SIN NOMBRE"}
                     </div>
 
                     <div class="item-info">
@@ -1653,21 +1640,19 @@ const renderInventarioDetallado = () => {
                         <br>
                         CATÁLOGO: ${objeto.catalogo_id || "SIN REGISTRO"}
                         <br>
-                        CATEGORÍA: ${objeto.categoria || "SIN CATEGORÍA"}
-                        <br>
                         ADQUISICIÓN: ${fecha}
                         <br>
                         PRECIO: ${precio} CORPOS
                         <br>
-                        ESTADO: <strong>${objeto.estado || "SIN ESTADO"}</strong>
+                        ESTADO:
+                        <strong>${objeto.estado || "SIN ESTADO"}</strong>
                     </div>
                 </div>
             `;
         }).join("");
 };
 
-renderInventarioDetallado();
-
+renderArmas();
         
               /* =========================
    EQUIPO

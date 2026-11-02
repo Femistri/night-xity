@@ -1185,9 +1185,12 @@ economyContainer.innerHTML = `
            IDENTIDAD
            ========================= */
 
-        document.getElementById("citizen-name").textContent =
-            identidad.nombre_clave || "SIN REGISTRO";
+       const elementoNombre = document.getElementById("citizen-name");
 
+if (elementoNombre) {
+    elementoNombre.textContent =
+        identidad.nombre_clave || "SIN REGISTRO";
+}
        document.getElementById("citizen-class").value =
     identidad.clase || "";
 

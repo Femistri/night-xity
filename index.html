@@ -3,295 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>NIGHT XITY // Citizen Net</title>
-
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             background: #0b0d0e;
             color: #e8e8e8;
             font-family: Arial, Helvetica, sans-serif;
         }
-
         header {
-            min-height: 100vh;
+            min-height: 62vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             border-bottom: 1px solid #444;
+            text-align: center;
         }
-
         .system {
+            margin-bottom: 35px;
+            color: #888;
             font-size: 12px;
             letter-spacing: 4px;
-            color: #888;
-            margin-bottom: 35px;
         }
-
         h1 {
-            font-size: clamp(55px, 15vw, 130px);
-            letter-spacing: 14px;
             margin: 0;
+            font-size: clamp(55px, 15vw, 130px);
             font-weight: 900;
-            line-height: 0.9;
+            letter-spacing: 14px;
+            line-height: .9;
         }
-
         .subtitle {
             margin-top: 35px;
+            color: #aaa;
             font-size: 20px;
             letter-spacing: 6px;
-            color: #aaa;
         }
-
         .status {
-            margin-top: 50px;
+            margin-top: 35px;
             padding: 10px 18px;
             border: 1px solid #555;
+            color: #aaa;
             font-size: 12px;
             letter-spacing: 3px;
-            color: #aaa;
         }
-
-        main {
-            max-width: 1100px;
-            margin: auto;
-            padding: 70px 25px;
-        }
-
-        .intro {
-            text-align: center;
-            margin-bottom: 70px;
-        }
-
-        .intro h2 {
-            font-size: 34px;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-        }
-
+        main { max-width: 1100px; margin: auto; padding: 55px 25px 70px; }
+        .intro { margin-bottom: 45px; text-align: center; }
+        .intro h2 { margin: 0 0 18px; font-size: 30px; letter-spacing: 3px; }
         .intro p {
             max-width: 700px;
             margin: auto;
-            line-height: 1.8;
             color: #aaa;
-            font-size: 17px;
+            font-size: 16px;
+            line-height: 1.8;
         }
-
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
+        .menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
         .card {
             display: block;
-            text-decoration: none;
-            color: #eee;
+            min-height: 165px;
+            padding: 28px 24px;
             border: 1px solid #444;
-            padding: 30px 25px;
-            min-height: 150px;
-            transition: 0.2s;
+            color: #eee;
+            text-decoration: none;
+            transition: background .2s, border-color .2s, transform .2s;
         }
-
-        .card:hover {
-            background: #171a1c;
+        .card:hover, .card:focus-visible {
+            transform: translateY(-3px);
             border-color: #aaa;
+            background: #171a1c;
         }
-
-        .card-number {
-            font-size: 12px;
-            color: #777;
-            letter-spacing: 3px;
+        .card:focus-visible, .close-offline:focus-visible { outline: 2px solid #00ff9c; outline-offset: 4px; }
+        .card-number { color: #777; font-size: 12px; letter-spacing: 3px; }
+        .card h3 { margin: 18px 0 10px; font-size: 22px; letter-spacing: 2px; }
+        .card p { margin: 0; color: #888; font-size: 14px; line-height: 1.5; }
+        .offline-panel {
+            position: fixed;
+            z-index: 10;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(5, 7, 8, .96);
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .35s ease, transform .35s ease, visibility .35s;
         }
-
-        .card h3 {
-            font-size: 22px;
-            margin: 18px 0 10px;
-            letter-spacing: 2px;
+        .offline-panel.open { visibility: visible; opacity: 1; transform: translateY(0); }
+        .offline-inner {
+            position: relative;
+            width: min(100%, 820px);
+            min-height: 280px;
+            padding: 55px clamp(24px, 7vw, 70px);
+            border: 1px solid #444;
+            background: #0b0d0e;
         }
-
-        .card p {
-            color: #888;
-            font-size: 14px;
-            line-height: 1.5;
+        .offline-inner .system { margin-bottom: 22px; }
+        .offline-inner h2 { margin: 0; font-size: clamp(36px, 8vw, 64px); letter-spacing: 8px; }
+        .offline-subtitle { margin: 22px 0 0; color: #aaa; font-size: 16px; letter-spacing: 3px; line-height: 1.6; }
+        .offline-description { max-width: 600px; margin: 26px 0 0; color: #888; font-size: 14px; line-height: 1.7; }
+        .close-offline {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            padding: 4px 10px;
+            border: 1px solid #555;
+            background: transparent;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
         }
-
+        .close-offline:hover { border-color: #aaa; color: #eee; }
+        body.panel-open { overflow: hidden; }
         footer {
+            padding: 30px 20px;
             border-top: 1px solid #333;
-            padding: 35px 20px;
-            text-align: center;
             color: #666;
             font-size: 11px;
             letter-spacing: 2px;
+            text-align: center;
         }
-
-        @media (max-width: 600px) {
-
-            h1 {
-                letter-spacing: 8px;
-            }
-
-            .subtitle {
-                font-size: 15px;
-                letter-spacing: 4px;
-            }
-
-            main {
-                padding: 50px 18px;
-            }
-
-            .intro h2 {
-                font-size: 27px;
-            }
+        @media (max-width: 700px) {
+            header { min-height: 55vh; }
+            h1 { letter-spacing: 8px; }
+            .subtitle { font-size: 15px; letter-spacing: 4px; }
+            main { padding: 45px 18px; }
+            .intro h2 { font-size: 25px; }
+            .menu { grid-template-columns: 1fr; }
+            .card { min-height: 135px; }
+            .offline-inner h2 { letter-spacing: 5px; }
+            .offline-subtitle { font-size: 14px; letter-spacing: 2px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
-
 <body>
-
     <header>
-
-        <div class="system">
-            NIGHT XITY // CITIZEN NET
-        </div>
-
+        <div class="system">NIGHT XITY // CITIZEN NET</div>
         <h1>NIGHT<br>XITY</h1>
-
-        <div class="subtitle">
-            CYBERPUNK OLD SCHOOL RPG
-        </div>
-
-        <div class="status">
-            SISTEMA ACTIVO // 2066
-        </div>
-
+        <div class="subtitle">CYBERPUNK OLD SCHOOL RPG</div>
+        <div class="status">SISTEMA ACTIVO // 2066</div>
     </header>
 
-
     <main>
-
         <section class="intro">
-
             <h2>BIENVENIDO A LA CIUDAD</h2>
-
-            <p>
-                Night Xity es una ciudad construida sobre los restos
-                de un mundo que ya no existe.
-            </p>
-
-            <p>
-                Corporaciones, barrios, tecnología,
-                implantes, programas y personas
-                intentando sobrevivir.
-            </p>
-
+            <p>Night Xity es una ciudad construida sobre los restos de un mundo que ya no existe. Corporaciones, barrios, tecnología y personas intentando sobrevivir.</p>
         </section>
 
-
-        <section class="menu">
-
-            <a class="card" href="#">
+        <nav class="menu" aria-label="Accesos principales">
+            <a class="card" href="tienda.html">
                 <div class="card-number">01</div>
-                <h3>ARCHIVO</h3>
-                <p>
-                    Historia, cronología y acontecimientos
-                    de Night Xity.
-                </p>
-            </a>
-
-
-            <a class="card" href="#">
-                <div class="card-number">02</div>
-                <h3>LA CIUDAD</h3>
-                <p>
-                    Distritos, barrios, corporaciones
-                    y lugares de interés.
-                </p>
-            </a>
-
-
-            <a class="card" href="#">
-                <div class="card-number">03</div>
-                <h3>CITIZEN NET</h3>
-                <p>
-                    Acceso al perfil, economía,
-                    inventario y estado ciudadano.
-                </p>
-            </a>
-
-
-            <a class="card" href="#">
-                <div class="card-number">04</div>
-                <h3>TECNOLOGÍA</h3>
-                <p>
-                    Implantes, programas,
-                    modificaciones y equipo.
-                </p>
-            </a>
-
-
-            <a class="card" href="#">
-                <div class="card-number">05</div>
                 <h3>TIENDA</h3>
-                <p>
-                    Catálogo de bienes y servicios
-                    disponibles en Night Xity.
-                </p>
+                <p>Catálogo de bienes y servicios disponibles en Night Xity.</p>
             </a>
-
-
-            <a class="card" href="#">
-                <div class="card-number">06</div>
-                <h3>RECURSOS</h3>
-                <p>
-                    Materiales para jugadores
-                    y Marakames.
-                </p>
+            <a class="card" href="citizen.html">
+                <div class="card-number">02</div>
+                <h3>CITIZEN</h3>
+                <p>Acceso al perfil, economía, inventario y estado ciudadano.</p>
             </a>
-
-        </section>
-
+            <a class="card" href="#offline" aria-controls="offline" aria-expanded="false">
+                <div class="card-number">03</div>
+                <h3>OFFLINE</h3>
+                <p>Información, antecedentes y metajuego</p>
+            </a>
+        </nav>
     </main>
 
+    <section class="offline-panel" id="offline" aria-labelledby="offline-title" aria-hidden="true">
+        <div class="offline-inner">
+            <button class="close-offline" type="button" aria-label="Cerrar OFFLINE">×</button>
+            <div class="system">NIGHT XITY // ARCHIVO</div>
+            <h2 id="offline-title">OFFLINE</h2>
+            <p class="offline-subtitle">Información, antecedentes y metajuego</p>
+            <p class="offline-description">Este apartado reúne la información y el contexto de Night Xity fuera de Citizen Net.</p>
+        </div>
+    </section>
 
     <footer>
-
         NIGHT XITY // CITIZEN NET<br><br>
         SISTEMA DE INFORMACIÓN CIUDADANA
-
     </footer>
 
-</body>
-</html>    </style>
-</head>
+    <script>
+        const offlinePanel = document.getElementById("offline");
+        const offlineLink = document.querySelector('a[href="#offline"]');
+        const closeOfflineButton = document.querySelector(".close-offline");
 
-<body>
+        function openOffline() {
+            offlinePanel.classList.add("open");
+            offlinePanel.setAttribute("aria-hidden", "false");
+            offlineLink.setAttribute("aria-expanded", "true");
+            document.body.classList.add("panel-open");
+            if (window.location.hash !== "#offline") history.replaceState(null, "", "#offline");
+            closeOfflineButton.focus();
+        }
 
-    <header>
-        <h1>NIGHT XITY</h1>
-        <p>Cyberpunk RPG</p>
-    </header>
+        function closeOffline() {
+            offlinePanel.classList.remove("open");
+            offlinePanel.setAttribute("aria-hidden", "true");
+            offlineLink.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("panel-open");
+            if (window.location.hash === "#offline") history.replaceState(null, "", window.location.pathname + window.location.search);
+            offlineLink.focus();
+        }
 
-    <main>
-        <h2>Bienvenido a la ciudad</h2>
-
-        <p>
-            Una ciudad que sobrevivió al mundo que conocíamos.
-        </p>
-
-        <p>
-            Corporaciones, barrios, implantes,
-            programas y personas intentando sobrevivir.
-        </p>
-    </main>
-
+        offlineLink.addEventListener("click", event => {
+            event.preventDefault();
+            openOffline();
+        });
+        closeOfflineButton.addEventListener("click", closeOffline);
+        offlinePanel.addEventListener("click", event => {
+            if (event.target === offlinePanel) closeOffline();
+        });
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && offlinePanel.classList.contains("open")) closeOffline();
+        });
+        if (window.location.hash === "#offline") openOffline();
+    </script>
 </body>
 </html>

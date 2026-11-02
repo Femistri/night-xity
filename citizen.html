@@ -407,6 +407,14 @@
                     CIUDADANO DE PRUEBA
                 </div>
 
+                <div class="label" style="margin-top:15px;">
+    CAMBIAR CIUDADANO
+</div>
+
+<select id="citizen-selector" class="value">
+    <option value="">CARGANDO CIUDADANOS...</option>
+</select>
+
             </div>
 
 
@@ -966,6 +974,31 @@ if (!ciudadano || !ciudadano.identidad) {
 
       const identidad = ciudadano.identidad;
 
+const selectorCitizen =
+    document.getElementById("citizen-selector");
+
+selectorCitizen.innerHTML = "";
+
+ciudadanos.ciudadanos.forEach(personaje => {
+    const opcion = document.createElement("option");
+
+    opcion.value = personaje.identidad.nombre_clave;
+    opcion.textContent = personaje.identidad.nombre_clave;
+
+    selectorCitizen.appendChild(opcion);
+});
+
+selectorCitizen.value = identidad.nombre_clave;
+
+selectorCitizen.addEventListener("change", () => {
+    localStorage.setItem(
+        "nightXity_ciudadano_activo",
+        selectorCitizen.value
+    );
+
+    location.reload();
+});
+        
 const claveEconomia =
     `nightXity_economia_${identidad.nombre_clave}`;
 

@@ -931,11 +931,20 @@ fetch("Gastos_de_vida_CBPunk_v1.json?v=1")
         console.log("Fobias:", saludMental.fobias.length);
 console.log("Gastos de vida:", gastosVida);
         
-        const ciudadano = ciudadanos.ciudadanos[0];
+       const claveCiudadanoActivo = "nightXity_ciudadano_activo";
 
-        if (!ciudadano || !ciudadano.identidad) {
-            throw new Error("No se encontró el ciudadano principal.");
-        }
+const nombreCiudadanoActivo =
+    localStorage.getItem(claveCiudadanoActivo);
+
+const ciudadano =
+    ciudadanos.ciudadanos.find(
+        personaje =>
+            personaje.identidad.nombre_clave === nombreCiudadanoActivo
+    ) || ciudadanos.ciudadanos[0];
+
+if (!ciudadano || !ciudadano.identidad) {
+    throw new Error("No se encontró el ciudadano activo.");
+}
 
       const identidad = ciudadano.identidad;
 

@@ -1584,6 +1584,63 @@ const renderArmas = () => {
 renderArmas();
 
 
+/* =========================
+   INVENTARIO INDIVIDUAL
+   ========================= */
+
+const inventarioDetallado =
+    Array.isArray(estadoEconomico.inventario_detallado)
+        ? estadoEconomico.inventario_detallado
+        : [];
+
+const inventarioDetalladoContainer =
+    document.getElementById("citizen-inventory-detailed");
+
+const renderInventarioDetallado = () => {
+
+    if (inventarioDetallado.length === 0) {
+        inventarioDetalladoContainer.innerHTML =
+            "SIN REGISTROS INDIVIDUALES";
+        return;
+    }
+
+    inventarioDetalladoContainer.innerHTML =
+        inventarioDetallado.map(objeto => {
+
+            const fecha = objeto.fecha_adquisicion
+                ? new Date(objeto.fecha_adquisicion)
+                    .toLocaleString("es-MX")
+                : "FECHA NO DISPONIBLE";
+
+            const precio = Number(objeto.precio_compra || 0)
+                .toLocaleString("es-MX");
+
+            return `
+                <div class="item">
+                    <div class="item-name">
+                        ${objeto.nombre || "OBJETO SIN NOMBRE"}
+                    </div>
+
+                    <div class="item-info">
+                        ID: ${objeto.id_instancia || "SIN ID"}
+                        <br>
+                        CATÁLOGO: ${objeto.catalogo_id || "SIN REGISTRO"}
+                        <br>
+                        CATEGORÍA: ${objeto.categoria || "SIN CATEGORÍA"}
+                        <br>
+                        ADQUISICIÓN: ${fecha}
+                        <br>
+                        PRECIO: ${precio} CORPOS
+                        <br>
+                        ESTADO: <strong>${objeto.estado || "SIN ESTADO"}</strong>
+                    </div>
+                </div>
+            `;
+        }).join("");
+};
+
+renderInventarioDetallado();
+
         
               /* =========================
    EQUIPO

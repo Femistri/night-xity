@@ -398,6 +398,19 @@
        "saldo_inicial": 4710,
         "movimientos": []
       },
+            "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
          },
     {
       "identidad": {

@@ -398,6 +398,57 @@
        "saldo_inicial": 4710,
         "movimientos": []
       },
+         },
+    {
+      "identidad": {
+        "nombre_clave": "Tank",
+        "clase": "Backup",
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 4710,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [],
+        "programas": [],
+        "armas": [],
+        "accesorios": [],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [],
+        "drogas": [],
+        "vehiculos": [],
+        "varios": [],
+        "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Juanelo",
+        "clase": "Data",
+        "trasfondo": "",
+        "tara_sintetica": null,
+        "puntos_alma": 4,
+        "talentos": [],
+        "salud_mental": {
+          "manias": [],
+          "fobias": [],
+          "adicciones": []
+        }
+      },
+      "economia": {
+        "saldo_inicial": 4710,
+        "movimientos": []
+      },
       "inventario": {
         "implantes": [],
         "programas": [],
@@ -413,4 +464,5 @@
       }
     }
   ]
+}
 }

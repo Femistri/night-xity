@@ -114,7 +114,7 @@
         "nombre_clave": "Inesa",
         "clase": "Backup",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": ["Lucha con X"],
         "salud_mental": {
@@ -161,7 +161,7 @@
         "nombre_clave": "Toques",
         "clase": "Link",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -193,7 +193,7 @@
         "nombre_clave": "Pacheco",
         "clase": "Data",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -225,7 +225,7 @@
         "nombre_clave": "Codigo Toledo",
         "clase": "Microchip",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -257,7 +257,7 @@
         "nombre_clave": "Raskol",
         "clase": "Microchip",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -289,7 +289,7 @@
         "nombre_clave": "Tope",
         "clase": "Link",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -321,7 +321,7 @@
         "nombre_clave": "Cyanura",
         "clase": "Link",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -353,7 +353,7 @@
         "nombre_clave": "Xela",
         "clase": "Link",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -385,7 +385,7 @@
         "nombre_clave": "Moikano",
         "clase": "Backup",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -417,7 +417,7 @@
         "nombre_clave": "Tank",
         "clase": "Backup",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {
@@ -449,7 +449,7 @@
         "nombre_clave": "Juanelo",
         "clase": "Data",
         "trasfondo": "",
-        "tara_sintetica": null,
+        "tara_sintetica": [],
         "puntos_alma": 4,
         "talentos": [],
         "salud_mental": {

@@ -1200,21 +1200,29 @@ if (elementoNombre) {
         document.getElementById("citizen-background").value =
     identidad.trasfondo || "";
 
-       const taraContainer = document.getElementById("citizen-tara");
+     const taraContainer = document.getElementById("citizen-tara");
 
 const taras = ciudadanos.tara_sintetica || {};
+
+const tarasCiudadano =
+    Array.isArray(identidad.tara_sintetica)
+        ? identidad.tara_sintetica
+        : [];
 
 taraContainer.innerHTML = Object.entries(taras).map(
     ([nombre, descripcion]) => `
         <label style="display:block; margin:8px 0;">
-            <input type="checkbox" value="${nombre}">
+            <input
+                type="checkbox"
+                value="${nombre}"
+                ${tarasCiudadano.includes(nombre) ? "checked" : ""}
+            >
             <strong>${nombre}</strong>
             <br>
             <small>${descripcion}</small>
         </label>
     `
 ).join("");
-
         /* =========================
            TALENTOS
            ========================= */

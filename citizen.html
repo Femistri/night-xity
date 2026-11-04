@@ -1032,6 +1032,129 @@ if (!estadoEconomicoGuardado) {
     guardarEstadoEconomico();
 }
 
+/* =========================================
+   REGISTRO INICIAL DE CANARIO
+   Se ejecuta una sola vez.
+   No descuenta CORPOS.
+   ========================================= */
+
+if (
+    identidad.nombre_clave === "Canario" &&
+    !estadoEconomico.registro_inicial_canario
+) {
+    const inventarioBase = ciudadano.inventario || {};
+
+    const catalogoCompleto = Array.isArray(catalogo.items)
+        ? catalogo.items
+        : Object.values(catalogo.categorias || {}).flat();
+
+    if (!Array.isArray(estadoEconomico.inventario_detallado)) {
+        estadoEconomico.inventario_detallado = [];
+    }
+
+    const fechaRegistroInicial = new Date().toISOString();
+
+    const categoriasRegistro = {
+        implantes: "Implantes",
+        programas: "Programas",
+        armas: "Armas",
+        accesorios: "Accesorios",
+        blindajes: "Blindajes",
+        terminales: "Terminales",
+        medicare: "MediCare",
+        drogas: "Drogas",
+        vehiculos: "Vehiculos",
+        varios: "Varios",
+        cotidiano: "Cotidiano"
+    };
+
+    Object.entries(categoriasRegistro).forEach(
+        ([categoriaInventario, categoriaCatalogo]) => {
+
+            const objetosBase =
+                inventarioBase[categoriaInventario] || [];
+
+            objetosBase.forEach(idObjeto => {
+
+                const articulo = catalogoCompleto.find(
+                    item => item.id === idObjeto
+                );
+
+                if (!articulo) {
+                    console.warn(
+                        "Objeto no encontrado en catálogo:",
+                        idObjeto
+                    );
+                    return;
+                }
+
+                estadoEconomico.inventario[categoriaInventario].push(
+                    idObjeto
+                );
+
+                estadoEconomico.inventario_detallado.push({
+                    id_instancia:
+                        window.crypto &&
+                        typeof window.crypto.randomUUID === "function"
+                            ? window.crypto.randomUUID()
+                            : `NX-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                    catalogo_id: articulo.id,
+                    nombre: articulo.nombre,
+                    categoria: articulo.categoria || categoriaCatalogo,
+                    fecha_adquisicion: fechaRegistroInicial,
+                    precio_compra: articulo.costo || 0,
+                    estado: "SERVIBLE"
+                });
+            });
+        }
+    );
+
+    const cantidadesPorObjeto = {};
+
+    Object.values(inventarioBase).forEach(lista => {
+        if (!Array.isArray(lista)) return;
+
+        lista.forEach(idObjeto => {
+            cantidadesPorObjeto[idObjeto] =
+                (cantidadesPorObjeto[idObjeto] || 0) + 1;
+        });
+    });
+
+    Object.entries(cantidadesPorObjeto).forEach(
+        ([idObjeto, cantidad]) => {
+
+            const articulo = catalogoCompleto.find(
+                item => item.id === idObjeto
+            );
+
+            if (!articulo) return;
+
+            const precioUnitario =
+                typeof articulo.costo === "number"
+                    ? articulo.costo
+                    : 0;
+
+            estadoEconomico.movimientos.push({
+                fecha: fechaRegistroInicial,
+                tipo: "egreso",
+                subtipo: "COMPRA",
+                concepto: articulo.nombre,
+                catalogo_id: articulo.id,
+                cantidad: cantidad,
+                precio_unitario: precioUnitario,
+                monto: precioUnitario * cantidad,
+                quien_pago: "Canario",
+                quien_cobro: "TIENDA",
+                registro_inicial: true
+            });
+        }
+    );
+
+    estadoEconomico.registro_inicial_canario = true;
+
+    guardarEstadoEconomico();
+}
+        
 const saldoActual =
     estadoEconomico?.saldo_actual
         ?? ciudadano.economia?.saldo_inicial

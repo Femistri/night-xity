@@ -473,6 +473,75 @@
         "drogas": [],
         "vehiculos": [],
         "varios": [],
+            "cotidiano": []
+      }
+    },
+    {
+      "identidad": {
+        "nombre_clave": "Canario",
+        "clase": "Backup",
+        "trasfondo": "Sobreviviente de implantes experimentales. Mercenaria para las Serpientes.",
+        "tara_sintetica": [
+          "Pérdida de recuerdos",
+          "Falta de creatividad"
+        ],
+        "puntos_alma": 2,
+        "talentos": [
+          "Lucha con X",
+          "Músculos de acero"
+        ],
+        "salud_mental": {
+          "manias": [6],
+          "fobias": [71, 94],
+          "adicciones": ["DRG-0010"]
+        }
+      },
+      "economia": {
+        "saldo_inicial": 9180,
+        "movimientos": []
+      },
+      "inventario": {
+        "implantes": [
+          "IMP-0002",
+          "IMP-0020",
+          "IMP-0023"
+        ],
+        "programas": [],
+        "armas": [
+          "ARM-0004",
+          "ARM-0007",
+          "ARM-0015",
+          "ARM-0018"
+        ],
+        "accesorios": [
+          "ACC-0021",
+          "ACC-0022"
+        ],
+        "blindajes": [],
+        "terminales": [],
+        "medicare": [
+          "MED-0003",
+          "MED-0004",
+          "MED-0004"
+        ],
+        "drogas": [
+          "DRG-0010",
+          "DRG-0010",
+          "DRG-0010",
+          "DRG-0010",
+          "DRG-0010",
+          "DRG-0006",
+          "DRG-0006",
+          "DRG-0009",
+          "DRG-0009"
+        ],
+        "vehiculos": [
+          "VEH-0001"
+        ],
+        "varios": [
+          "VAR-0008",
+          "VAR-0015"
+        ],
         "cotidiano": []
       }
     }

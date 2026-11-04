@@ -1048,9 +1048,11 @@ if (
         ? catalogo.items
         : Object.values(catalogo.categorias || {}).flat();
 
-    if (!Array.isArray(estadoEconomico.inventario_detallado)) {
-        estadoEconomico.inventario_detallado = [];
-    }
+   estadoEconomico.inventario_detallado = [];
+
+Object.keys(categoriasInventario).forEach(categoria => {
+    estadoEconomico.inventario[categoria] = [];
+});
 
     const fechaRegistroInicial = new Date().toISOString();
 

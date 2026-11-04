@@ -1329,25 +1329,46 @@ if (elementoNombre) {
 
 const taras = ciudadanos.tara_sintetica || {};
 
+const taraContainer = document.getElementById("citizen-tara");
+
+const taras = ciudadanos.tara_sintetica || {};
+
 const tarasCiudadano =
     Array.isArray(identidad.tara_sintetica)
         ? identidad.tara_sintetica
         : [];
 
-taraContainer.innerHTML = Object.entries(taras).map(
-    ([nombre, descripcion]) => `
-        <label style="display:block; margin:8px 0;">
-            <input
-                type="checkbox"
-                value="${nombre}"
-                ${tarasCiudadano.includes(nombre) ? "checked" : ""}
-            >
-            <strong>${nombre}</strong>
-            <br>
-            <small>${descripcion}</small>
-        </label>
-    `
-).join("");
+const tarasSeleccionadas = Object.entries(taras)
+    .filter(([nombre]) => tarasCiudadano.includes(nombre));
+
+const tarasDisponibles = Object.entries(taras)
+    .filter(([nombre]) => !tarasCiudadano.includes(nombre));
+
+const renderTara = ([nombre, descripcion]) => `
+    <label style="display:block; margin:8px 0;">
+        <input
+            type="checkbox"
+            value="${nombre}"
+            ${tarasCiudadano.includes(nombre) ? "checked" : ""}
+        >
+        <strong>${nombre}</strong>
+        <br>
+        <small>${descripcion}</small>
+    </label>
+`;
+
+taraContainer.innerHTML = `
+    <strong>SELECCIONADAS (${tarasSeleccionadas.length})</strong>
+    ${tarasSeleccionadas.length
+        ? tarasSeleccionadas.map(renderTara).join("")
+        : "<div>NINGUNA</div>"
+    }
+
+    <hr>
+
+    <strong>TODAS LAS DEMÁS</strong>
+    ${tarasDisponibles.map(renderTara).join("")}
+`;
         /* =========================
            TALENTOS
            ========================= */

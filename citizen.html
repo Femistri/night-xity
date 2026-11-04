@@ -1364,16 +1364,6 @@ economyContainer.innerHTML = `
     )}
 
 
-setInterval(() => {
-    const cuenta = formatoCuentaRegresiva();
-
-    document
-        .querySelectorAll("[data-cuenta-obligatoria]")
-        .forEach(elemento => {
-            elemento.textContent = cuenta;
-        });
-}, 1000);
-
     ${renderMovimientos(
         gastosOpcionales,
         "OPCIONALES"
@@ -1389,7 +1379,15 @@ setInterval(() => {
         "EVENTOS"
     )}
 `;
-        
+      setInterval(() => {
+    const cuenta = formatoCuentaRegresiva();
+
+    document
+        .querySelectorAll("[data-cuenta-obligatoria]")
+        .forEach(elemento => {
+            elemento.textContent = cuenta;
+        });
+}, 1000);  
         /* =========================
            IDENTIDAD
            ========================= */

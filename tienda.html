@@ -734,10 +734,14 @@ cargarTienda();
 
         if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
 
-        selectorPersonaje.innerHTML = "";
+                selectorPersonaje.innerHTML = "";
         const personajes = (data || []).map(row => row.personajes).filter(Boolean);
+        const personajeGuardado =
+            localStorage.getItem("nightXity_personaje_activo");
+
         if (!personajes.length) {
-            selectorPersonaje.innerHTML = '<option value="">NO TIENES PERSONAJES ASIGNADOS</option>';
+            selectorPersonaje.innerHTML =
+                '<option value="">NO TIENES PERSONAJES ASIGNADOS</option>';
         } else {
             selectorPersonaje.add(new Option("SELECCIONA TU PERSONAJE", ""));
             personajes.forEach(personaje => {
@@ -746,7 +750,20 @@ cargarTienda();
                     personaje.id
                 ));
             });
+
+            if (personajes.some(personaje => personaje.id === personajeGuardado)) {
+                selectorPersonaje.value = personajeGuardado;
+            }
         }
+
+        selectorPersonaje.addEventListener("change", () => {
+            if (selectorPersonaje.value) {
+                localStorage.setItem(
+                    "nightXity_personaje_activo",
+                    selectorPersonaje.value
+                );
+            }
+        });
 
         const { data: perfil } = await supabaseClient
             .from("perfiles")
@@ -821,7 +838,8 @@ cargarTienda();
                 throw new Error("DunoXusa no confirmó la compra.");
             }
 
-            boton.textContent = "COMPRA REALIZADA";
+                        boton.disabled = false;
+            boton.textContent = "COMPRAR";
             mensaje.textContent =
                 "Compra confirmada para " + data.personaje +
                 ". Total: " + Number(data.total).toLocaleString("es-MX") +

@@ -11,6 +11,12 @@
     <title>Tienda // Night Xity</title>
 
     <style>
+        /* La identidad y el saldo solo se muestran después de iniciar sesión. */
+        .citizen-balance { display: none !important; }
+        #acceso-jugador { display: none; margin-top: 22px; border-top: 1px solid #333; padding-top: 20px; }
+        #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
+        #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
+        #acceso-mensaje { margin-top:10px; color:#aaa; }
 
         * {
             box-sizing: border-box;
@@ -314,6 +320,24 @@
 
         </section>
     
+    <section class="panel" id="acceso-jugador" aria-live="polite">
+        <h2>ACCESO CIUDADANO</h2>
+        <div id="formulario-acceso">
+            <p>Inicia sesión para identificarte y consultar tus personajes asignados.</p>
+            <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
+            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" required>
+            <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
+        </div>
+        <div id="selector-personaje-contenedor" hidden>
+            <p id="jugador-identificado"></p>
+            <label for="personaje-asignado">PERSONAJE:</label>
+            <select id="personaje-asignado">
+                <option value="">CARGANDO PERSONAJES...</option>
+            </select>
+            <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
+        </div>
+        <div id="acceso-mensaje"></div>
+    </section>
 </main>
 
 
@@ -920,6 +944,111 @@ ${
 
 cargarTienda();
 
+</script>
+
+<script>
+// FASE: autenticación del jugador y consulta de personajes asignados.
+// No realiza compras ni modifica saldos.
+(() => {
+    const panel = document.getElementById("acceso-jugador");
+    const mensaje = document.getElementById("acceso-mensaje");
+    const formulario = document.getElementById("formulario-acceso");
+    const selectorContenedor = document.getElementById("selector-personaje-contenedor");
+    const selectorPersonaje = document.getElementById("personaje-asignado");
+
+    function mostrarAcceso() {
+        panel.style.display = "block";
+        panel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    async function cargarPersonajesAsignados() {
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !user) throw new Error("No se pudo identificar la sesión.");
+
+        const { data, error } = await supabaseClient
+            .from("asignaciones")
+            .select("personaje_id, personajes ( id, nombre_clave, clase )")
+            .eq("perfil_id", user.id);
+
+        if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
+
+        selectorPersonaje.innerHTML = "";
+        const personajes = (data || []).map(row => row.personajes).filter(Boolean);
+        if (!personajes.length) {
+            selectorPersonaje.innerHTML = '<option value="">NO TIENES PERSONAJES ASIGNADOS</option>';
+        } else {
+            selectorPersonaje.add(new Option("SELECCIONA TU PERSONAJE", ""));
+            personajes.forEach(personaje => {
+                selectorPersonaje.add(new Option(
+                    `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                    personaje.id
+                ));
+            });
+        }
+
+        const { data: perfil } = await supabaseClient
+            .from("perfiles")
+            .select("rol")
+            .eq("id", user.id)
+            .maybeSingle();
+        document.getElementById("jugador-identificado").textContent =
+            `SESIÓN: ${user.email || "USUARIO AUTENTICADO"} // ROL: ${perfil?.rol || "JUGADOR"}`;
+        formulario.hidden = true;
+        selectorContenedor.hidden = false;
+        mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
+    }
+
+    document.addEventListener("click", event => {
+        const boton = event.target.closest(".buy-button");
+        if (!boton) return;
+        // Detiene la compra local existente: aún no hay RPC transaccional de compra.
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        mostrarAcceso();
+        mensaje.textContent = "Para continuar, inicia sesión. La compra todavía no se ejecutará en esta fase.";
+    }, true);
+
+    document.getElementById("boton-iniciar-sesion").addEventListener("click", async () => {
+        const email = document.getElementById("acceso-correo").value.trim();
+        const password = document.getElementById("acceso-contrasena").value;
+        if (!email || !password) {
+            mensaje.textContent = "Escribe tu correo y contraseña.";
+            return;
+        }
+        mensaje.textContent = "Verificando acceso...";
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+            mensaje.textContent = "No se pudo iniciar sesión: " + error.message;
+            return;
+        }
+        try {
+            await cargarPersonajesAsignados();
+        } catch (error) {
+            mensaje.textContent = error.message;
+        }
+    });
+
+    document.getElementById("boton-cerrar-sesion").addEventListener("click", async () => {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            mensaje.textContent = "No se pudo cerrar sesión: " + error.message;
+            return;
+        }
+        formulario.hidden = false;
+        selectorContenedor.hidden = true;
+        document.getElementById("acceso-contrasena").value = "";
+        mensaje.textContent = "Sesión cerrada.";
+    });
+
+    supabaseClient.auth.getSession().then(async ({ data, error }) => {
+        if (error || !data.session) return;
+        try {
+            await cargarPersonajesAsignados();
+        } catch (error) {
+            mensaje.textContent = error.message;
+        }
+    });
+})();
 </script>
 
 </body>

@@ -324,40 +324,67 @@
 
 </footer>
 
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
    <script src="motor_economico_night_xity_v1.js"></script>
 
 <script>
+
+// Supabase: lectura pública del catálogo. Las compras aún no se procesan aquí.
+const SUPABASE_URL = "https://mxolzgerwrzeqcfmsxaa.supabase.co";
+const SUPABASE_PUBLIC_KEY = "sb_publishable_ym1P2o0CCXd9E7H89nTaNA_CCldoI6a";
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLIC_KEY
+);
 
 const cargarTienda = async () => {
 
     try {
 
-        const response =
-            await fetch("catalogo_night_xity_web_v1.json?v=1");
+        const [productosResult, gastosResult] = await Promise.all([
+            supabaseClient
+                .from("catalogo_productos")
+                .select("*")
+                .eq("activo", true)
+                .order("id"),
+            supabaseClient
+                .from("catalogo_gastos_vida")
+                .select("*")
+                .eq("activo", true)
+                .order("id")
+        ]);
 
-        if (!response.ok) {
-            throw new Error(
-                "No se pudo cargar el catálogo."
-            );
+        if (productosResult.error) {
+            throw new Error("No se pudo cargar el catálogo: " + productosResult.error.message);
+        }
+        if (gastosResult.error) {
+            throw new Error("No se pudieron cargar los gastos de vida: " + gastosResult.error.message);
         }
 
-        const catalogo =
-            await response.json();
+        const categorias = {};
+        (productosResult.data || []).forEach(producto => {
+            if (!categorias[producto.categoria]) {
+                categorias[producto.categoria] = [];
+            }
+            categorias[producto.categoria].push(producto);
+        });
 
-      const categorias = catalogo.categorias || {};
+        const gastosRows = gastosResult.data || [];
+        const gastosVida = {
+            gastos_obligatorios: gastosRows
+                .filter(gasto => gasto.grupo === "obligatorio"),
+            gastos_opcionales: gastosRows
+                .filter(gasto => gasto.grupo === "opcional"),
+            variables: gastosRows
+                .filter(gasto => gasto.grupo === "variable" || gasto.grupo === "evento")
+                .map(gasto => ({ ...gasto, tipo: gasto.grupo }))
+        };
 
-const gastosResponse =
-    await fetch("Gastos_de_vida_CBPunk_v1.json?v=1");
+        console.log("TIENDA // Supabase conectado:", {
+            productos: productosResult.data?.length || 0,
+            gastosVida: gastosRows.length
+        });
 
-if (!gastosResponse.ok) {
-    throw new Error(
-        "No se pudieron cargar los gastos de vida."
-    );
-}
-
-const gastosVida =
-    await gastosResponse.json();
-        
 const citizenResponse =
     await fetch("Night_Xity_Citizen_Nucleo_v1.json?v=1");
 

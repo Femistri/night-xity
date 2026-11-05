@@ -486,48 +486,53 @@ const cargarTienda = async () => {
 
             ${
                 gastos.length
-                    ? gastos.map(gasto => `
+                                     ? gastos.map(gasto => {
+                        const esVivienda = gasto.grupo === "vivienda";
+                        const costoPorPersona = Number(
+                            gasto.datos_originales?.costo_por_persona ?? gasto.costo
+                        );
+                        const precioVisible = esVivienda
+                            ? `${costoPorPersona.toLocaleString("es-MX")} CORPOS POR PERSONA`
+                            : gasto.costo !== null
+                                ? `${Number(gasto.costo).toLocaleString("es-MX")} CORPOS`
+                                : "COSTO VARIABLE";
+                        const frecuenciaVisible = esVivienda
+                            ? "CADA 6 MIÉRCOLES"
+                            : String(gasto.frecuencia || "").toUpperCase();
+                        const accionVisible = esVivienda
+                            ? gasto.id === "VIV-003"
+                                ? "ACTIVAR VIVIENDA"
+                                : "SOLICITAR AL DM"
+                            : "SELECCIONAR";
 
-                                              <div class="item">
+                        return `
+                            <div class="item">
+                                <div class="item-name">${gasto.nombre}</div>
 
-                            <div class="item-name">
-                                ${gasto.nombre}
-                            </div>
-
-                            <div class="item-info">
+                                <div class="item-info">
+                                    ${precioVisible}
+                                    <br>
+                                    ${frecuenciaVisible}
+                                </div>
 
                                 ${
                                     gasto.costo !== null
-                                        ? `${Number(gasto.costo).toLocaleString("es-MX")} CORPOS`
-                                        : "COSTO VARIABLE"
+                                        ? `
+                                            <button
+                                                class="select-item"
+                                                data-id="${gasto.id}"
+                                                data-name="${gasto.nombre}"
+                                                data-price="${esVivienda ? costoPorPersona : gasto.costo}"
+                                                data-source="${esVivienda ? "vivienda" : "gasto-vida"}"
+                                            >
+                                                ${accionVisible}
+                                            </button>
+                                        `
+                                        : ""
                                 }
-
-                                <br>
-
-                                ${String(
-                                    gasto.frecuencia || ""
-                                ).toUpperCase()}
-
                             </div>
-
-                            ${
-                                gasto.costo !== null
-                                    ? `
-                                        <button
-                                            class="select-item"
-                                            data-id="${gasto.id}"
-                                            data-name="${gasto.nombre}"
-                                            data-price="${gasto.costo}"
-                                            data-source="gasto-vida"
-                                        >
-                                            SELECCIONAR
-                                        </button>
-                                    `
-                                    : ""
-                            }
-
-                        </div>
-                    `).join("")
+                        `;
+                    }).join("")
                     : `<div class="item-info">SIN REGISTROS</div>`
             }
 
@@ -779,74 +784,97 @@ cargarTienda();
         mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
     }
 
-    document.addEventListener("click", async event => {
+        document.addEventListener("click", async event => {
         const boton = event.target.closest(".buy-button");
         if (!boton) return;
 
-        // La compra local queda bloqueada: toda operación se valida en Supabase.
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        const { data: { user }, error: authError } =
-            await supabaseClient.auth.getUser();
-
-        if (authError || !user) {
-            mostrarAcceso();
-            mensaje.textContent = "Inicia sesión para continuar con tu compra.";
-            return;
-        }
-
-        const personajeId = selectorPersonaje.value;
-        if (!personajeId) {
-            mostrarAcceso();
-            mensaje.textContent = "Selecciona el personaje que realizará la compra.";
-            return;
-        }
-
-        const seleccionados = Array.from(
-            document.querySelectorAll(".select-item.selected")
-        );
-
-        if (!seleccionados.length) {
-            mensaje.textContent = "No hay productos seleccionados.";
-            mostrarAcceso();
-            return;
-        }
-
-        if (seleccionados.some(item => item.dataset.source === "gasto-vida")) {
-            mensaje.textContent =
-                "Los gastos de vida todavía no se procesan mediante esta compra. Retíralos de la selección y vuelve a intentarlo.";
-            mostrarAcceso();
-            return;
-        }
-
-        const productos = seleccionados.map(item => item.dataset.id);
-
         boton.disabled = true;
         boton.textContent = "PROCESANDO...";
-        mensaje.textContent = "Validando compra en DunoXusa...";
 
         try {
-            const { data, error } = await supabaseClient.rpc(
-                "realizar_compra_multiple",
-                {
-                    p_personaje_id: personajeId,
-                    p_productos: productos
-                }
-            );
+            const { data: { user }, error: authError } =
+                await supabaseClient.auth.getUser();
 
-            if (error) throw error;
-            if (!data || data.exito !== true) {
-                throw new Error("DunoXusa no confirmó la compra.");
+            if (authError || !user) {
+                mostrarAcceso();
+                throw new Error("Inicia sesión para continuar.");
             }
 
-                        boton.disabled = false;
-            boton.textContent = "COMPRAR";
-            mensaje.textContent =
-                "Compra confirmada para " + data.personaje +
-                ". Total: " + Number(data.total).toLocaleString("es-MX") +
-                " CORPOS. Saldo restante: " +
-                Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+            const personajeId = selectorPersonaje.value;
+            if (!personajeId) {
+                mostrarAcceso();
+                throw new Error("Selecciona el personaje que realizará la operación.");
+            }
+
+            const seleccionados = Array.from(
+                document.querySelectorAll(".select-item.selected")
+            );
+
+            if (!seleccionados.length) {
+                throw new Error("No hay productos ni viviendas seleccionados.");
+            }
+
+            const vivienda = seleccionados.filter(
+                item => item.dataset.source === "vivienda"
+            );
+
+            if (vivienda.length) {
+                if (seleccionados.length !== 1) {
+                    throw new Error("Procesa la vivienda por separado de otros artículos.");
+                }
+
+                const viviendaId = vivienda[0].dataset.id;
+                const nombreFuncion = viviendaId === "VIV-003"
+                    ? "activar_vivienda_predeterminada"
+                    : "solicitar_cambio_vivienda";
+                const parametros = viviendaId === "VIV-003"
+                    ? { p_personaje_id: personajeId }
+                    : {
+                        p_personaje_id: personajeId,
+                        p_vivienda_id: viviendaId
+                    };
+
+                const { data, error } = await supabaseClient.rpc(
+                    nombreFuncion,
+                    parametros
+                );
+
+                if (error) throw error;
+                if (!data || data.exito !== true) {
+                    throw new Error("Supabase no confirmó la operación de vivienda.");
+                }
+
+                mensaje.textContent = viviendaId === "VIV-003"
+                    ? `Vivienda activada. Cargo inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`
+                    : `Solicitud enviada al DM para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
+            } else {
+                if (seleccionados.some(item => item.dataset.source === "gasto-vida")) {
+                    throw new Error("En esta fase solo se procesan viviendas.");
+                }
+
+                const productos = seleccionados.map(item => item.dataset.id);
+                const { data, error } = await supabaseClient.rpc(
+                    "realizar_compra_multiple",
+                    {
+                        p_personaje_id: personajeId,
+                        p_productos: productos
+                    }
+                );
+
+                if (error) throw error;
+                if (!data || data.exito !== true) {
+                    throw new Error("Supabase no confirmó la compra.");
+                }
+
+                mensaje.textContent =
+                    "Compra confirmada para " + data.personaje +
+                    ". Total: " + Number(data.total).toLocaleString("es-MX") +
+                    " CORPOS. Saldo restante: " +
+                    Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+            }
 
             seleccionados.forEach(item => {
                 item.classList.remove("selected");
@@ -854,12 +882,12 @@ cargarTienda();
             });
 
             document.getElementById("selected-products").textContent =
-                "Compra Registrada en DunoXusa.";
+                "Operación registrada en DunoXusa.";
         } catch (error) {
+            mensaje.textContent = "Operación no completada: " + error.message;
+        } finally {
             boton.disabled = false;
             boton.textContent = "COMPRAR";
-            mostrarAcceso();
-            mensaje.textContent = "Compra no realizada: " + error.message;
         }
     }, true);
 

@@ -554,6 +554,16 @@
             </div>
 
         </details>
+
+        <details>
+            <summary>VIVIENDA Y SOLICITUDES</summary>
+            <div id="citizen-housing-status">CARGANDO...</div>
+        </details>
+
+        <details id="dm-housing-panel" hidden>
+            <summary>SOLICITUDES DE VIVIENDA // DM</summary>
+            <div id="dm-housing-requests">CARGANDO...</div>
+        </details>
         
     </section>
 
@@ -999,6 +1009,155 @@ selectorCitizen.addEventListener("change", () => {
     location.reload();
 });
 
+const panelVivienda = document.getElementById("citizen-housing-status");
+const panelSolicitudesDM = document.getElementById("dm-housing-panel");
+const listaSolicitudesDM = document.getElementById("dm-housing-requests");
+
+const { data: perfilActual, error: errorPerfil } = await supabaseClient
+    .from("perfiles")
+    .select("rol")
+    .eq("id", user.id)
+    .maybeSingle();
+
+const { data: suscripcionesVivienda, error: errorSuscripciones } =
+    await supabaseClient
+        .from("suscripciones_gastos_vida")
+        .select("gasto_id, costo, frecuencia, estado, proximo_cobro")
+        .eq("personaje_id", personajeActivo.id)
+        .like("gasto_id", "VIV-%");
+
+const { data: solicitudesPropias, error: errorSolicitudesPropias } =
+    await supabaseClient
+        .from("solicitudes_gastos_vida")
+        .select("gasto_id, estado, importe_solicitado, mensaje, fecha_solicitud")
+        .eq("personaje_id", personajeActivo.id)
+        .eq("tipo_solicitud", "cambio_vivienda")
+        .order("fecha_solicitud", { ascending: false })
+        .limit(5);
+
+if (errorPerfil || errorSuscripciones || errorSolicitudesPropias) {
+    panelVivienda.textContent =
+        "No se pudo cargar la vivienda o sus solicitudes.";
+} else {
+    const viviendasCatalogo = gastosVida.vivienda || [];
+    const nombreVivienda = id =>
+        viviendasCatalogo.find(vivienda => vivienda.id === id)?.descripcion || id;
+
+    const suscripciones = suscripcionesVivienda || [];
+    const solicitudes = solicitudesPropias || [];
+    const viviendaActiva = suscripciones.find(item => item.estado === "activa");
+    const viviendaSuspendida = suscripciones.find(item => item.estado === "suspendida");
+
+    const formatoFechaVivienda = fecha =>
+        fecha
+            ? new Date(fecha).toLocaleString("es-MX", {
+                timeZone: "America/Cancun",
+                dateStyle: "medium",
+                timeStyle: "short"
+            })
+            : "SIN FECHA PROGRAMADA";
+
+    panelVivienda.innerHTML = `
+        ${
+            viviendaActiva
+                ? `<div class="item">
+                    <div class="item-name">${nombreVivienda(viviendaActiva.gasto_id)}</div>
+                    <div class="item-info">
+                        ${Number(viviendaActiva.costo).toLocaleString("es-MX")} CORPOS POR PERSONA
+                        <br>
+                        ESTADO: ACTIVA
+                        <br>
+                        PRÓXIMO COBRO: ${formatoFechaVivienda(viviendaActiva.proximo_cobro)}
+                    </div>
+                </div>`
+                : viviendaSuspendida
+                    ? `<div class="item-info">
+                        ${nombreVivienda(viviendaSuspendida.gasto_id)}
+                        — SUSCRIPCIÓN SUSPENDIDA POR SALDO INSUFICIENTE
+                    </div>`
+                    : `<div class="item-info">NO HAY VIVIENDA ACTIVA.</div>`
+        }
+
+        ${
+            solicitudes.length
+                ? solicitudes.map(solicitud => `
+                    <div class="item-info">
+                        SOLICITUD: ${nombreVivienda(solicitud.gasto_id)}
+                        // ${String(solicitud.estado).toUpperCase()}
+                        ${solicitud.estado === "pendiente" ? "// EN ESPERA DEL DM" : ""}
+                    </div>
+                `).join("")
+                : `<div class="item-info">SIN SOLICITUDES DE VIVIENDA.</div>`
+        }
+    `;
+}
+
+if (!errorPerfil && perfilActual?.rol === "dm") {
+    panelSolicitudesDM.hidden = false;
+
+    const { data: solicitudesDM, error: errorSolicitudesDM } =
+        await supabaseClient
+            .from("solicitudes_gastos_vida")
+            .select("id, gasto_id, importe_solicitado, mensaje, fecha_solicitud, personajes(nombre_clave)")
+            .eq("tipo_solicitud", "cambio_vivienda")
+            .eq("estado", "pendiente")
+            .order("fecha_solicitud", { ascending: true });
+
+    if (errorSolicitudesDM) {
+        listaSolicitudesDM.textContent =
+            "No se pudieron cargar las solicitudes para revisar.";
+    } else if (!solicitudesDM?.length) {
+        listaSolicitudesDM.textContent = "NO HAY SOLICITUDES PENDIENTES.";
+    } else {
+        listaSolicitudesDM.innerHTML = solicitudesDM.map(solicitud => `
+            <div class="item">
+                <div class="item-name">
+                    ${solicitud.personajes?.nombre_clave || "PERSONAJE"}
+                    — ${nombreVivienda(solicitud.gasto_id)}
+                </div>
+                <div class="item-info">
+                    CARGO POR PERSONA:
+                    ${Number(solicitud.importe_solicitado || 0).toLocaleString("es-MX")} CORPOS
+                    <br>
+                    SOLICITUD: ${new Date(solicitud.fecha_solicitud).toLocaleString("es-MX")}
+                </div>
+                <button data-resolver-vivienda="${solicitud.id}" data-aprobar="true">
+                    APROBAR
+                </button>
+                <button data-resolver-vivienda="${solicitud.id}" data-aprobar="false">
+                    RECHAZAR
+                </button>
+            </div>
+        `).join("");
+
+        listaSolicitudesDM.addEventListener("click", async event => {
+            const boton = event.target.closest("[data-resolver-vivienda]");
+            if (!boton) return;
+
+            boton.disabled = true;
+            const { error } = await supabaseClient.rpc(
+                "resolver_solicitud_vivienda",
+                {
+                    p_solicitud_id: boton.dataset.resolverVivienda,
+                    p_aprobar: boton.dataset.aprobar === "true",
+                    p_mensaje: null
+                }
+            );
+
+            if (error) {
+                boton.disabled = false;
+                listaSolicitudesDM.insertAdjacentHTML(
+                    "afterbegin",
+                    `<div class="item-info">No se pudo resolver: ${error.message}</div>`
+                );
+                return;
+            }
+
+            location.reload();
+        });
+    }
+}
+        
 const ficha = personajeActivo.ficha || {};
 
 const ciudadano = {

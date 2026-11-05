@@ -695,14 +695,18 @@ const objetos =
 
                 const selectedProducts =
             document.getElementById("selected-products");
+selectedProducts.addEventListener("click", evento => {
+    const botonQuitar = evento.target.closest(".remove-item");
+    if (!botonQuitar) return;
 
-                selectedProducts.addEventListener("click", evento => {
+    const botonProducto = document.querySelector(
+        `.select-item[data-id="${botonQuitar.dataset.id}"]`
+    );
 
-const botonComprar =
-    evento.target.closest(".buy-button");
-
-if (botonComprar) {
-
+    if (botonProducto) {
+        botonProducto.click();
+    }
+});
     const seleccionados =
         document.querySelectorAll(
             ".select-item.selected"

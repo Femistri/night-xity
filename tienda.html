@@ -409,91 +409,9 @@ const cargarTienda = async () => {
             gastosVida: gastosRows.length
         });
 
-const citizenResponse =
-    await fetch("Night_Xity_Citizen_Nucleo_v1.json?v=1");
-
-if (!citizenResponse.ok) {
-    throw new Error(
-        "No se pudo cargar el núcleo ciudadano."
-    );
-}
-
-const citizenData =
-    await citizenResponse.json();
-
-const claveCiudadanoActivo = "nightXity_ciudadano_activo";
-
-const ciudadanoGuardado =
-    localStorage.getItem(claveCiudadanoActivo);
-
-const ciudadanoActivo =
-    citizenData.ciudadanos.find(
-        ciudadano =>
-            ciudadano.identidad.nombre_clave === ciudadanoGuardado
-    ) ||
-    citizenData.ciudadanos.find(
-        ciudadano =>
-            ciudadano.identidad.nombre_clave === "Inesa"
-    ) ||
-    citizenData.ciudadanos[0];
-
-if (!ciudadanoActivo) {
-    throw new Error(
-        "No se encontró ningún ciudadano."
-    );
-}
-
-localStorage.setItem(
-    claveCiudadanoActivo,
-    ciudadanoActivo.identidad.nombre_clave
-);
-
-const selectorCiudadano =
-    document.getElementById("ciudadano-selector");
-
-selectorCiudadano.innerHTML = "";
-
-citizenData.ciudadanos.forEach(ciudadano => {
-    const opcion = document.createElement("option");
-
-    opcion.value = ciudadano.identidad.nombre_clave;
-    opcion.textContent = ciudadano.identidad.nombre_clave;
-
-    selectorCiudadano.appendChild(opcion);
-});
-
-selectorCiudadano.value =
-    ciudadanoActivo.identidad.nombre_clave;
-
-selectorCiudadano.addEventListener("change", () => {
-    localStorage.setItem(
-        claveCiudadanoActivo,
-        selectorCiudadano.value
-    );
-
-    location.reload();
-});
-      const claveEconomia =
-    `nightXity_economia_${ciudadanoActivo.identidad.nombre_clave}`;
-
-const estadoEconomicoGuardado =
-    localStorage.getItem(claveEconomia);
-
-window.estadoEconomico =
-    estadoEconomicoGuardado
-        ? JSON.parse(estadoEconomicoGuardado)
-        : MotorEconomico.crearEstadoInicial(ciudadanoActivo);
-
-if (!estadoEconomicoGuardado) {
-    localStorage.setItem(
-        claveEconomia,
-        JSON.stringify(window.estadoEconomico)
-    );
-}
-
-document.getElementById("citizen-balance").textContent =
-    `SALDO DISPONIBLE: ${window.estadoEconomico.saldo_actual.toLocaleString("es-MX")} CORPOS`;
-const mapaCategorias = {
+// El personaje y el saldo de compra se validan en Supabase.
+// El selector de personajes asignados se carga en el bloque de acceso
+// y la RPC realizar_compra_multiple calcula el saldo del servidor.const mapaCategorias = {
             "IMPLANTES": "Implantes",
             "PROGRAMAS": "Programas",
             "ARMAS": "Armas",

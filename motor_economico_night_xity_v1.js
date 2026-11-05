@@ -12,96 +12,166 @@
 
 const MotorEconomico = {
 
+    crearEstadoInicial(ciudadano) {
 
-    
-registrarCompra(estado, objeto, cantidad = 1) {
+        if (!ciudadano) {
+            throw new Error("No se recibió un ciudadano válido.");
+        }
 
-    if (!estado || !objeto) {
-        throw new Error("Faltan datos para registrar la compra.");
-    }
+        const inventarioBase = ciudadano.inventario || {};
+        const saldoInicial = ciudadano.economia?.saldo_inicial ?? 0;
+        const movimientos = [
+            ...(ciudadano.economia?.movimientos || [])
+        ];
 
-    if (typeof objeto.costo !== "number") {
-        throw new Error("El objeto no tiene un costo válido.");
-    }
+        if (
+            typeof saldoInicial !== "number" ||
+            !Number.isFinite(saldoInicial)
+        ) {
+            throw new Error("El saldo inicial no es válido.");
+        }
 
-    if (!Number.isInteger(cantidad) || cantidad < 1) {
-        throw new Error("La cantidad debe ser un número entero mayor que cero.");
-    }
+        if (!Array.isArray(movimientos)) {
+            throw new Error("El historial de movimientos no es válido.");
+        }
 
-    const categoriaInventario = {
-        "Programas": "programas",
-        "Implantes": "implantes",
-        "Armas": "armas",
-        "Accesorios": "accesorios",
-        "Blindajes": "blindajes",
-        "Terminales": "terminales",
-        "MediCare": "medicare",
-        "Drogas": "drogas",
-        "Vehiculos": "vehiculos",
-        "Varios": "varios",
-        "Cotidiano": "cotidiano"
-    }[objeto.categoria];
+        let saldoActual = saldoInicial;
 
-    if (!categoriaInventario) {
-        throw new Error("Categoría de inventario no reconocida.");
-    }
+        for (const movimiento of movimientos) {
 
-    const montoTotal = objeto.costo * cantidad;
+            if (!movimiento || typeof movimiento !== "object") {
+                throw new Error("Se encontró un movimiento inválido.");
+            }
 
-    if (montoTotal > estado.saldo_actual) {
-        throw new Error("Saldo insuficiente.");
-    }
+            if (
+                typeof movimiento.monto !== "number" ||
+                !Number.isFinite(movimiento.monto) ||
+                movimiento.monto < 0
+            ) {
+                throw new Error("El monto de un movimiento no es válido.");
+            }
 
-    if (!Array.isArray(estado.inventario[categoriaInventario])) {
-        estado.inventario[categoriaInventario] = [];
-    }
+            if (movimiento.tipo === "ingreso") {
+                saldoActual += movimiento.monto;
+            } else if (movimiento.tipo === "egreso") {
+                saldoActual -= movimiento.monto;
+            } else {
+                throw new Error(
+                    `Tipo de movimiento no reconocido: ${movimiento.tipo}`
+                );
+            }
+        }
 
-    if (!Array.isArray(estado.inventario_detallado)) {
-        estado.inventario_detallado = [];
-    }
+        return {
+            ciudadano: ciudadano.identidad?.nombre_clave || null,
+            saldo_inicial: saldoInicial,
+            saldo_actual: saldoActual,
+            movimientos,
 
-    const fechaCompra = new Date().toISOString();
+            inventario: {
+                implantes: [...(inventarioBase.implantes || [])],
+                programas: [...(inventarioBase.programas || [])],
+                armas: [...(inventarioBase.armas || [])],
+                accesorios: [...(inventarioBase.accesorios || [])],
+                blindajes: [...(inventarioBase.blindajes || [])],
+                terminales: [...(inventarioBase.terminales || [])],
+                medicare: [...(inventarioBase.medicare || [])],
+                drogas: [...(inventarioBase.drogas || [])],
+                vehiculos: [...(inventarioBase.vehiculos || [])],
+                varios: [...(inventarioBase.varios || [])],
+                cotidiano: [...(inventarioBase.cotidiano || [])]
+            }
+        };
+    },
 
-    estado.saldo_actual -= montoTotal;
+    registrarCompra(estado, objeto, cantidad = 1) {
 
-    estado.movimientos.push({
-        fecha: fechaCompra,
-        tipo: "egreso",
-        subtipo: "COMPRA",
-        monto: montoTotal,
-        concepto: objeto.nombre,
-        catalogo_id: objeto.id,
-        cantidad: cantidad,
-        precio_unitario: objeto.costo,
-        quien_pago: estado.ciudadano,
-        quien_cobro: "TIENDA"
-    });
+        if (!estado || !objeto) {
+            throw new Error("Faltan datos para registrar la compra.");
+        }
 
-    for (let i = 0; i < cantidad; i++) {
+        if (typeof objeto.costo !== "number") {
+            throw new Error("El objeto no tiene un costo válido.");
+        }
 
-        const identificadorUnico =
-            window.crypto &&
-            typeof window.crypto.randomUUID === "function"
-                ? window.crypto.randomUUID()
-                : `NX-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
+            throw new Error("La cantidad debe ser un número entero mayor que cero.");
+        }
 
-        // Conserva el inventario anterior para compatibilidad.
-        estado.inventario[categoriaInventario].push(objeto.id);
+        const categoriaInventario = {
+            "Programas": "programas",
+            "Implantes": "implantes",
+            "Armas": "armas",
+            "Accesorios": "accesorios",
+            "Blindajes": "blindajes",
+            "Terminales": "terminales",
+            "MediCare": "medicare",
+            "Drogas": "drogas",
+            "Vehiculos": "vehiculos",
+            "Varios": "varios",
+            "Cotidiano": "cotidiano"
+        }[objeto.categoria];
 
-        // Registra la unidad individual.
-        estado.inventario_detallado.push({
-            id_instancia: identificadorUnico,
+        if (!categoriaInventario) {
+            throw new Error("Categoría de inventario no reconocida.");
+        }
+
+        const montoTotal = objeto.costo * cantidad;
+
+        if (montoTotal > estado.saldo_actual) {
+            throw new Error("Saldo insuficiente.");
+        }
+
+        if (!Array.isArray(estado.inventario[categoriaInventario])) {
+            estado.inventario[categoriaInventario] = [];
+        }
+
+        if (!Array.isArray(estado.inventario_detallado)) {
+            estado.inventario_detallado = [];
+        }
+
+        const fechaCompra = new Date().toISOString();
+
+        estado.saldo_actual -= montoTotal;
+
+        estado.movimientos.push({
+            fecha: fechaCompra,
+            tipo: "egreso",
+            subtipo: "COMPRA",
+            monto: montoTotal,
+            concepto: objeto.nombre,
             catalogo_id: objeto.id,
-            nombre: objeto.nombre,
-            categoria: objeto.categoria,
-            fecha_adquisicion: fechaCompra,
-            precio_compra: objeto.costo,
-            estado: "SERVIBLE"
+            cantidad: cantidad,
+            precio_unitario: objeto.costo,
+            quien_pago: estado.ciudadano,
+            quien_cobro: "TIENDA"
         });
-    }
 
-    return estado;
-},
+        for (let i = 0; i < cantidad; i++) {
+
+            const identificadorUnico =
+                window.crypto &&
+                typeof window.crypto.randomUUID === "function"
+                    ? window.crypto.randomUUID()
+                    : `NX-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+            // Conserva el inventario anterior para compatibilidad.
+            estado.inventario[categoriaInventario].push(objeto.id);
+
+            // Registra la unidad individual.
+            estado.inventario_detallado.push({
+                id_instancia: identificadorUnico,
+                catalogo_id: objeto.id,
+                nombre: objeto.nombre,
+                categoria: objeto.categoria,
+                fecha_adquisicion: fechaCompra,
+                precio_compra: objeto.costo,
+                estado: "SERVIBLE"
+            });
+        }
+
+        return estado;
+    },
 
     registrarGastoVida(estado, gasto) {
 

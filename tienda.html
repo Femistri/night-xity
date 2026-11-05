@@ -393,17 +393,18 @@ const cargarTienda = async () => {
             categorias[producto.categoria].push(producto);
         });
 
-        const gastosRows = gastosResult.data || [];
+               const gastosRows = gastosResult.data || [];
         const gastosVida = {
             gastos_obligatorios: gastosRows
                 .filter(gasto => gasto.grupo === "obligatorio"),
             gastos_opcionales: gastosRows
                 .filter(gasto => gasto.grupo === "opcional"),
+            viviendas: gastosRows
+                .filter(gasto => gasto.grupo === "vivienda"),
             variables: gastosRows
                 .filter(gasto => gasto.grupo === "variable" || gasto.grupo === "evento")
                 .map(gasto => ({ ...gasto, tipo: gasto.grupo }))
         };
-
         console.log("TIENDA // DunoXusa conectado:", {
             productos: productosResult.data?.length || 0,
             gastosVida: gastosRows.length
@@ -463,13 +464,14 @@ const cargarTienda = async () => {
             gasto => gasto.tipo === "evento"
         ) || [];
 
-    const grupos = [
+        const grupos = [
+        ["VIVIENDAS", gastosVida.viviendas || []],
         ["OBLIGATORIOS", gastosObligatorios],
         ["OPCIONALES", gastosOpcionales],
         ["VARIABLES", gastosVariables],
         ["EVENTOS", gastosEventos]
     ];
-
+                  
     const contenido =
         detalle.querySelector(".category-content");
 

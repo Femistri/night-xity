@@ -353,7 +353,7 @@
 
 <script>
 
-// Supabase: lectura pública del catálogo. Las compras aún no se procesan aquí.
+// Supabase: catálogo público y compras validadas mediante RPC.
 const SUPABASE_URL = "https://mxolzgerwrzeqcfmsxaa.supabase.co";
 const SUPABASE_PUBLIC_KEY = "sb_publishable_ym1P2o0CCXd9E7H89nTaNA_CCldoI6a";
 const supabaseClient = window.supabase.createClient(
@@ -597,6 +597,7 @@ const mapaCategorias = {
                                             data-id="${gasto.id}"
                                             data-name="${gasto.nombre}"
                                             data-price="${gasto.costo}"
+                                            data-source="gasto-vida"
                                         >
                                             SELECCIONAR
                                         </button>
@@ -898,27 +899,13 @@ selectedProducts.innerHTML =
     <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
 </div>
 
-<div class="selection-status ${
-    totalSeleccion > window.estadoEconomico.saldo_actual
-        ? "insufficient"
-        : ""
-}">
-    ${
-        totalSeleccion > window.estadoEconomico.saldo_actual
-            ? "SALDO INSUFICIENTE"
-            : "SALDO SUFICIENTE"
-    }
+<div class="selection-status">
+    EL SALDO SE VALIDARÁ EN SUPABASE AL CONFIRMAR.
 </div>
 
-${
-    totalSeleccion <= window.estadoEconomico.saldo_actual
-        ? `
-            <button class="buy-button">
-                COMPRAR
-            </button>
-          `
-        : ""
-}
+<button class="buy-button">
+    COMPRAR
+</button>
 
     `;
                     
@@ -947,8 +934,7 @@ cargarTienda();
 </script>
 
 <script>
-// FASE: autenticación del jugador y consulta de personajes asignados.
-// No realiza compras ni modifica saldos.
+// FASE: autenticación, personajes asignados y compra transaccional mediante RPC.
 (() => {
     const panel = document.getElementById("acceso-jugador");
     const mensaje = document.getElementById("acceso-mensaje");
@@ -998,14 +984,87 @@ cargarTienda();
         mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
     }
 
-    document.addEventListener("click", event => {
+    document.addEventListener("click", async event => {
         const boton = event.target.closest(".buy-button");
         if (!boton) return;
-        // Detiene la compra local existente: aún no hay RPC transaccional de compra.
+
+        // La compra local queda bloqueada: toda operación se valida en Supabase.
         event.preventDefault();
         event.stopImmediatePropagation();
-        mostrarAcceso();
-        mensaje.textContent = "Para continuar, inicia sesión. La compra todavía no se ejecutará en esta fase.";
+
+        const { data: { user }, error: authError } =
+            await supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+            mostrarAcceso();
+            mensaje.textContent = "Inicia sesión para continuar con tu compra.";
+            return;
+        }
+
+        const personajeId = selectorPersonaje.value;
+        if (!personajeId) {
+            mostrarAcceso();
+            mensaje.textContent = "Selecciona el personaje que realizará la compra.";
+            return;
+        }
+
+        const seleccionados = Array.from(
+            document.querySelectorAll(".select-item.selected")
+        );
+
+        if (!seleccionados.length) {
+            mensaje.textContent = "No hay productos seleccionados.";
+            mostrarAcceso();
+            return;
+        }
+
+        if (seleccionados.some(item => item.dataset.source === "gasto-vida")) {
+            mensaje.textContent =
+                "Los gastos de vida todavía no se procesan mediante esta compra. Retíralos de la selección y vuelve a intentarlo.";
+            mostrarAcceso();
+            return;
+        }
+
+        const productos = seleccionados.map(item => item.dataset.id);
+
+        boton.disabled = true;
+        boton.textContent = "PROCESANDO...";
+        mensaje.textContent = "Validando compra en Supabase...";
+
+        try {
+            const { data, error } = await supabaseClient.rpc(
+                "realizar_compra_multiple",
+                {
+                    p_personaje_id: personajeId,
+                    p_productos: productos
+                }
+            );
+
+            if (error) throw error;
+            if (!data || data.exito !== true) {
+                throw new Error("Supabase no confirmó la compra.");
+            }
+
+            boton.textContent = "COMPRA REALIZADA";
+            mensaje.textContent =
+                "Compra confirmada para " + data.personaje +
+                ". Total: " + Number(data.total).toLocaleString("es-MX") +
+                " CORPOS. Saldo restante: " +
+                Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+
+            seleccionados.forEach(item => {
+                item.classList.remove("selected");
+                item.textContent = "SELECCIONAR";
+            });
+
+            document.getElementById("selected-products").textContent =
+                "COMPRA REGISTRADA EN SUPABASE.";
+        } catch (error) {
+            boton.disabled = false;
+            boton.textContent = "COMPRAR";
+            mostrarAcceso();
+            mensaje.textContent = "Compra no realizada: " + error.message;
+        }
     }, true);
 
     document.getElementById("boton-iniciar-sesion").addEventListener("click", async () => {

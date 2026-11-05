@@ -908,108 +908,133 @@ console.log("NIGHT XITY // SUPABASE CONECTADO");
 async function cargarDatosCitizenNet() {
     try {
 
-      const [ciudadanos, catalogo, saludMental, gastosVida] = await Promise.all([
+    const cargarJSON = async (ruta, nombre) => {
+    const respuesta = await fetch(ruta);
 
-            fetch("Night_Xity_Citizen_Nucleo_v1.json?v=14")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            "No se pudo cargar Night_Xity_Citizen_Nucleo_v1.json"
-                        );
-                    }
-                    return response.json();
-                }),
+    if (!respuesta.ok) {
+        throw new Error(`No se pudo cargar ${nombre}.`);
+    }
 
-            fetch("catalogo_night_xity_web_v1.json?v=8")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            "No se pudo cargar catalogo_night_xity_web_v1.json"
-                        );
-                    }
-                    return response.json();
-                }),
+    return respuesta.json();
+};
 
-            fetch("salud_mental_night_xity_v1.json?v=3")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            "No se pudo cargar salud_mental_night_xity_v1.json"
-                        );
-                    }
-                    return response.json();
-                })
-          ,
-fetch("Gastos_de_vida_CBPunk_v1.json?v=1")
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(
-                "No se pudo cargar Gastos_de_vida_CBPunk_v1.json"
-            );
-        }
-        return response.json();
-    })
-        ]);
+const [datosCiudadanos, catalogo, saludMental, gastosVida] =
+    await Promise.all([
+        cargarJSON(
+            "Night_Xity_Citizen_Nucleo_v1.json?v=14",
+            "los datos auxiliares de Citizen Net"
+        ),
+        cargarJSON(
+            "catalogo_night_xity_web_v1.json?v=8",
+            "el catálogo"
+        ),
+        cargarJSON(
+            "salud_mental_night_xity_v1.json?v=3",
+            "los datos de salud mental"
+        ),
+        cargarJSON(
+            "Gastos_de_vida_CBPunk_v1.json?v=1",
+            "los gastos de vida"
+        )
+    ]);
 
-        console.log("CITIZEN NET // DATOS CARGADOS");
-        console.log("Ciudadanos:", ciudadanos.ciudadanos.length);
-        console.log("Objetos del catálogo:", catalogo.total);
-        console.log("Manías:", saludMental.manias.length);
-        console.log("Fobias:", saludMental.fobias.length);
-console.log("Gastos de vida:", gastosVida);
-        
-       const claveCiudadanoActivo = "nightXity_ciudadano_activo";
+const { data: { user }, error: errorSesion } =
+    await supabaseClient.auth.getUser();
 
-const nombreCiudadanoActivo =
-    localStorage.getItem(claveCiudadanoActivo);
-
-const ciudadano =
-    ciudadanos.ciudadanos.find(
-        personaje =>
-            personaje.identidad.nombre_clave === nombreCiudadanoActivo
-    ) || ciudadanos.ciudadanos[0];
-
-if (!ciudadano || !ciudadano.identidad) {
-    throw new Error("No se encontró el ciudadano activo.");
+if (errorSesion || !user) {
+    const nombre = document.getElementById("citizen-name");
+    if (nombre) nombre.textContent = "INICIA SESIÓN PARA CONTINUAR";
+    throw new Error("Inicia sesión desde la tienda y vuelve a Citizen Net.");
 }
 
-      const identidad = ciudadano.identidad;
+const { data: asignaciones, error: errorAsignaciones } =
+    await supabaseClient
+        .from("asignaciones")
+        .select("personaje_id, personajes ( id, nombre_clave, clase, ficha )")
+        .eq("perfil_id", user.id);
 
-const selectorCitizen =
-    document.getElementById("citizen-selector");
+if (errorAsignaciones) {
+    throw new Error(
+        "No se pudieron cargar tus personajes: " + errorAsignaciones.message
+    );
+}
 
+const personajesAsignados = (asignaciones || [])
+    .map(fila => fila.personajes)
+    .filter(Boolean);
+
+if (!personajesAsignados.length) {
+    const nombre = document.getElementById("citizen-name");
+    if (nombre) nombre.textContent = "SIN PERSONAJES ASIGNADOS";
+    throw new Error("Tu cuenta todavía no tiene personajes asignados.");
+}
+
+const clavePersonajeActivo = "nightXity_personaje_activo";
+const personajeGuardado = localStorage.getItem(clavePersonajeActivo);
+
+const personajeActivo =
+    personajesAsignados.find(personaje => personaje.id === personajeGuardado)
+    || personajesAsignados[0];
+
+const selectorCitizen = document.getElementById("citizen-selector");
 selectorCitizen.innerHTML = "";
 
-ciudadanos.ciudadanos.forEach(personaje => {
-    const opcion = document.createElement("option");
-
-    opcion.value = personaje.identidad.nombre_clave;
-    opcion.textContent = personaje.identidad.nombre_clave;
-
-    selectorCitizen.appendChild(opcion);
+personajesAsignados.forEach(personaje => {
+    selectorCitizen.add(
+        new Option(
+            personaje.nombre_clave,
+            personaje.id
+        )
+    );
 });
 
-selectorCitizen.value = identidad.nombre_clave;
+selectorCitizen.value = personajeActivo.id;
 
 selectorCitizen.addEventListener("change", () => {
-    localStorage.setItem(
-        "nightXity_ciudadano_activo",
-        selectorCitizen.value
-    );
-
+    localStorage.setItem(clavePersonajeActivo, selectorCitizen.value);
     location.reload();
 });
-        
-const claveEconomia =
-    `nightXity_economia_${identidad.nombre_clave}`;
 
-const estadoEconomicoGuardado =
-    localStorage.getItem(claveEconomia);
+const ficha = personajeActivo.ficha || {};
 
+const ciudadano = {
+    ...ficha,
+    identidad: {
+        ...(ficha.identidad || {}),
+        nombre_clave:
+            personajeActivo.nombre_clave
+            || ficha.identidad?.nombre_clave
+            || "SIN NOMBRE",
+        clase:
+            personajeActivo.clase
+            || ficha.identidad?.clase
+            || ""
+    },
+    economia: {
+        ...(ficha.economia || {}),
+        saldo_inicial: Number(ficha.economia?.saldo_inicial ?? 0),
+        movimientos: Array.isArray(ficha.economia?.movimientos)
+            ? ficha.economia.movimientos
+            : []
+    },
+    inventario: ficha.inventario || {}
+};
+
+// Conserva del JSON los datos auxiliares compartidos,
+// pero el personaje activo viene de Supabase.
+const ciudadanos = {
+    ...datosCiudadanos,
+    ciudadanos: [ciudadano]
+};
+
+const identidad = ciudadano.identidad;
 const estadoEconomico =
-    estadoEconomicoGuardado
-        ? JSON.parse(estadoEconomicoGuardado)
-        : MotorEconomico.crearEstadoInicial(ciudadano);
+    MotorEconomico.crearEstadoInicial(ciudadano);
+
+estadoEconomico.inventario_detallado =
+    Array.isArray(ficha.inventario_detallado)
+        ? ficha.inventario_detallado
+        : [];
 
 const categoriasInventario = [
     "implantes",
@@ -1026,147 +1051,10 @@ const categoriasInventario = [
 ];
 
 categoriasInventario.forEach(categoria => {
-    if (!Array.isArray(estadoEconomico.inventario?.[categoria])) {
+    if (!Array.isArray(estadoEconomico.inventario[categoria])) {
         estadoEconomico.inventario[categoria] = [];
     }
-});
-
-const guardarEstadoEconomico = () => {
-    localStorage.setItem(
-        claveEconomia,
-        JSON.stringify(estadoEconomico)
-    );
-};
-
-if (!estadoEconomicoGuardado) {
-    guardarEstadoEconomico();
-}
-
-/* =========================================
-   REGISTRO INICIAL DE CANARIO
-   Se ejecuta una sola vez.
-   No descuenta CORPOS.
-   ========================================= */
-
-if (
-    identidad.nombre_clave === "Canario" &&
-    !estadoEconomico.registro_inicial_canario
-) {
-    const inventarioBase = ciudadano.inventario || {};
-
-    const catalogoCompleto = Array.isArray(catalogo.items)
-        ? catalogo.items
-        : Object.values(catalogo.categorias || {}).flat();
-
-   estadoEconomico.inventario_detallado = [];
-
-categoriasInventario.forEach(categoria => {
-    estadoEconomico.inventario[categoria] = [];
-});
-
-    const fechaRegistroInicial = new Date().toISOString();
-
-    const categoriasRegistro = {
-        implantes: "Implantes",
-        programas: "Programas",
-        armas: "Armas",
-        accesorios: "Accesorios",
-        blindajes: "Blindajes",
-        terminales: "Terminales",
-        medicare: "MediCare",
-        drogas: "Drogas",
-        vehiculos: "Vehiculos",
-        varios: "Varios",
-        cotidiano: "Cotidiano"
-    };
-
-    Object.entries(categoriasRegistro).forEach(
-        ([categoriaInventario, categoriaCatalogo]) => {
-
-            const objetosBase =
-                inventarioBase[categoriaInventario] || [];
-
-            objetosBase.forEach(idObjeto => {
-
-                const articulo = catalogoCompleto.find(
-                    item => item.id === idObjeto
-                );
-
-                if (!articulo) {
-                    console.warn(
-                        "Objeto no encontrado en catálogo:",
-                        idObjeto
-                    );
-                    return;
-                }
-
-                estadoEconomico.inventario[categoriaInventario].push(
-                    idObjeto
-                );
-
-                estadoEconomico.inventario_detallado.push({
-                    id_instancia:
-                        window.crypto &&
-                        typeof window.crypto.randomUUID === "function"
-                            ? window.crypto.randomUUID()
-                            : `NX-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                    catalogo_id: articulo.id,
-                    nombre: articulo.nombre,
-                    categoria: articulo.categoria || categoriaCatalogo,
-                    fecha_adquisicion: fechaRegistroInicial,
-                    precio_compra: articulo.costo || 0,
-                    estado: "SERVIBLE"
-                });
-            });
-        }
-    );
-
-    const cantidadesPorObjeto = {};
-
-    Object.values(inventarioBase).forEach(lista => {
-        if (!Array.isArray(lista)) return;
-
-        lista.forEach(idObjeto => {
-            cantidadesPorObjeto[idObjeto] =
-                (cantidadesPorObjeto[idObjeto] || 0) + 1;
-        });
-    });
-
-    Object.entries(cantidadesPorObjeto).forEach(
-        ([idObjeto, cantidad]) => {
-
-            const articulo = catalogoCompleto.find(
-                item => item.id === idObjeto
-            );
-
-            if (!articulo) return;
-
-            const precioUnitario =
-                typeof articulo.costo === "number"
-                    ? articulo.costo
-                    : 0;
-
-            estadoEconomico.movimientos.push({
-                fecha: fechaRegistroInicial,
-                tipo: "egreso",
-                subtipo: "COMPRA",
-                concepto: articulo.nombre,
-                catalogo_id: articulo.id,
-                cantidad: cantidad,
-                precio_unitario: precioUnitario,
-                monto: precioUnitario * cantidad,
-                quien_pago: "Canario",
-                quien_cobro: "TIENDA",
-                registro_inicial: true
-            });
-        }
-    );
-
-    estadoEconomico.registro_inicial_canario = true;
-
-    guardarEstadoEconomico();
-}
-        
+});    
 const saldoActual =
     estadoEconomico?.saldo_actual
         ?? ciudadano.economia?.saldo_inicial

@@ -404,7 +404,7 @@ const cargarTienda = async () => {
                 .map(gasto => ({ ...gasto, tipo: gasto.grupo }))
         };
 
-        console.log("TIENDA // Supabase conectado:", {
+        console.log("TIENDA // DunoXusa conectado:", {
             productos: productosResult.data?.length || 0,
             gastosVida: gastosRows.length
         });
@@ -757,7 +757,7 @@ selectedProducts.innerHTML =
 </div>
 
 <div class="selection-status">
-    EL SALDO SE VALIDARÁ EN SUPABASE AL CONFIRMAR.
+    EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR.
 </div>
 
 <button class="buy-button">
@@ -886,7 +886,7 @@ cargarTienda();
 
         boton.disabled = true;
         boton.textContent = "PROCESANDO...";
-        mensaje.textContent = "Validando compra en Supabase...";
+        mensaje.textContent = "Validando compra en DunoXusa...";
 
         try {
             const { data, error } = await supabaseClient.rpc(
@@ -899,7 +899,7 @@ cargarTienda();
 
             if (error) throw error;
             if (!data || data.exito !== true) {
-                throw new Error("Supabase no confirmó la compra.");
+                throw new Error("DunoXusa no confirmó la compra.");
             }
 
             boton.textContent = "COMPRA REALIZADA";

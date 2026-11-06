@@ -327,6 +327,7 @@
             <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
             <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" required>
             <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
+            <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
         </div>
         <div id="selector-personaje-contenedor" hidden>
             <p id="jugador-identificado"></p>
@@ -913,6 +914,23 @@ mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
         }
     });
 
+    document.getElementById("boton-recuperar-contrasena").addEventListener("click", async () => {
+    const email = document.getElementById("acceso-correo").value.trim();
+
+    if (!email) {
+        mensaje.textContent = "Escribe el correo de la cuenta que quieres recuperar.";
+        return;
+    }
+
+    mensaje.textContent = "Enviando instrucciones...";
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://femistri.github.io/night-xity/restablecer.html"
+    });
+
+    mensaje.textContent = error
+        ? "No se pudo enviar: " + error.message
+        : "Si ese correo está registrado, recibirás un enlace para cambiar la contraseña.";
+});
     document.getElementById("boton-cerrar-sesion").addEventListener("click", async () => {
         const { error } = await supabaseClient.auth.signOut();
         if (error) {

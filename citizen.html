@@ -978,11 +978,107 @@ const personajesAsignados = (asignaciones || [])
     .filter(Boolean);
 
 if (!personajesAsignados.length) {
+    const { data: perfilSinPersonaje, error: errorPerfilSinPersonaje } =
+        await supabaseClient
+            .from("perfiles")
+            .select("rol")
+            .eq("id", user.id)
+            .maybeSingle();
+
+    if (errorPerfilSinPersonaje) {
+        throw new Error("No se pudo verificar el rol de la cuenta.");
+    }
+
+    if (perfilSinPersonaje?.rol === "dm") {
+        const panelDM = document.getElementById("dm-housing-panel");
+        const listaDM = document.getElementById("dm-housing-requests");
+
+        document.querySelectorAll(".grid > .panel").forEach(panel => {
+            if (panel.contains(panelDM)) {
+                Array.from(panel.children).forEach(elemento => {
+                    if (elemento !== panelDM) elemento.hidden = true;
+                });
+            } else {
+                panel.hidden = true;
+            }
+        });
+
+        panelDM.hidden = false;
+        panelDM.open = true;
+
+        const viviendas = gastosVida.vivienda || [];
+        const nombreVivienda = id =>
+            viviendas.find(vivienda => vivienda.id === id)?.descripcion || id;
+
+        const { data: solicitudesDM, error: errorSolicitudesDM } =
+            await supabaseClient
+                .from("solicitudes_gastos_vida")
+                .select("id, gasto_id, importe_solicitado, fecha_solicitud, personajes(nombre_clave)")
+                .eq("tipo_solicitud", "cambio_vivienda")
+                .eq("estado", "pendiente")
+                .order("fecha_solicitud", { ascending: true });
+
+        if (errorSolicitudesDM) {
+            listaDM.textContent = "No se pudieron cargar las solicitudes.";
+        } else if (!solicitudesDM?.length) {
+            listaDM.textContent = "NO HAY SOLICITUDES PENDIENTES.";
+        } else {
+            listaDM.innerHTML = solicitudesDM.map(solicitud => `
+                <div class="item">
+                    <div class="item-name">
+                        ${solicitud.personajes?.nombre_clave || "PERSONAJE"}
+                        — ${nombreVivienda(solicitud.gasto_id)}
+                    </div>
+                    <div class="item-info">
+                        ${Number(solicitud.importe_solicitado || 0).toLocaleString("es-MX")}
+                        CORPOS POR PERSONA
+                        <br>
+                        SOLICITUD: ${new Date(solicitud.fecha_solicitud).toLocaleString("es-MX")}
+                    </div>
+                    <button data-resolver-vivienda="${solicitud.id}" data-aprobar="true">
+                        APROBAR
+                    </button>
+                    <button data-resolver-vivienda="${solicitud.id}" data-aprobar="false">
+                        RECHAZAR
+                    </button>
+                </div>
+            `).join("");
+
+            listaDM.addEventListener("click", async evento => {
+                const boton = evento.target.closest("[data-resolver-vivienda]");
+                if (!boton) return;
+
+                boton.disabled = true;
+
+                const { error } = await supabaseClient.rpc(
+                    "resolver_solicitud_vivienda",
+                    {
+                        p_solicitud_id: boton.dataset.resolverVivienda,
+                        p_aprobar: boton.dataset.aprobar === "true",
+                        p_mensaje: null
+                    }
+                );
+
+                if (error) {
+                    boton.disabled = false;
+                    listaDM.insertAdjacentHTML(
+                        "afterbegin",
+                        `<div class="item-info">No se pudo resolver: ${error.message}</div>`
+                    );
+                    return;
+                }
+
+                location.reload();
+            });
+        }
+
+        return;
+    }
+
     const nombre = document.getElementById("citizen-name");
     if (nombre) nombre.textContent = "SIN PERSONAJES ASIGNADOS";
     throw new Error("Tu cuenta todavía no tiene personajes asignados.");
 }
-
 const clavePersonajeActivo = "nightXity_personaje_activo";
 const personajeGuardado = localStorage.getItem(clavePersonajeActivo);
 

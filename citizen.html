@@ -922,36 +922,6 @@ console.log("NIGHT XITY // SUPABASE CONECTADO");
 async function cargarDatosCitizenNet() {
     try {
 
-    const cargarJSON = async (ruta, nombre) => {
-    const respuesta = await fetch(ruta);
-
-    if (!respuesta.ok) {
-        throw new Error(`No se pudo cargar ${nombre}.`);
-    }
-
-    return respuesta.json();
-};
-
-const [datosCiudadanos, catalogo, saludMental, gastosVida] =
-    await Promise.all([
-        cargarJSON(
-            "Night_Xity_Citizen_Nucleo_v1.json?v=14",
-            "los datos auxiliares de Citizen Net"
-        ),
-        cargarJSON(
-            "catalogo_night_xity_web_v1.json?v=8",
-            "el catálogo"
-        ),
-        cargarJSON(
-            "salud_mental_night_xity_v1.json?v=3",
-            "los datos de salud mental"
-        ),
-        cargarJSON(
-            "Gastos_de_vida_CBPunk_v1.json?v=1",
-            "los gastos de vida"
-        )
-    ]);
-
 const { data: { user }, error: errorSesion } =
     await supabaseClient.auth.getUser();
 
@@ -1006,8 +976,14 @@ if (!personajesAsignados.length) {
         panelDM.hidden = false;
         panelDM.open = true;
 
-        const viviendas = gastosVida.vivienda || [];
+               const { data: viviendas } = await supabaseClient
+            .from("catalogo_gastos_vida")
+            .select("id, nombre")
+            .eq("grupo", "vivienda")
+            .eq("activo", true);
+
         const nombreVivienda = id =>
+            (viviendas || []).find(vivienda => vivienda.id === id)?.nombre || id;
             viviendas.find(vivienda => vivienda.id === id)?.descripcion || id;
 
         const { data: solicitudesDM, error: errorSolicitudesDM } =
@@ -1079,6 +1055,35 @@ if (!personajesAsignados.length) {
     if (nombre) nombre.textContent = "SIN PERSONAJES ASIGNADOS";
     throw new Error("Tu cuenta todavía no tiene personajes asignados.");
 }
+            const cargarJSON = async (ruta, nombre) => {
+    const respuesta = await fetch(ruta);
+
+    if (!respuesta.ok) {
+        throw new Error(`No se pudo cargar ${nombre}.`);
+    }
+
+    return respuesta.json();
+};
+
+const [datosCiudadanos, catalogo, saludMental, gastosVida] =
+    await Promise.all([
+        cargarJSON(
+            "Night_Xity_Citizen_Nucleo_v1.json?v=14",
+            "los datos auxiliares de Citizen Net"
+        ),
+        cargarJSON(
+            "catalogo_night_xity_web_v1.json?v=8",
+            "el catálogo"
+        ),
+        cargarJSON(
+            "salud_mental_night_xity_v1.json?v=3",
+            "los datos de salud mental"
+        ),
+        cargarJSON(
+            "Gastos_de_vida_CBPunk_v1.json?v=1",
+            "los gastos de vida"
+        )
+    ]);
 const clavePersonajeActivo = "nightXity_personaje_activo";
 const personajeGuardado = localStorage.getItem(clavePersonajeActivo);
 
@@ -2634,13 +2639,14 @@ renderFobias();
         console.log("Ciudadano:", identidad.nombre_clave);
         console.log("Clase:", identidad.clase);
         console.log("Puntos de alma:", identidad.puntos_alma);
-
     } catch (error) {
+        console.error("CITIZEN NET // ERROR DE DATOS", error);
 
-        console.error(
-            "CITIZEN NET // ERROR DE DATOS",
-            error
-        );
+        const aviso = document.createElement("p");
+        aviso.className = "item-info";
+        aviso.setAttribute("role", "alert");
+        aviso.textContent = `Citizen Net no pudo cargar: ${error.message}`;
+        document.querySelector("main")?.prepend(aviso);
     }
 }
 

@@ -413,6 +413,10 @@
     NOMBRE CIUDADANX
 </div>
 
+                <div class="label" id="dm-access-label" hidden>
+    ACCESO DEL ARQUITECTO
+</div>
+                
 <select id="citizen-selector" class="value">
     <option value="">CARGANDO CIUDADANOS...</option>
 </select>
@@ -953,6 +957,11 @@ if (errorPerfilInicio || !perfilInicio) {
 }
 
 const esDM = perfilInicio.rol === "dm";
+        const marcaDM = document.getElementById("dm-access-label");
+
+if (marcaDM) {
+    marcaDM.hidden = !esDM;
+}
 let personajesAsignados = [];
 
 if (esDM) {

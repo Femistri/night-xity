@@ -70,6 +70,14 @@
 .grid[hidden] {
     display: none;
 }
+        #citizen-housing-summary.pending-category {
+    color: #00ff9c;
+}
+
+#citizen-housing-summary.pending-category::after {
+    content: " // PENDIENTE";
+    font-size: 0.75em;
+}
         .panel {
             border: 1px solid #444;
             padding: 25px;
@@ -570,7 +578,7 @@
         </details>
 
         <details>
-            <summary>VIVIENDA Y SOLICITUDES</summary>
+          <summary id="citizen-housing-summary">VIVIENDA Y SOLICITUDES</summary>
             <div id="citizen-housing-status">CARGANDO...</div>
         </details>
 
@@ -1144,6 +1152,13 @@ if (errorPerfil || errorSuscripciones || errorSolicitudesPropias) {
 
     const suscripciones = suscripcionesVivienda || [];
     const solicitudes = solicitudesPropias || [];
+    const resumenVivienda =
+    document.getElementById("citizen-housing-summary");
+
+resumenVivienda?.classList.toggle(
+    "pending-category",
+    solicitudes.some(solicitud => solicitud.estado === "pendiente")
+);
     const viviendaActiva = suscripciones.find(item => item.estado === "activa");
     const viviendaSuspendida = suscripciones.find(item => item.estado === "suspendida");
 

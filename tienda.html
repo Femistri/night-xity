@@ -525,6 +525,7 @@ const cargarTienda = async () => {
                                                 data-name="${gasto.nombre}"
                                                 data-price="${esVivienda ? costoPorPersona : gasto.costo}"
                                                 data-source="${esVivienda ? "vivienda" : "gasto-vida"}"
+                                                data-grupo="${gasto.grupo}"
                                             >
                                                 ${accionVisible}
                                             </button>
@@ -660,6 +661,10 @@ selectedProducts.addEventListener("click", evento => {
             (total, seleccionado) =>
                 total + Number(seleccionado.dataset.price),
             0
+            const esSolicitudEvento =
+    seleccionados.length === 1 &&
+    seleccionados[0].dataset.source === "gasto-vida" &&
+    seleccionados[0].dataset.grupo === "evento";
         );
 
 selectedProducts.innerHTML =

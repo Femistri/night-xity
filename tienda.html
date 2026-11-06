@@ -763,15 +763,16 @@ cargarTienda();
             }
         }
 
-        selectorPersonaje.addEventListener("change", () => {
-            if (selectorPersonaje.value) {
-                localStorage.setItem(
-                    "nightXity_personaje_activo",
-                    selectorPersonaje.value
-                );
-            }
-        });
+      selectorPersonaje.addEventListener("change", () => {
+    if (!selectorPersonaje.value) return;
 
+    localStorage.setItem(
+        "nightXity_personaje_activo",
+        selectorPersonaje.value
+    );
+
+    location.reload();
+});
         const { data: perfil } = await supabaseClient
             .from("perfiles")
             .select("rol")

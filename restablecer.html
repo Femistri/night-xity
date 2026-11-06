@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cambiar contraseña // Night Xity</title>
+  <style>
+    body { margin: 0; padding: 32px; background: #0b0d0e; color: #eee; font: 18px Arial, sans-serif; }
+    main { max-width: 600px; margin: 40px auto; border: 1px solid #444; padding: 24px; }
+    input, button { display: block; width: 100%; max-width: 420px; box-sizing: border-box; margin: 14px 0; padding: 12px; }
+    button { background: transparent; border: 1px solid #00ff9c; color: #00ff9c; cursor: pointer; }
+    #mensaje { color: #aaa; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Cambiar contraseña</h1>
+    <form id="formulario">
+      <input id="contrasena" type="password" placeholder="Nueva contraseña" autocomplete="new-password" required>
+      <input id="confirmar" type="password" placeholder="Repite la contraseña" autocomplete="new-password" required>
+      <button type="submit">GUARDAR CONTRASEÑA</button>
+    </form>
+    <p id="mensaje">Abre esta página desde el enlace que recibiste por correo.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const cliente = window.supabase.createClient(
+      "https://mxolzgerwrzeqcfmsxaa.supabase.co",
+      "sb_publishable_ym1P2o0CCXd9E7H89nTaNA_CCldoI6a"
+    );
+
+    document.getElementById("formulario").addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const mensaje = document.getElementById("mensaje");
+      const password = document.getElementById("contrasena").value;
+      const confirmar = document.getElementById("confirmar").value;
+
+      if (password !== confirmar) {
+        mensaje.textContent = "Las contraseñas no coinciden.";
+        return;
+      }
+
+      mensaje.textContent = "Guardando...";
+      const { error } = await cliente.auth.updateUser({ password });
+
+      if (error) {
+        mensaje.textContent = "No se pudo cambiar: " + error.message;
+        return;
+      }
+
+      mensaje.textContent = "Contraseña cambiada. Ya puedes iniciar sesión en la tienda.";
+    });
+  </script>
+</body>
+</html>

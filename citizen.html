@@ -577,16 +577,15 @@
 
         </details>
 
-        <details>
-          <summary id="citizen-housing-summary">VIVIENDA Y SOLICITUDES</summary>
-            <div id="citizen-housing-status">CARGANDO...</div>
-        </details>
+        <details id="citizen-housing-section">
+    <summary id="citizen-housing-summary">VIVIENDA Y SOLICITUDES</summary>
+    <div id="citizen-housing-status">CARGANDO...</div>
 
-        <details id="dm-housing-panel" hidden>
-            <summary>SOLICITUDES DE VIVIENDA // ARQUITECTO</summary>
-            <div id="dm-housing-requests">CARGANDO...</div>
-        </details>
-        
+    <details id="dm-housing-panel" hidden>
+        <summary>SOLICITUDES DE VIVIENDA // ARQUITECTO</summary>
+        <div id="dm-housing-requests">CARGANDO...</div>
+    </details>
+</details>
     </section>
 
 
@@ -1224,6 +1223,8 @@ if (!errorPerfil && perfilActual?.rol === "dm") {
     } else if (!solicitudesDM?.length) {
         listaSolicitudesDM.textContent = "NO HAY SOLICITUDES PENDIENTES.";
     } else {
+        document.getElementById("citizen-housing-section").open = true;
+panelSolicitudesDM.open = true;
         listaSolicitudesDM.innerHTML = solicitudesDM.map(solicitud => `
             <div class="item">
                 <div class="item-name">

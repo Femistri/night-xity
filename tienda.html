@@ -780,9 +780,10 @@ cargarTienda();
             .maybeSingle();
         document.getElementById("jugador-identificado").textContent =
             `SESIÓN: ${user.email || "USUARIO AUTENTICADO"} // ROL: ${perfil?.rol || "JUGADOR"}`;
-        formulario.hidden = true;
-        selectorContenedor.hidden = false;
-        mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
+       panel.style.display = "block";
+formulario.hidden = true;
+selectorContenedor.hidden = false;
+mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
     }
 
         document.addEventListener("click", async event => {

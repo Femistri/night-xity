@@ -383,7 +383,15 @@
 <main>
 
 
-<div class="grid">
+<section class="panel" id="dm-character-gate" hidden>
+    <h2>ACCESO DEL DM</h2>
+    <label for="dm-character-selector">ELIGE PERSONAJE</label>
+    <select id="dm-character-selector" class="value">
+        <option value="">CARGANDO PERSONAJES...</option>
+    </select>
+</section>
+    
+    <div class="grid">
 
 
     <!-- =========================
@@ -989,6 +997,52 @@ if (!personajesAsignados.length) {
 
     throw new Error(mensaje);
 }
+
+        const clavePersonajeActivo = esDM
+    ? "nightXity_personaje_dm_activo"
+    : "nightXity_personaje_activo";
+const personajeGuardado =
+    localStorage.getItem(clavePersonajeActivo);
+
+if (esDM) {
+    const panelSeleccionDM =
+        document.getElementById("dm-character-gate");
+    const selectorDM =
+        document.getElementById("dm-character-selector");
+    const contenidoCitizen =
+        document.getElementById("citizen-content");
+
+    selectorDM.innerHTML = "";
+    selectorDM.add(new Option("ELIGE UN PERSONAJE", ""));
+
+    personajesAsignados.forEach(personaje => {
+        selectorDM.add(
+            new Option(personaje.nombre_clave, personaje.id)
+        );
+    });
+
+    const personajeGuardadoValido =
+        personajesAsignados.some(
+            personaje => personaje.id === personajeGuardado
+        );
+
+    if (!personajeGuardadoValido) {
+        panelSeleccionDM.hidden = false;
+        contenidoCitizen.hidden = true;
+
+        selectorDM.addEventListener("change", () => {
+            if (!selectorDM.value) return;
+
+            localStorage.setItem(
+                clavePersonajeActivo,
+                selectorDM.value
+            );
+            location.reload();
+        });
+
+        return;
+    }
+}
         
         const cargarJSON = async (ruta, nombre) => {
     const respuesta = await fetch(ruta);
@@ -1019,8 +1073,6 @@ const [datosCiudadanos, catalogo, saludMental, gastosVida] =
             "los gastos de vida"
         )
     ]);
-const clavePersonajeActivo = "nightXity_personaje_activo";
-const personajeGuardado = localStorage.getItem(clavePersonajeActivo);
 
 const personajeActivo =
     personajesAsignados.find(personaje => personaje.id === personajeGuardado)
@@ -1136,6 +1188,7 @@ if (!errorPerfil && perfilActual?.rol === "dm") {
             .from("solicitudes_gastos_vida")
             .select("id, gasto_id, importe_solicitado, mensaje, fecha_solicitud, personajes(nombre_clave)")
             .eq("tipo_solicitud", "cambio_vivienda")
+        .eq("personaje_id", personajeActivo.id)
             .eq("estado", "pendiente")
             .order("fecha_solicitud", { ascending: true });
 

@@ -984,7 +984,7 @@ if (!personajesAsignados.length) {
 
         const nombreVivienda = id =>
             (viviendas || []).find(vivienda => vivienda.id === id)?.nombre || id;
-            viviendas.find(vivienda => vivienda.id === id)?.descripcion || id;
+            
 
         const { data: solicitudesDM, error: errorSolicitudesDM } =
             await supabaseClient

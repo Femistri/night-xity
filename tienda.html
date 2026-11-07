@@ -654,18 +654,16 @@ selectedProducts.addEventListener("click", evento => {
 
                         return;
                     }
+const totalSeleccion = Array.from(seleccionados).reduce(
+    (total, seleccionado) =>
+        total + Number(seleccionado.dataset.price),
+    0
+);
 
-                const totalSeleccion =
-    Array.from(seleccionados)
-        .reduce(
-            (total, seleccionado) =>
-                total + Number(seleccionado.dataset.price),
-            0
-            const esSolicitudEvento =
+const esSolicitudEvento =
     seleccionados.length === 1 &&
     seleccionados[0].dataset.source === "gasto-vida" &&
     seleccionados[0].dataset.grupo === "evento";
-        );
 
 selectedProducts.innerHTML =
     Array.from(seleccionados)
@@ -689,11 +687,13 @@ selectedProducts.innerHTML =
 </div>
 
 <div class="selection-status">
-    EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR.
+    ${esSolicitudEvento
+        ? "NO SE COBRARÁ HASTA QUE EL ARQUITECTO APRUEBE LA SOLICITUD."
+        : "EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR."}
 </div>
 
 <button class="buy-button">
-    COMPRAR
+    ${esSolicitudEvento ? "SOLICITAR EVENTO" : "COMPRAR"}
 </button>
 
     `;
@@ -859,30 +859,62 @@ mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
                     ? `Vivienda activada. Cargo inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`
                     : `Solicitud enviada al DM para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
             } else {
-                if (seleccionados.some(item => item.dataset.source === "gasto-vida")) {
-                    throw new Error("En esta fase solo se procesan viviendas.");
-                }
+    const eventos = seleccionados.filter(
+        item =>
+            item.dataset.source === "gasto-vida" &&
+            item.dataset.grupo === "evento"
+    );
 
-                const productos = seleccionados.map(item => item.dataset.id);
-                const { data, error } = await supabaseClient.rpc(
-                    "realizar_compra_multiple",
-                    {
-                        p_personaje_id: personajeId,
-                        p_productos: productos
-                    }
-                );
+    if (eventos.length) {
+        if (seleccionados.length !== 1) {
+            throw new Error("Solicita un evento a la vez.");
+        }
 
-                if (error) throw error;
-                if (!data || data.exito !== true) {
-                    throw new Error("Supabase no confirmó la compra.");
-                }
-
-                mensaje.textContent =
-                    "Compra confirmada para " + data.personaje +
-                    ". Total: " + Number(data.total).toLocaleString("es-MX") +
-                    " CORPOS. Saldo restante: " +
-                    Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+        const { data, error } = await supabaseClient.rpc(
+            "solicitar_gasto_evento",
+            {
+                p_personaje_id: personajeId,
+                p_evento_id: eventos[0].dataset.id
             }
+        );
+
+        if (error) throw error;
+        if (!data || data.exito !== true) {
+            throw new Error("Supabase no confirmó la solicitud del evento.");
+        }
+
+        mensaje.textContent =
+            `Solicitud enviada al Arquitecto para ${data.evento}. No se cobrará hasta que la apruebe.`;
+    } else {
+        if (seleccionados.some(
+            item => item.dataset.source === "gasto-vida"
+        )) {
+            throw new Error(
+                "Por ahora solo se procesan viviendas y eventos."
+            );
+        }
+
+        const productos = seleccionados.map(item => item.dataset.id);
+        const { data, error } = await supabaseClient.rpc(
+            "realizar_compra_multiple",
+            {
+                p_personaje_id: personajeId,
+                p_productos: productos
+            }
+        );
+
+        if (error) throw error;
+        if (!data || data.exito !== true) {
+            throw new Error("Supabase no confirmó la compra.");
+        }
+
+        mensaje.textContent =
+            "Compra confirmada para " + data.personaje +
+            ". Total: " + Number(data.total).toLocaleString("es-MX") +
+            " CORPOS. Saldo restante: " +
+            Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+    }
+}
 
             seleccionados.forEach(item => {
                 item.classList.remove("selected");
@@ -895,7 +927,12 @@ mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
             mensaje.textContent = "Operación no completada: " + error.message;
         } finally {
             boton.disabled = false;
-            boton.textContent = "COMPRAR";
+         boton.textContent =
+    document.querySelector(
+        '.select-item.selected[data-grupo="evento"]'
+    )
+        ? "SOLICITAR EVENTO"
+        : "COMPRAR";
         }
     }, true);
 

@@ -70,14 +70,18 @@
 .grid[hidden] {
     display: none;
 }
-        #citizen-housing-summary.pending-category {
+
+        #citizen-housing-summary.pending-category,
+#citizen-events-summary.pending-category {
     color: #00ff9c;
 }
 
-#citizen-housing-summary.pending-category::after {
+#citizen-housing-summary.pending-category::after,
+#citizen-events-summary.pending-category::after {
     content: " // PENDIENTE";
     font-size: 0.75em;
 }
+        
         .panel {
             border: 1px solid #444;
             padding: 25px;
@@ -1140,6 +1144,16 @@ const { data: solicitudesPropias, error: errorSolicitudesPropias } =
         .eq("tipo_solicitud", "cambio_vivienda")
         .order("fecha_solicitud", { ascending: false })
         .limit(5);
+        const {
+    data: solicitudesEventos,
+    error: errorSolicitudesEventos
+} = await supabaseClient
+    .from("solicitudes_gastos_vida")
+    .select("id, gasto_id, estado, importe_solicitado, fecha_solicitud")
+    .eq("personaje_id", personajeActivo.id)
+    .eq("tipo_solicitud", "evento")
+    .order("fecha_solicitud", { ascending: false })
+    .limit(10);
 const viviendasCatalogo = gastosVida.vivienda || [];
 const nombreVivienda = id =>
     viviendasCatalogo.find(vivienda => vivienda.id === id)?.descripcion || id;
@@ -1504,7 +1518,114 @@ economyContainer.innerHTML = `
         "EVENTOS"
     )}
 `;
-    
+
+        const panelEventos = Array.from(
+    economyContainer.querySelectorAll("details")
+).find(
+    panel => panel.querySelector("summary")?.textContent.trim() === "EVENTOS"
+);
+
+const solicitudesEvento = solicitudesEventos || [];
+const hayEventosPendientes = solicitudesEvento.some(
+    solicitud => solicitud.estado === "pendiente"
+);
+
+if (panelEventos) {
+    const resumenEventos = panelEventos.querySelector("summary");
+    resumenEventos.id = "citizen-events-summary";
+    resumenEventos.classList.toggle(
+        "pending-category",
+        hayEventosPendientes
+    );
+
+    if (hayEventosPendientes) {
+        panelEventos.open = true;
+    }
+
+    const listaEventos = document.createElement("div");
+    listaEventos.id = "event-requests-list";
+
+    if (errorSolicitudesEventos) {
+        listaEventos.textContent =
+            "No se pudieron cargar las solicitudes de eventos.";
+    } else if (!solicitudesEvento.length) {
+        listaEventos.innerHTML =
+            '<div class="item-info">SIN SOLICITUDES DE EVENTOS.</div>';
+    } else {
+        listaEventos.innerHTML = solicitudesEvento.map(solicitud => {
+            const evento = gastosEventos.find(
+                item => item.id === solicitud.gasto_id
+            );
+            const nombreEvento = evento?.nombre || solicitud.gasto_id;
+            const botonesRevision =
+                perfilActual?.rol === "dm" &&
+                solicitud.estado === "pendiente"
+                    ? `
+                        <button
+                            data-resolver-evento="${solicitud.id}"
+                            data-aprobar-evento="true"
+                        >APROBAR</button>
+                        <button
+                            data-resolver-evento="${solicitud.id}"
+                            data-aprobar-evento="false"
+                        >RECHAZAR</button>
+                    `
+                    : "";
+
+            return `
+                <div class="item">
+                    <div class="item-name">${nombreEvento}</div>
+                    <div class="item-info">
+                        ESTADO: ${solicitud.estado.toUpperCase()}
+                        <br>
+                        IMPORTE: ${Number(
+                            solicitud.importe_solicitado || 0
+                        ).toLocaleString("es-MX")} CORPOS
+                        <br>
+                        SOLICITUD:
+                        ${new Date(solicitud.fecha_solicitud).toLocaleString(
+                            "es-MX",
+                            { timeZone: "America/Cancun" }
+                        )}
+                    </div>
+                    ${botonesRevision}
+                </div>
+            `;
+        }).join("");
+    }
+
+    panelEventos.appendChild(listaEventos);
+
+    if (perfilActual?.rol === "dm") {
+        listaEventos.addEventListener("click", async event => {
+            const boton = event.target.closest("[data-resolver-evento]");
+            if (!boton) return;
+
+            boton.disabled = true;
+
+            const { error } = await supabaseClient.rpc(
+                "resolver_solicitud_evento",
+                {
+                    p_solicitud_id: boton.dataset.resolverEvento,
+                    p_aprobar: boton.dataset.aprobarEvento === "true",
+                    p_mensaje: null
+                }
+            );
+
+            if (error) {
+                boton.disabled = false;
+                const aviso = document.createElement("div");
+                aviso.className = "item-info";
+                aviso.textContent = `No se pudo resolver: ${error.message}`;
+                listaEventos.prepend(aviso);
+                return;
+            }
+
+            location.reload();
+        });
+    }
+}
+        
         /* =========================
            IDENTIDAD
            ========================= */

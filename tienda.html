@@ -58,6 +58,28 @@
             letter-spacing: 2px;
         }
 
+        .page-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .page-nav a {
+            display: inline-block;
+            padding: 9px 14px;
+            border: 1px solid #00ff9c;
+            color: #00ff9c;
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+        }
+
+        .page-nav a:hover {
+            background: #00ff9c;
+            color: #0b0d0e;
+        }
+
         main {
             max-width: 1100px;
             margin: auto;
@@ -218,6 +240,10 @@
     <div class="subtitle">
         BIENES Y SERVICIOS DISPONIBLES
     </div>
+
+    <nav class="page-nav" aria-label="Navegación principal">
+        <a href="citizen.html">IR A CITIZEN</a>
+    </nav>
 
 </header>
 

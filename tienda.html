@@ -598,9 +598,7 @@ const cargarTienda = async () => {
                                     ? "CADA DÍA"
                                     : String(gasto.frecuencia || "").toUpperCase();
                         const accionVisible = esVivienda
-                            ? gasto.id === "VIV-003"
-                                ? "ACTIVAR VIVIENDA"
-                                : "SOLICITAR AL DM"
+                            ? "SOLICITAR AL ARQUITECTO"
                             : esVariable
                                 ? "SOLICITAR AL DM"
                                 : esRecurrente
@@ -744,7 +742,7 @@ const objetos =
                         if (boton.dataset.subscriptionState === "activa") boton.textContent = "SERVICIO ACTIVO";
                         else if (boton.dataset.subscriptionState === "suspendida") boton.textContent = boton.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                         else if (boton.dataset.grupo === "variable") boton.textContent = "SOLICITAR AL DM";
-                        else if (boton.dataset.source === "vivienda") boton.textContent = boton.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM";
+                        else if (boton.dataset.source === "vivienda") boton.textContent = "SOLICITAR AL ARQUITECTO";
                         else if (["obligatorio", "opcional"].includes(boton.dataset.grupo) && ["mensual", "diaria"].includes(boton.dataset.frequency)) boton.textContent = "ACTIVAR SERVICIO";
                         else boton.textContent = "SELECCIONAR";
                     }
@@ -804,6 +802,9 @@ const esSolicitudVariable =
     seleccionados.length === 1 &&
     seleccionados[0].dataset.source === "gasto-vida" &&
     seleccionados[0].dataset.grupo === "variable";
+const esSolicitudVivienda =
+    seleccionados.length === 1 &&
+    seleccionados[0].dataset.source === "vivienda";
 const esServicioRecurrente =
     seleccionados.length === 1 &&
     seleccionados[0].dataset.source === "gasto-vida" &&
@@ -840,16 +841,20 @@ selectedProducts.innerHTML =
 </div>
 
 <div class="selection-status">
-    ${esSolicitudEvento || esSolicitudVariable
-        ? "NO SE COBRARÁ HASTA QUE EL DM APRUEBE LA SOLICITUD."
+    ${esSolicitudEvento || esSolicitudVariable || esSolicitudVivienda
+        ? (esSolicitudVivienda
+            ? "NO SE COBRARÁ HASTA QUE EL ARQUITECTO APRUEBE LA SOLICITUD."
+            : "NO SE COBRARÁ HASTA QUE EL DM APRUEBE LA SOLICITUD.")
         : esServicioRecurrente
             ? `SE COBRA EL PRIMER CICLO AL ACTIVAR; RECURRENCIA ${frecuenciaSeleccionada}.`
             : "EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR."}
 </div>
 
 <button class="buy-button">
-    ${esSolicitudEvento || esSolicitudVariable
-        ? "SOLICITAR AL DM"
+    ${esSolicitudVivienda
+        ? "SOLICITAR AL ARQUITECTO"
+        : esSolicitudEvento || esSolicitudVariable
+            ? "SOLICITAR AL DM"
         : esServicioRecurrente
             ? (seleccionados[0].dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO" : "ACTIVAR SERVICIO")
             : "COMPRAR"}
@@ -1256,19 +1261,12 @@ cargarTienda().finally(() => {
                 }
 
                 const viviendaId = vivienda[0].dataset.id;
-                const nombreFuncion = viviendaId === "VIV-003"
-                    ? "activar_vivienda_predeterminada"
-                    : "solicitar_cambio_vivienda";
-                const parametros = viviendaId === "VIV-003"
-                    ? { p_personaje_id: personajeId }
-                    : {
+                const { data, error } = await supabaseClient.rpc(
+                    "solicitar_cambio_vivienda",
+                    {
                         p_personaje_id: personajeId,
                         p_vivienda_id: viviendaId
-                    };
-
-                const { data, error } = await supabaseClient.rpc(
-                    nombreFuncion,
-                    parametros
+                    }
                 );
 
                 if (error) throw error;
@@ -1276,10 +1274,8 @@ cargarTienda().finally(() => {
                     throw new Error("Supabase no confirmó la operación de vivienda.");
                 }
 
-                mensajeCompra.textContent = viviendaId === "VIV-003"
-                    ? `Vivienda activada. Cargo inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`
-                    : `Solicitud enviada al DM para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
-                if (viviendaId === "VIV-003") await cargarEstadoEconomico(personajeId);
+                mensajeCompra.textContent =
+                    `Solicitud enviada al Arquitecto para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
             } else {
     const eventos = seleccionados.filter(
         item =>
@@ -1388,13 +1384,13 @@ cargarTienda().finally(() => {
                 if (item.dataset.subscriptionState === "activa") item.textContent = "SERVICIO ACTIVO";
                 else if (item.dataset.subscriptionState === "suspendida") item.textContent = item.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                 else if (item.dataset.grupo === "variable") item.textContent = "SOLICITAR AL DM";
-                else if (item.dataset.source === "vivienda") item.textContent = item.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM";
+                else if (item.dataset.source === "vivienda") item.textContent = "SOLICITAR AL ARQUITECTO";
                 else if (["obligatorio", "opcional"].includes(item.dataset.grupo) && ["mensual", "diaria"].includes(item.dataset.frequency)) item.textContent = "ACTIVAR SERVICIO";
                 else item.textContent = "SELECCIONAR";
             });
 
             document.getElementById("selected-products").textContent =
-                "Operación registrada en DunoXusa.";
+                "Operación registrada en DunoXuXa.";
         } catch (error) {
             mensajeCompra.textContent = "Operación no completada: " + error.message;
             mensajeCompra.classList.add("error");
@@ -1405,7 +1401,7 @@ cargarTienda().finally(() => {
                 : ["evento", "variable"].includes(seleccion.dataset.grupo) ? "SOLICITAR AL DM"
                 : seleccion.dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO"
                 : ["obligatorio", "opcional"].includes(seleccion.dataset.grupo) ? "ACTIVAR SERVICIO"
-                : seleccion.dataset.source === "vivienda" ? (seleccion.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM")
+                : seleccion.dataset.source === "vivienda" ? "SOLICITAR AL ARQUITECTO"
                 : "COMPRAR";
         }
     }, true);

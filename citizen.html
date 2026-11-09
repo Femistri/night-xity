@@ -616,6 +616,12 @@
         <div id="dm-housing-requests">CARGANDO...</div>
     </details>
 </details>
+<details id="dm-variable-requests-panel" hidden>
+    <summary>SOLICITUDES DE GASTOS VARIABLES // ARQUITECTO</summary>
+    <p>Asigna el importe antes de aprobar. La aprobación registra el cargo según las reglas económicas.</p>
+    <div id="dm-variable-requests">CARGANDO...</div>
+    <div id="dm-variable-message" role="status" aria-live="polite"></div>
+</details>
 <details id="dm-payroll-panel" hidden>
     <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
     <p>Los salarios automáticos comienzan a los 42 días y se repiten cada 42 días. Los trabajos se pagan una sola vez.</p>
@@ -960,20 +966,6 @@
         
 </section>
     
-<!-- =========================
-     VIDA COTIDIANA // INVENTARIO
-     ========================= -->
-
-<section class="panel">
-
-    <h2>VIDA COTIDIANA</h2>
-
-    <div class="item-info" id="citizen-cotidiano">
-        SIN REGISTRO
-    </div>
-
-</section>
-
 </div>
 
 </main>
@@ -1011,7 +1003,7 @@ const { data: { user }, error: errorSesion } =
 if (errorSesion || !user) {
     const nombre = document.getElementById("citizen-name");
     if (nombre) nombre.textContent = "INICIA SESIÓN PARA CONTINUAR";
-    throw new Error("Inicia sesión desde la tienda y vuelve a Citizen Net.");
+    throw new Error("Inicia sesión en Tienda; la cuenta DM recibirá ahí un acceso directo a Citizen Net.");
 }
 
 const { data: perfilInicio, error: errorPerfilInicio } =
@@ -1296,12 +1288,13 @@ const { data: perfilActual, error: errorPerfil } = await supabaseClient
     .eq("id", user.id)
     .maybeSingle();
 
-const { data: suscripcionesVivienda, error: errorSuscripciones } =
+const { data: suscripcionesEconomicas, error: errorSuscripciones } =
     await supabaseClient
         .from("suscripciones_gastos_vida")
         .select("gasto_id, costo, frecuencia, estado, proximo_cobro")
-        .eq("personaje_id", personajeActivo.id)
-        .like("gasto_id", "VIV-%");
+        .eq("personaje_id", personajeActivo.id);
+const suscripcionesVivienda = (suscripcionesEconomicas || [])
+    .filter(item => item.gasto_id.startsWith("VIV-"));
 
 const { data: solicitudesPropias, error: errorSolicitudesPropias } =
     await supabaseClient
@@ -1321,6 +1314,15 @@ const { data: solicitudesPropias, error: errorSolicitudesPropias } =
     .eq("tipo_solicitud", "evento")
     .order("fecha_solicitud", { ascending: false })
     .limit(10);
+const { data: solicitudesVariables, error: errorSolicitudesVariables } = esDM
+    ? await supabaseClient
+        .from("solicitudes_gastos_vida")
+        .select("id, personaje_id, gasto_id, estado, importe_solicitado, fecha_solicitud")
+        .eq("tipo_solicitud", "variable")
+        .eq("estado", "pendiente")
+        .order("fecha_solicitud", { ascending: true })
+        .limit(50)
+    : { data: [], error: null };
 const viviendasCatalogo = gastosVida.vivienda || [];
 const nombreVivienda = id =>
     viviendasCatalogo.find(vivienda => vivienda.id === id)?.descripcion || id;
@@ -1600,7 +1602,37 @@ const gastosEventos =
     ) || [];
 
 
-const formatoCuentaRegresiva = () => "SIN COBRO AUTOMÁTICO";
+const formatoEstadoCobro = gasto => {
+    const esPeriodico =
+        ["obligatorio", "opcional"].includes(gasto.grupo) &&
+        ["mensual", "diaria"].includes(gasto.frecuencia);
+    if (!esPeriodico) return "SIN COBRO PROGRAMADO";
+    if (errorSuscripciones) return "ESTADO DE COBRO NO DISPONIBLE";
+
+    const suscripcion = (suscripcionesEconomicas || [])
+        .find(item => item.gasto_id === gasto.id);
+    if (!suscripcion) return "NO ACTIVADO · ACTÍVALO EN TIENDA";
+    if (suscripcion.estado === "suspendida") {
+        return "SUSPENDIDO POR MORA · LIQUIDA EN TIENDA";
+    }
+    if (suscripcion.estado !== "activa") {
+        return "ESTADO: " + String(suscripcion.estado || "DESCONOCIDO").toUpperCase();
+    }
+
+    const proximoCobro = suscripcion.proximo_cobro
+        ? new Date(suscripcion.proximo_cobro).toLocaleString("es-MX", {
+            timeZone: "America/Cancun",
+            dateStyle: "medium",
+            timeStyle: "short"
+        })
+        : "SIN FECHA";
+    return "COBRO AUTOMÁTICO ACTIVO · PRÓXIMO: " + proximoCobro;
+};
+
+const frecuenciaVisible = frecuencia =>
+    frecuencia === "mensual" ? "CADA 42 DÍAS"
+        : frecuencia === "diaria" ? "CADA DÍA"
+        : String(frecuencia || "").toUpperCase();
         
 const renderMovimientos = (
     gastos,
@@ -1641,18 +1673,14 @@ const renderMovimientos = (
                                     : "COSTO VARIABLE"
                             }
                             <br>
-                            ${String(gasto.frecuencia || "").toUpperCase()}
+                            ${frecuenciaVisible(gasto.frecuencia)}
                             <br>
                             <strong ${
                                 esObligatorio
                                     ? 'data-cuenta-obligatoria="true"'
                                     : ""
                             }>
-                                ${
-                                    esObligatorio
-                                        ? formatoCuentaRegresiva()
-                                        : "SIN COBRO PROGRAMADO"
-                                }
+                                ${formatoEstadoCobro(gasto)}
                             </strong>
                         </div>
                     </div>
@@ -1793,7 +1821,128 @@ if (panelEventos) {
     }
 }
         
-        /* =========================
+if (esDM) {
+    const panelVariables = document.getElementById("dm-variable-requests-panel");
+    const listaVariables = document.getElementById("dm-variable-requests");
+    const mensajeVariables = document.getElementById("dm-variable-message");
+    panelVariables.hidden = false;
+
+    if (errorSolicitudesVariables) {
+        listaVariables.textContent =
+            "No se pudieron cargar las solicitudes variables: " +
+            errorSolicitudesVariables.message;
+    } else {
+        const solicitudesPendientes = solicitudesVariables || [];
+        panelVariables.open = solicitudesPendientes.length > 0;
+        listaVariables.replaceChildren();
+
+        if (!solicitudesPendientes.length) {
+            listaVariables.textContent = "NO HAY SOLICITUDES VARIABLES PENDIENTES.";
+        } else {
+            solicitudesPendientes.forEach(solicitud => {
+                const tarjeta = document.createElement("div");
+                tarjeta.className = "item";
+                tarjeta.dataset.variableRequest = solicitud.id;
+
+                const titulo = document.createElement("div");
+                titulo.className = "item-name";
+                const personajeSolicitud = personajesAsignados.find(
+                    personaje => personaje.id === solicitud.personaje_id
+                );
+                const gastoSolicitud = gastosVariables.find(
+                    gasto => gasto.id === solicitud.gasto_id
+                );
+                titulo.textContent =
+                    (personajeSolicitud?.nombre_clave || "PERSONAJE") +
+                    " — " + (gastoSolicitud?.nombre || solicitud.gasto_id);
+
+                const fecha = document.createElement("div");
+                fecha.className = "item-info";
+                fecha.textContent = "SOLICITUD: " +
+                    new Date(solicitud.fecha_solicitud).toLocaleString("es-MX", {
+                        timeZone: "America/Cancun",
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    });
+
+                const label = document.createElement("label");
+                label.textContent = "IMPORTE A APROBAR (CORPOS)";
+                const importe = document.createElement("input");
+                importe.type = "number";
+                importe.min = "0.01";
+                importe.step = "0.01";
+                importe.required = true;
+                importe.className = "value";
+                importe.dataset.variableAmount = "true";
+                importe.setAttribute("aria-label", "Importe a aprobar en CORPOS");
+                if (solicitud.importe_solicitado !== null &&
+                    solicitud.importe_solicitado !== undefined) {
+                    importe.value = String(solicitud.importe_solicitado);
+                }
+
+                const aprobar = document.createElement("button");
+                aprobar.type = "button";
+                aprobar.textContent = "APROBAR Y PROCESAR CARGO";
+                aprobar.dataset.variableAction = "aprobar";
+                aprobar.dataset.requestId = solicitud.id;
+
+                const rechazar = document.createElement("button");
+                rechazar.type = "button";
+                rechazar.textContent = "RECHAZAR";
+                rechazar.dataset.variableAction = "rechazar";
+                rechazar.dataset.requestId = solicitud.id;
+
+                tarjeta.append(titulo, fecha, label, importe, aprobar, rechazar);
+                listaVariables.appendChild(tarjeta);
+            });
+        }
+    }
+
+    listaVariables.addEventListener("click", async event => {
+        const boton = event.target.closest("[data-variable-action]");
+        if (!boton) return;
+
+        const aprobarSolicitud = boton.dataset.variableAction === "aprobar";
+        const tarjeta = boton.closest("[data-variable-request]");
+        const campoImporte = tarjeta?.querySelector("[data-variable-amount]");
+        let importe = null;
+
+        if (aprobarSolicitud) {
+            if (!campoImporte?.reportValidity()) return;
+            importe = Number(campoImporte.value);
+            if (!Number.isFinite(importe) || importe <= 0) return;
+        }
+
+        listaVariables.querySelectorAll("button").forEach(item => {
+            item.disabled = true;
+        });
+        mensajeVariables.textContent = "Procesando decisión del Arquitecto...";
+
+        const { data, error } = await supabaseClient.rpc(
+            "resolver_solicitud_variable",
+            {
+                p_solicitud_id: boton.dataset.requestId,
+                p_aprobar: aprobarSolicitud,
+                p_importe: importe,
+                p_mensaje: null
+            }
+        );
+
+        if (error || !data?.exito) {
+            mensajeVariables.textContent =
+                "No se pudo resolver la solicitud: " +
+                (error?.message || data?.mensaje || "respuesta no confirmada");
+            listaVariables.querySelectorAll("button").forEach(item => {
+                item.disabled = false;
+            });
+            return;
+        }
+
+        location.reload();
+    });
+}
+
+/* =========================
            IDENTIDAD
            ========================= */
 
@@ -2540,78 +2689,8 @@ const renderVehiculosInventario = () => {
 renderVehiculosInventario();
 
 /* =========================
-   VIDA COTIDIANA
+   SALUD MENTAL
    ========================= */
-
-const cotidianoInventario =
-    Array.isArray(estadoEconomico?.inventario?.cotidiano)
-        ? estadoEconomico.inventario.cotidiano
-        : [];
-
-const cotidianoContainer =
-    document.getElementById("citizen-cotidiano");
-
-const renderCotidianoInventario = () => {
-
-    if (!cotidianoInventario.length) {
-        cotidianoContainer.innerHTML =
-            "SIN REGISTRO";
-        return;
-    }
-
-    const cantidades = {};
-
-    cotidianoInventario.forEach(id => {
-        cantidades[id] =
-            (cantidades[id] || 0) + 1;
-    });
-
-    const cotidianoPoseido =
-        Object.entries(cantidades)
-            .map(([id, cantidad]) => {
-
-                const objeto =
-                    catalogo.items.find(
-                        item =>
-                            item.id === id &&
-                            item.categoria === "Cotidiano"
-                    );
-
-                if (!objeto) {
-                    return `
-                        <div class="item">
-                            <div class="item-name">
-                                ${id}
-                            </div>
-                            <div class="item-info">
-                                REGISTRO NO ENCONTRADO
-                            </div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="item">
-                        <div class="item-name">
-                            ${objeto.nombre}
-                        </div>
-
-                        <div class="item-info">
-                            CANTIDAD: ${cantidad}
-                            <br>
-                            ${objeto.descripcion || "SIN DESCRIPCIÓN"}
-                        </div>
-                    </div>
-                `;
-            })
-            .join("");
-
-    cotidianoContainer.innerHTML =
-        cotidianoPoseido;
-};
-
-renderCotidianoInventario();
-        
         /* =========================
            SALUD MENTAL
            ========================= */

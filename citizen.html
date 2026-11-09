@@ -53,6 +53,28 @@
             letter-spacing: 2px;
         }
 
+        .page-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .page-nav a {
+            display: inline-block;
+            padding: 9px 14px;
+            border: 1px solid #00ff9c;
+            color: #00ff9c;
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+        }
+
+        .page-nav a:hover {
+            background: #00ff9c;
+            color: #0b0d0e;
+        }
+
 
         main {
             max-width: 1100px;
@@ -389,6 +411,10 @@
     <div class="citizen-id">
         REGISTRO NX-2066-0001
     </div>
+
+    <nav class="page-nav" aria-label="Navegación principal">
+        <a href="tienda.html">IR A TIENDA</a>
+    </nav>
 
 </header>
 
@@ -2788,3 +2814,4 @@ renderFobias();
 
 cargarDatosCitizenNet();
 </script>
+

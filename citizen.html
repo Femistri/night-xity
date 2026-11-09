@@ -616,6 +616,38 @@
         <div id="dm-housing-requests">CARGANDO...</div>
     </details>
 </details>
+<details id="dm-payroll-panel" hidden>
+    <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
+    <p>Los salarios automáticos comienzan a los 42 días y se repiten cada 42 días. Los trabajos se pagan una sola vez.</p>
+    <label for="dm-payroll-character">PERSONAJE</label>
+    <select id="dm-payroll-character" class="value"></select>
+    <form id="dm-salary-form">
+        <h3>CREAR SALARIO PERIÓDICO</h3>
+        <label for="dm-salary-position">PUESTO</label>
+        <input id="dm-salary-position" required maxlength="120" placeholder="Puesto o empleo">
+        <label for="dm-salary-amount">MONTO POR CICLO</label>
+        <input id="dm-salary-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
+        <button type="submit">PROGRAMAR SALARIO</button>
+    </form>
+    <form id="dm-manual-payment-form">
+        <h3>PAGO PUNTUAL</h3>
+        <label for="dm-payment-type">TIPO</label>
+        <select id="dm-payment-type" class="value">
+            <option value="trabajo">TRABAJO</option>
+            <option value="salario_manual">SALARIO MANUAL</option>
+        </select>
+        <label for="dm-payment-concept">CONCEPTO</label>
+        <input id="dm-payment-concept" required maxlength="200" placeholder="Trabajo realizado o periodo">
+        <label for="dm-payment-amount">MONTO</label>
+        <input id="dm-payment-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
+        <button type="submit">EMITIR PAGO</button>
+    </form>
+    <div id="dm-payroll-message" role="status" aria-live="polite"></div>
+    <h3>SALARIOS ACTIVOS</h3>
+    <div id="dm-payroll-list">CARGANDO...</div>
+    <h3>PAGOS RECIENTES</h3>
+    <div id="dm-payment-history">CARGANDO...</div>
+</details>
     </section>
 
 
@@ -1125,6 +1157,115 @@ const [datosCiudadanos, catalogo, saludMental, gastosVida] =
 const personajeActivo =
     personajesAsignados.find(personaje => personaje.id === personajeGuardado)
     || personajesAsignados[0];
+
+if (esDM) {
+    const panelPagos = document.getElementById("dm-payroll-panel");
+    const selectorPago = document.getElementById("dm-payroll-character");
+    const mensajePago = document.getElementById("dm-payroll-message");
+    const listaNominas = document.getElementById("dm-payroll-list");
+    const historialPagos = document.getElementById("dm-payment-history");
+    const clavesPagoPendientes = new Map(
+        personajesAsignados.map(personaje => [personaje.id, crypto.randomUUID()])
+    );
+    panelPagos.hidden = false;
+    selectorPago.replaceChildren(new Option("ELIGE PERSONAJE", ""));
+    personajesAsignados.forEach(personaje =>
+        selectorPago.add(new Option(personaje.nombre_clave, personaje.id))
+    );
+    selectorPago.value = personajeActivo.id;
+
+    const avisarPago = texto => { mensajePago.textContent = texto; };
+    const fechaPago = fecha => fecha ? new Date(fecha).toLocaleString("es-MX") : "SIN FECHA";
+    const cargarNominasYPagos = async () => {
+        const [{ data: nominas, error: errorNominas }, { data: pagos, error: errorPagos }] = await Promise.all([
+            supabaseClient.from("nominas_jugadores")
+                .select("id, personaje_id, puesto, monto, proximo_pago, personajes(nombre_clave)")
+                .eq("estado", "activa").order("proximo_pago", { ascending: true }),
+            supabaseClient.from("pagos_dm")
+                .select("id, personaje_id, tipo, monto, concepto, pagado_en, personajes(nombre_clave)")
+                .order("pagado_en", { ascending: false }).limit(30)
+        ]);
+        if (errorNominas || errorPagos) {
+            listaNominas.textContent = historialPagos.textContent =
+                "No se pudieron cargar los pagos: " + (errorNominas?.message || errorPagos?.message);
+            return;
+        }
+        const nominasFiltradas = (nominas || []).filter(item => item.personaje_id === selectorPago.value);
+        listaNominas.replaceChildren();
+        if (!nominasFiltradas.length) listaNominas.textContent = "SIN SALARIOS ACTIVOS PARA ESTE PERSONAJE.";
+        nominasFiltradas.forEach(item => {
+            const bloque = document.createElement("div");
+            bloque.className = "item";
+            const texto = document.createElement("div");
+            texto.className = "item-info";
+            texto.textContent = `${item.puesto} — ${Number(item.monto).toLocaleString("es-MX")} CORPOS / 42 DÍAS; próximo: ${fechaPago(item.proximo_pago)}`;
+            const cancelar = document.createElement("button");
+            cancelar.type = "button";
+            cancelar.dataset.cancelarNomina = item.id;
+            cancelar.textContent = "CANCELAR SALARIO";
+            bloque.append(texto, cancelar);
+            listaNominas.append(bloque);
+        });
+        const pagosFiltrados = (pagos || []).filter(item => item.personaje_id === selectorPago.value);
+        historialPagos.replaceChildren();
+        if (!pagosFiltrados.length) historialPagos.textContent = "SIN PAGOS REGISTRADOS.";
+        pagosFiltrados.forEach(item => {
+            const linea = document.createElement("div");
+            linea.className = "item-info";
+            linea.textContent = `${fechaPago(item.pagado_en)} — ${item.tipo.toUpperCase()} — ${item.concepto} — ${Number(item.monto).toLocaleString("es-MX")} CORPOS`;
+            historialPagos.append(linea);
+        });
+    };
+    selectorPago.addEventListener("change", cargarNominasYPagos);
+    document.getElementById("dm-salary-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        const boton = event.submitter;
+        boton.disabled = true;
+        avisarPago("PROGRAMANDO SALARIO...");
+        const { data, error } = await supabaseClient.rpc("crear_nomina_jugador_dm", {
+            p_personaje_id: selectorPago.value,
+            p_puesto: document.getElementById("dm-salary-position").value.trim(),
+            p_monto: Number(document.getElementById("dm-salary-amount").value)
+        });
+        boton.disabled = false;
+        if (error) { avisarPago("No se pudo programar: " + error.message); return; }
+        event.target.reset();
+        avisarPago(`Salario creado. Primer pago: ${fechaPago(data.proximo_pago)}.`);
+        await cargarNominasYPagos();
+    });
+    document.getElementById("dm-manual-payment-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!selectorPago.value) { avisarPago("Elige un personaje."); return; }
+        const boton = event.submitter;
+        boton.disabled = true;
+        avisarPago("EMITIENDO PAGO...");
+        const { data, error } = await supabaseClient.rpc("pagar_ingreso_dm", {
+            p_personaje_id: selectorPago.value,
+            p_tipo: document.getElementById("dm-payment-type").value,
+            p_monto: Number(document.getElementById("dm-payment-amount").value),
+            p_concepto: document.getElementById("dm-payment-concept").value.trim(),
+            p_clave_idempotencia: clavesPagoPendientes.get(selectorPago.value)
+        });
+        boton.disabled = false;
+        if (error) { avisarPago("No se pudo emitir: " + error.message); return; }
+        clavesPagoPendientes.set(selectorPago.value, crypto.randomUUID());
+        event.target.reset();
+        avisarPago(`Pago registrado: ${Number(data.monto).toLocaleString("es-MX")} CORPOS. Saldo: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`);
+        await cargarNominasYPagos();
+    });
+    listaNominas.addEventListener("click", async event => {
+        const boton = event.target.closest("[data-cancelar-nomina]");
+        if (!boton) return;
+        boton.disabled = true;
+        const { error } = await supabaseClient.rpc("cancelar_nomina_jugador_dm", {
+            p_nomina_id: boton.dataset.cancelarNomina
+        });
+        if (error) { boton.disabled = false; avisarPago("No se pudo cancelar: " + error.message); return; }
+        avisarPago("Salario periódico cancelado.");
+        await cargarNominasYPagos();
+    });
+    await cargarNominasYPagos();
+}
 
 const selectorCitizen = document.getElementById("citizen-selector");
 selectorCitizen.innerHTML = "";

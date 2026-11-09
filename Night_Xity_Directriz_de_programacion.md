@@ -21,15 +21,24 @@ Esta directriz conserva los acuerdos del sistema económico y rige los cambios s
 - Cobros, movimientos, estado de obligación y estado de suscripción deben confirmarse o revertirse dentro de la misma transacción.
 - No crear deuda retroactiva a partir de periodos históricos para los que el sistema no guardó un importe vencido.
 
+## Inventario y compras
+
+- catalogo_productos.restantes es el dato único de existencias: SQL NULL o JSON null significa inventario sin límite; un entero JSON no negativo representa existencias finitas.
+- La tienda compra una unidad por producto y rechaza identificadores duplicados. realizar_compra_multiple bloquea las filas de productos en orden estable, valida y descuenta el inventario dentro de la misma transacción que actualiza la ficha, el saldo y el historial.
+- Una existencia de cero impide la compra. Si el saldo no alcanza, el inventario no se descuenta. Cada movimiento registra las existencias que quedan cuando el producto tiene control finito.
+- No se crea otra tabla de inventario porque el catálogo ya contiene restantes. Al 9 de noviembre de 2026, los 158 productos activos tienen restantes = NULL. El usuario decidió tratar los suministros como infinitos y no gestionar inventario en el alcance v1; no se deben configurar cantidades finitas hasta que reabra esa decisión.
+- La migración 20261109162100_integrar_existencias_productos.sql ya se aplicó a Supabase. Su archivo y el HTML de tienda actualizado siguen pendientes de incorporarse al repositorio, porque GitHub rechazó la escritura de esta sesión con HTTP 403.
 ## Seguridad de nuevas operaciones
 
 - No hacer una nueva auditoría general de permisos en cada paso. Al añadir o reemplazar RPC, comprobar los permisos que esa RPC necesita: sesión, asignación del personaje, rol DM cuando aplique, `SECURITY DEFINER` con `search_path` vacío o fijado, y `EXECUTE` limitado a los roles requeridos.
 - Los clientes no escriben directamente suscripciones, obligaciones ni movimientos. Las operaciones económicas se realizan por RPC transaccionales.
-- Antes de concluir la integración, revisar los flujos reales de alta, asignación y selección de personaje en la página publicada. La revisión inicial encontró que la página ofrece inicio de sesión y personajes ya asignados, pero no alta de cuenta ni selección de personajes sin asignación; la RPC `gestionar_mis_personajes` no está conectada desde ese flujo.
+- El flujo de alta y acceso de jugadores ya está publicado. La prueba del usuario confirmó que Citizen Net carga al iniciar sesión después del alta. La página limita la cuenta a tres personajes; la cuenta probada tiene tres asignaciones reales.
 
 ## Cambios y pruebas
 
 - Toda migración se guarda como archivo versionado en `supabase/migrations` además de aplicarse a Supabase. No ejecutar SQL manual sin conservar su migración equivalente.
-- Las migraciones `20261109013946_night_xity_mora_42_dias.sql` y `20261109023259_night_xity_reactivation_debt.sql` ya están aplicadas en la base de datos. La integración de GitHub rechazó la escritura (HTTP 403), y el editor web requiere una sesión iniciada; ambos archivos entregables todavía deben incorporarse a `supabase/migrations` del repositorio.
-- No cobrar personajes reales en pruebas. Usar fixtures/personajes aislados o una rama/base de pruebas y cubrir reintentos, concurrencia, rollback, mora, reactivación y permisos de las rutas nuevas.
-- No probar un bloque parcial: primero terminar la integración de facturación, mora, reactivación y flujos de la interfaz; después ejecutar la batería acordada.
+- Las migraciones de facturación y reactivación están aplicadas y guardadas en `supabase/migrations` del repositorio. La migración de inventario ya está aplicada; su archivo y la tienda actualizada están en los entregables locales porque la conexión de GitHub rechazó esta escritura con HTTP 403.
+- Las pruebas económicas aisladas y las pruebas de inventario con fixtures se ejecutaron sin dejar cargos ni datos de prueba persistentes. No se usaron personajes de jugadores.
+- La prueba de dos cobros simultáneos queda aplazada por decisión del usuario. La función de compra bloquea filas de productos para evitar sobreventa; la carrera real entre dos sesiones no se verificó.
+- El README y esta directriz delimitan el cierre v1 a la plataforma web y económica. Las mecánicas de partida quedan para una fase posterior.
+

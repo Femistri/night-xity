@@ -167,23 +167,15 @@
                 <h3>CITIZEN</h3>
                 <p>Acceso al perfil, economía, inventario y estado ciudadano.</p>
             </a>
-            <a class="card" href="#offline" aria-controls="offline" aria-expanded="false">
+            <a class="card" href="offline.html">
                 <div class="card-number">03</div>
                 <h3>OFFLINE</h3>
-                <p>Información, antecedentes y metajuego</p>
+                <p>World building, cronología y archivo de partidas.</p>
             </a>
         </nav>
     </main>
 
-    <section class="offline-panel" id="offline" aria-labelledby="offline-title" aria-hidden="true">
-        <div class="offline-inner">
-            <button class="close-offline" type="button" aria-label="Cerrar OFFLINE">×</button>
-            <div class="system">NIGHT XITY // ARCHIVO</div>
-            <h2 id="offline-title">OFFLINE</h2>
-            <p class="offline-subtitle">Información, antecedentes y metajuego</p>
-            <p class="offline-description">Este apartado reúne la información y el contexto de Night Xity fuera de Citizen Net.</p>
-        </div>
-    </section>
+
 
     <footer>
         NIGHT XITY // CITIZEN NET<br><br>
@@ -192,41 +184,6 @@
         Historias dentro del HomieVerse
     </footer>
 
-    <script>
-        const offlinePanel = document.getElementById("offline");
-        const offlineLink = document.querySelector('a[href="#offline"]');
-        const closeOfflineButton = document.querySelector(".close-offline");
 
-        function openOffline() {
-            offlinePanel.classList.add("open");
-            offlinePanel.setAttribute("aria-hidden", "false");
-            offlineLink.setAttribute("aria-expanded", "true");
-            document.body.classList.add("panel-open");
-            if (window.location.hash !== "#offline") history.replaceState(null, "", "#offline");
-            closeOfflineButton.focus();
-        }
-
-        function closeOffline() {
-            offlinePanel.classList.remove("open");
-            offlinePanel.setAttribute("aria-hidden", "true");
-            offlineLink.setAttribute("aria-expanded", "false");
-            document.body.classList.remove("panel-open");
-            if (window.location.hash === "#offline") history.replaceState(null, "", window.location.pathname + window.location.search);
-            offlineLink.focus();
-        }
-
-        offlineLink.addEventListener("click", event => {
-            event.preventDefault();
-            openOffline();
-        });
-        closeOfflineButton.addEventListener("click", closeOffline);
-        offlinePanel.addEventListener("click", event => {
-            if (event.target === offlinePanel) closeOffline();
-        });
-        document.addEventListener("keydown", event => {
-            if (event.key === "Escape" && offlinePanel.classList.contains("open")) closeOffline();
-        });
-        if (window.location.hash === "#offline") openOffline();
-    </script>
 </body>
 </html>

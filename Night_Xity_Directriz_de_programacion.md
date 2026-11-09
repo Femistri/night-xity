@@ -34,10 +34,20 @@ Esta directriz conserva los acuerdos del sistema económico y rige los cambios s
 - Los clientes no escriben directamente suscripciones, obligaciones ni movimientos. Las operaciones económicas se realizan por RPC transaccionales.
 - El flujo de alta y acceso de jugadores ya está publicado. La prueba del usuario confirmó que Citizen Net carga al iniciar sesión después del alta. La página limita la cuenta a tres personajes; la cuenta probada tiene tres asignaciones reales.
 
+## Nómina y pagos de DM
+
+- El DM puede emitir abonos de CORPOS sin descontarlos de otra cuenta o tesorería. La emisión queda identificada como pago del DM y se refleja en el saldo y el historial económico existente del personaje.
+- Los salarios periódicos comienzan con su primer pago 42 días después de su creación y continúan en ciclos fijos de 42 días. El procesador diario intenta liquidar ciclos vencidos, sin mover el ancla de fecha ni omitir periodos atrasados.
+- El DM también puede emitir pagos manuales de salario. Los pagos por trabajo son siempre puntuales y no crean una relación de nómina.
+- Cada contrato salarial activo se identifica por personaje y puesto. Cada ciclo tiene un pago único; los reintentos no vuelven a emitir el mismo ciclo. El DM puede cancelar contratos activos.
+- `nominas_jugadores` guarda contratos y próximo vencimiento; `pagos_dm` conserva autoría, tipo, concepto, importe e idempotencia. El saldo sigue teniendo una sola fuente: `personajes.ficha.economia.movimientos`; no se crea un ledger paralelo.
+- La página Citizen ofrece al DM un panel para crear/cancelar nóminas, emitir pagos puntuales y consultar pagos recientes. Los pagos automáticos se procesan diariamente a las 9:05 a. m. de Cancún.
+
 ## Cambios y pruebas
 
 - Toda migración se guarda como archivo versionado en `supabase/migrations` además de aplicarse a Supabase. No ejecutar SQL manual sin conservar su migración equivalente.
 - Las migraciones de facturación y reactivación están aplicadas y guardadas en `supabase/migrations` del repositorio. La migración de inventario ya está aplicada; su archivo y la tienda actualizada están en los entregables locales porque la conexión de GitHub rechazó esta escritura con HTTP 403.
+- La migración `20261109175734_nightxity_payroll_dm.sql` se aplicó a Supabase; tablas, funciones y cron se verificaron con consultas de solo lectura. El SQL y Citizen actualizado están preparados localmente, pero aún deben copiarse/publicarse en GitHub.
 - Las pruebas económicas aisladas y las pruebas de inventario con fixtures se ejecutaron sin dejar cargos ni datos de prueba persistentes. No se usaron personajes de jugadores.
 - La prueba de dos cobros simultáneos queda aplazada por decisión del usuario. La función de compra bloquea filas de productos para evitar sobreventa; la carrera real entre dos sesiones no se verificó.
 - El README y esta directriz delimitan el cierre v1 a la plataforma web y económica. Las mecánicas de partida quedan para una fase posterior.

@@ -17,6 +17,9 @@
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
+        #estado-economico { margin-top:18px; padding-top:14px; border-top:1px solid #333; }
+        #estado-economico .deuda { border:1px solid #654; padding:12px; margin:10px 0; }
+        #estado-economico button { margin-top:8px; padding:8px 12px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
 
         * {
             box-sizing: border-box;
@@ -343,6 +346,11 @@
                 </select>
                 <button id="boton-elegir-personaje" type="button" disabled>ELEGIR PERSONAJE</button>
             </div>
+            <div id="estado-economico" hidden>
+                <h3>SERVICIOS Y OBLIGACIONES</h3>
+                <div id="suscripciones-personaje"></div>
+                <div id="obligaciones-personaje"></div>
+            </div>
             <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
         <div id="acceso-mensaje"></div>
@@ -505,14 +513,24 @@ const cargarTienda = async () => {
                             : gasto.costo !== null
                                 ? `${Number(gasto.costo).toLocaleString("es-MX")} CORPOS`
                                 : "COSTO VARIABLE";
+                        const esVariable = gasto.grupo === "variable";
+                        const esRecurrente = ["obligatorio", "opcional"].includes(gasto.grupo) && ["mensual", "diaria"].includes(gasto.frecuencia);
                         const frecuenciaVisible = esVivienda
-                            ? "CADA 6 MIÉRCOLES"
-                            : String(gasto.frecuencia || "").toUpperCase();
+                            ? "CADA 42 DÍAS"
+                            : gasto.frecuencia === "mensual"
+                                ? "CADA 42 DÍAS"
+                                : gasto.frecuencia === "diaria"
+                                    ? "CADA DÍA"
+                                    : String(gasto.frecuencia || "").toUpperCase();
                         const accionVisible = esVivienda
                             ? gasto.id === "VIV-003"
                                 ? "ACTIVAR VIVIENDA"
                                 : "SOLICITAR AL DM"
-                            : "SELECCIONAR";
+                            : esVariable
+                                ? "SOLICITAR AL DM"
+                                : esRecurrente
+                                    ? "ACTIVAR SERVICIO"
+                                    : "SELECCIONAR";
 
                         return `
                             <div class="item">
@@ -525,15 +543,16 @@ const cargarTienda = async () => {
                                 </div>
 
                                 ${
-                                    gasto.costo !== null
+                                    gasto.costo !== null || esVariable
                                         ? `
                                             <button
                                                 class="select-item"
                                                 data-id="${gasto.id}"
                                                 data-name="${gasto.nombre}"
-                                                data-price="${esVivienda ? costoPorPersona : gasto.costo}"
+                                                data-price="${esVivienda ? costoPorPersona : (gasto.costo ?? 0)}"
                                                 data-source="${esVivienda ? "vivienda" : "gasto-vida"}"
                                                 data-grupo="${gasto.grupo}"
+                                                data-frequency="${gasto.frecuencia || ""}"
                                             >
                                                 ${accionVisible}
                                             </button>
@@ -618,7 +637,12 @@ const objetos =
                     if (boton.classList.contains("selected")) {
                         boton.textContent = "SELECCIONADO";
                     } else {
-                        boton.textContent = "SELECCIONAR";
+                        if (boton.dataset.subscriptionState === "activa") boton.textContent = "SERVICIO ACTIVO";
+                        else if (boton.dataset.subscriptionState === "suspendida") boton.textContent = boton.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
+                        else if (boton.dataset.grupo === "variable") boton.textContent = "SOLICITAR AL DM";
+                        else if (boton.dataset.source === "vivienda") boton.textContent = boton.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM";
+                        else if (["obligatorio", "opcional"].includes(boton.dataset.grupo) && ["mensual", "diaria"].includes(boton.dataset.frequency)) boton.textContent = "ACTIVAR SERVICIO";
+                        else boton.textContent = "SELECCIONAR";
                     }
 
                 });
@@ -672,13 +696,30 @@ const esSolicitudEvento =
     seleccionados.length === 1 &&
     seleccionados[0].dataset.source === "gasto-vida" &&
     seleccionados[0].dataset.grupo === "evento";
+const esSolicitudVariable =
+    seleccionados.length === 1 &&
+    seleccionados[0].dataset.source === "gasto-vida" &&
+    seleccionados[0].dataset.grupo === "variable";
+const esServicioRecurrente =
+    seleccionados.length === 1 &&
+    seleccionados[0].dataset.source === "gasto-vida" &&
+    ((["obligatorio", "opcional"].includes(seleccionados[0].dataset.grupo) &&
+      ["mensual", "diaria"].includes(seleccionados[0].dataset.frequency)) ||
+     seleccionados[0].dataset.subscriptionState === "suspendida");
+const frecuenciaSeleccionada = seleccionados[0]?.dataset.frequency === "mensual"
+    ? "CADA 42 DÍAS"
+    : seleccionados[0]?.dataset.frequency === "diaria"
+        ? "CADA DÍA"
+        : "";
 
 selectedProducts.innerHTML =
     Array.from(seleccionados)
         .map(seleccionado => `
            <div class="item">
     <strong>${seleccionado.dataset.name}</strong>
-    — ${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS
+    — ${seleccionado.dataset.grupo === "variable"
+        ? "IMPORTE A DETERMINAR POR EL DM"
+        : `${Number(seleccionado.dataset.price).toLocaleString("es-MX")} CORPOS`}
     <button
         class="remove-item"
         data-id="${seleccionado.dataset.id}"
@@ -691,17 +732,23 @@ selectedProducts.innerHTML =
         .join("") +
     `
       <div class="selection-total">
-    <strong>TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS</strong>
+    <strong>${esSolicitudVariable ? "IMPORTE PENDIENTE DE APROBACIÓN" : `TOTAL: ${totalSeleccion.toLocaleString("es-MX")} CORPOS`}</strong>
 </div>
 
 <div class="selection-status">
-    ${esSolicitudEvento
-        ? "NO SE COBRARÁ HASTA QUE EL ARQUITECTO APRUEBE LA SOLICITUD."
-        : "EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR."}
+    ${esSolicitudEvento || esSolicitudVariable
+        ? "NO SE COBRARÁ HASTA QUE EL DM APRUEBE LA SOLICITUD."
+        : esServicioRecurrente
+            ? `SE COBRA EL PRIMER CICLO AL ACTIVAR; RECURRENCIA ${frecuenciaSeleccionada}.`
+            : "EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR."}
 </div>
 
 <button class="buy-button">
-    ${esSolicitudEvento ? "SOLICITAR EVENTO" : "COMPRAR"}
+    ${esSolicitudEvento || esSolicitudVariable
+        ? "SOLICITAR AL DM"
+        : esServicioRecurrente
+            ? (seleccionados[0].dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO" : "ACTIVAR SERVICIO")
+            : "COMPRAR"}
 </button>
 
     `;
@@ -726,7 +773,11 @@ selectedProducts.innerHTML =
 
 };
 
-cargarTienda();
+window.nightXityTiendaLista = false;
+cargarTienda().finally(() => {
+    window.nightXityTiendaLista = true;
+    window.dispatchEvent(new Event("nightxity:tienda-lista"));
+});
 
 </script>
 
@@ -742,6 +793,113 @@ cargarTienda();
     function mostrarAcceso() {
         panel.style.display = "block";
         panel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    async function cargarEstadoEconomico(personajeId) {
+        const panelEconomico = document.getElementById("estado-economico");
+        const listaServicios = document.getElementById("suscripciones-personaje");
+        const listaObligaciones = document.getElementById("obligaciones-personaje");
+        if (!personajeId) {
+            panelEconomico.hidden = true;
+            return;
+        }
+
+        if (!window.nightXityTiendaLista) {
+            await new Promise(resolve => window.addEventListener("nightxity:tienda-lista", resolve, { once: true }));
+        }
+
+        const [suscripcionesResult, obligacionesResult] = await Promise.all([
+            supabaseClient.from("suscripciones_gastos_vida")
+                .select("id,gasto_id,costo,estado,proximo_cobro")
+                .eq("personaje_id", personajeId),
+            supabaseClient.from("obligaciones_gastos_vida")
+                .select("id,gasto_id,suscripcion_id,origen,monto_base,multa_mora,estado,vence_en")
+                .eq("personaje_id", personajeId)
+                .eq("estado", "mora")
+                .order("vence_en")
+        ]);
+        if (suscripcionesResult.error) throw new Error("No se pudieron consultar los servicios: " + suscripcionesResult.error.message);
+        if (obligacionesResult.error) throw new Error("No se pudieron consultar las deudas: " + obligacionesResult.error.message);
+
+        const suscripciones = suscripcionesResult.data || [];
+        const porGasto = new Map(suscripciones.map(item => [item.gasto_id, item]));
+        document.querySelectorAll('.select-item[data-source="gasto-vida"]').forEach(boton => {
+            const grupo = boton.dataset.grupo;
+            if (!["obligatorio", "opcional", "vivienda"].includes(grupo)) return;
+            const suscripcion = porGasto.get(boton.dataset.id);
+            boton.dataset.subscriptionId = suscripcion?.id || "";
+            boton.dataset.subscriptionState = suscripcion?.estado || "";
+            if (suscripcion?.estado === "activa") {
+                boton.disabled = true;
+                boton.textContent = "SERVICIO ACTIVO";
+                boton.title = suscripcion.proximo_cobro
+                    ? "Próximo cobro: " + new Date(suscripcion.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })
+                    : "Servicio activo";
+            } else if (suscripcion?.estado === "suspendida") {
+                boton.disabled = false;
+                boton.textContent = grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
+                boton.title = "Liquidación: deuda + multa + reconexión + nueva cuota";
+            } else if (["obligatorio", "opcional"].includes(grupo)) {
+                boton.disabled = false;
+                boton.textContent = "ACTIVAR SERVICIO";
+            }
+        });
+
+        listaServicios.replaceChildren();
+        if (!suscripciones.length) {
+            const vacio = document.createElement("p");
+            vacio.textContent = "Aún no tienes servicios recurrentes activos o suspendidos.";
+            listaServicios.append(vacio);
+        } else {
+            suscripciones.forEach(item => {
+                const fila = document.createElement("p");
+                const siguiente = item.proximo_cobro
+                    ? " // PRÓXIMO CICLO: " + new Date(item.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })
+                    : "";
+                fila.textContent = `${item.gasto_id} // ${item.estado.toUpperCase()} // ${Number(item.costo).toLocaleString("es-MX")} CORPOS${siguiente}`;
+                listaServicios.append(fila);
+            });
+        }
+
+        listaObligaciones.replaceChildren();
+        const obligaciones = obligacionesResult.data || [];
+        if (obligaciones.length) {
+            const cargosResult = await supabaseClient.from("cargos_reactivacion")
+                .select("obligacion_id,tipo,monto,multa_mora,estado")
+                .in("obligacion_id", obligaciones.map(item => item.id));
+            if (cargosResult.error) throw new Error("No se pudieron consultar los cargos de reactivación: " + cargosResult.error.message);
+            const cargosPorObligacion = new Map();
+            (cargosResult.data || []).forEach(cargo => {
+                const cargos = cargosPorObligacion.get(cargo.obligacion_id) || [];
+                cargos.push(cargo);
+                cargosPorObligacion.set(cargo.obligacion_id, cargos);
+            });
+
+            obligaciones.forEach(obligacion => {
+                const cargos = cargosPorObligacion.get(obligacion.id) || [];
+                const totalCargos = cargos.reduce((total, cargo) => total + Number(cargo.monto) + Number(cargo.multa_mora), 0);
+                const total = Number(obligacion.monto_base) + Number(obligacion.multa_mora) + totalCargos;
+                const tarjeta = document.createElement("div");
+                tarjeta.className = "deuda";
+                const detalle = document.createElement("p");
+                detalle.textContent = `${obligacion.gasto_id} // DEUDA ${Number(obligacion.monto_base).toLocaleString("es-MX")} + MULTA ${Number(obligacion.multa_mora).toLocaleString("es-MX")} + CARGOS ${totalCargos.toLocaleString("es-MX")} = ${total.toLocaleString("es-MX")} CORPOS`;
+                tarjeta.append(detalle);
+                const boton = document.createElement("button");
+                boton.type = "button";
+                boton.className = "deuda-reactivar";
+                boton.dataset.obligacionId = obligacion.id;
+                boton.dataset.suscripcionId = obligacion.suscripcion_id || "";
+                boton.dataset.origen = obligacion.origen;
+                boton.textContent = obligacion.origen === "periodico" ? "LIQUIDAR Y REACTIVAR SERVICIO" : "LIQUIDAR OBLIGACIÓN APROBADA";
+                tarjeta.append(boton);
+                listaObligaciones.append(tarjeta);
+            });
+        } else {
+            const vacio = document.createElement("p");
+            vacio.textContent = "No tienes obligaciones vencidas.";
+            listaObligaciones.append(vacio);
+        }
+        panelEconomico.hidden = false;
     }
 
     async function cargarPersonajesDisponibles() {
@@ -824,6 +982,7 @@ cargarTienda();
             selectorPersonaje.dataset.listenerAttached = "true";
         }
         await cargarPersonajesDisponibles();
+        if (selectorPersonaje.value) await cargarEstadoEconomico(selectorPersonaje.value);
     }
 
     document.getElementById("personaje-disponible").addEventListener("change", event => {
@@ -848,6 +1007,34 @@ cargarTienda();
         localStorage.setItem("nightXity_personaje_activo", personajeId);
         mensaje.textContent = "Personaje asignado. Actualizando tu acceso...";
         location.reload();
+    });
+
+    document.addEventListener("click", async event => {
+        const boton = event.target.closest(".deuda-reactivar");
+        if (!boton) return;
+        boton.disabled = true;
+        boton.textContent = "PROCESANDO LIQUIDACIÓN...";
+        try {
+            const esPeriodica = boton.dataset.origen === "periodico";
+            const { data, error } = await supabaseClient.rpc(
+                esPeriodica ? "reactivar_servicio_gasto" : "reactivar_obligacion_aprobada",
+                esPeriodica
+                    ? { p_suscripcion_id: boton.dataset.suscripcionId }
+                    : { p_obligacion_id: boton.dataset.obligacionId }
+            );
+            if (error) throw error;
+            if (!data?.exito) {
+                mensaje.textContent = data?.mensaje || `Saldo insuficiente. Se requieren ${Number(data?.total || 0).toLocaleString("es-MX")} CORPOS; saldo actual ${Number(data?.saldo_actual || 0).toLocaleString("es-MX")} CORPOS.`;
+                await cargarEstadoEconomico(selectorPersonaje.value);
+                return;
+            }
+            mensaje.textContent = `Liquidación completada: ${Number(data.total || 0).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual || 0).toLocaleString("es-MX")} CORPOS.`;
+            await cargarEstadoEconomico(selectorPersonaje.value);
+        } catch (error) {
+            mensaje.textContent = "No se pudo completar la liquidación: " + error.message;
+            boton.disabled = false;
+            boton.textContent = boton.dataset.origen === "periodico" ? "LIQUIDAR Y REACTIVAR SERVICIO" : "LIQUIDAR OBLIGACIÓN APROBADA";
+        }
     });
 
         document.addEventListener("click", async event => {
@@ -886,8 +1073,48 @@ cargarTienda();
             const vivienda = seleccionados.filter(
                 item => item.dataset.source === "vivienda"
             );
+            const suspendidos = seleccionados.filter(
+                item => item.dataset.subscriptionState === "suspendida"
+            );
+            const serviciosRecurrentes = seleccionados.filter(item =>
+                item.dataset.source === "gasto-vida" &&
+                ["obligatorio", "opcional"].includes(item.dataset.grupo) &&
+                ["mensual", "diaria"].includes(item.dataset.frequency)
+            );
 
-            if (vivienda.length) {
+            if (suspendidos.length) {
+                if (seleccionados.length !== 1) {
+                    throw new Error("Liquida y reactiva un servicio a la vez.");
+                }
+                const { data, error } = await supabaseClient.rpc(
+                    "reactivar_servicio_gasto",
+                    { p_suscripcion_id: suspendidos[0].dataset.subscriptionId }
+                );
+                if (error) throw error;
+                if (!data?.exito) {
+                    mensaje.textContent = data?.mensaje || `Saldo insuficiente. Liquidación: ${Number(data?.total || 0).toLocaleString("es-MX")} CORPOS; saldo: ${Number(data?.saldo_actual || 0).toLocaleString("es-MX")} CORPOS.`;
+                    await cargarEstadoEconomico(personajeId);
+                    return;
+                }
+                mensaje.textContent = `Servicio reactivado. Total liquidado: ${Number(data.total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
+                await cargarEstadoEconomico(personajeId);
+            } else if (serviciosRecurrentes.length) {
+                if (seleccionados.length !== 1) {
+                    throw new Error("Activa un servicio recurrente por separado.");
+                }
+                const { data, error } = await supabaseClient.rpc(
+                    "activar_servicio_gasto",
+                    { p_personaje_id: personajeId, p_gasto_id: serviciosRecurrentes[0].dataset.id }
+                );
+                if (error) throw error;
+                if (!data?.exito) {
+                    mensaje.textContent = data?.mensaje || "No se pudo activar el servicio.";
+                    await cargarEstadoEconomico(personajeId);
+                    return;
+                }
+                mensaje.textContent = `Servicio activado. Primer ciclo: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS; siguiente cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
+                await cargarEstadoEconomico(personajeId);
+            } else if (vivienda.length) {
                 if (seleccionados.length !== 1) {
                     throw new Error("Procesa la vivienda por separado de otros artículos.");
                 }
@@ -916,6 +1143,7 @@ cargarTienda();
                 mensaje.textContent = viviendaId === "VIV-003"
                     ? `Vivienda activada. Cargo inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`
                     : `Solicitud enviada al DM para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
+                if (viviendaId === "VIV-003") await cargarEstadoEconomico(personajeId);
             } else {
     const eventos = seleccionados.filter(
         item =>
@@ -944,11 +1172,25 @@ cargarTienda();
         mensaje.textContent =
             `Solicitud enviada al Arquitecto para ${data.evento}. No se cobrará hasta que la apruebe.`;
     } else {
+        const variables = seleccionados.filter(
+            item => item.dataset.source === "gasto-vida" && item.dataset.grupo === "variable"
+        );
+
+        if (variables.length) {
+            if (seleccionados.length !== 1) throw new Error("Solicita un gasto variable a la vez.");
+            const { data, error } = await supabaseClient.rpc("solicitar_gasto_variable", {
+                p_personaje_id: personajeId,
+                p_gasto_id: variables[0].dataset.id
+            });
+            if (error) throw error;
+            if (!data?.exito) throw new Error("Supabase no confirmó la solicitud variable.");
+            mensaje.textContent = `Solicitud enviada al DM para ${data.gasto}. No se cobrará hasta su aprobación.`;
+        } else {
         if (seleccionados.some(
             item => item.dataset.source === "gasto-vida"
         )) {
             throw new Error(
-                "Por ahora solo se procesan viviendas y eventos."
+                "Este cargo no se procesa como compra instantánea."
             );
         }
 
@@ -971,12 +1213,18 @@ cargarTienda();
             ". Total: " + Number(data.total).toLocaleString("es-MX") +
             " CORPOS. Saldo restante: " +
             Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+        }
     }
 }
 
             seleccionados.forEach(item => {
                 item.classList.remove("selected");
-                item.textContent = "SELECCIONAR";
+                if (item.dataset.subscriptionState === "activa") item.textContent = "SERVICIO ACTIVO";
+                else if (item.dataset.subscriptionState === "suspendida") item.textContent = item.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
+                else if (item.dataset.grupo === "variable") item.textContent = "SOLICITAR AL DM";
+                else if (item.dataset.source === "vivienda") item.textContent = item.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM";
+                else if (["obligatorio", "opcional"].includes(item.dataset.grupo) && ["mensual", "diaria"].includes(item.dataset.frequency)) item.textContent = "ACTIVAR SERVICIO";
+                else item.textContent = "SELECCIONAR";
             });
 
             document.getElementById("selected-products").textContent =
@@ -985,12 +1233,13 @@ cargarTienda();
             mensaje.textContent = "Operación no completada: " + error.message;
         } finally {
             boton.disabled = false;
-         boton.textContent =
-    document.querySelector(
-        '.select-item.selected[data-grupo="evento"]'
-    )
-        ? "SOLICITAR EVENTO"
-        : "COMPRAR";
+            const seleccion = document.querySelector(".select-item.selected");
+            boton.textContent = !seleccion ? "COMPRAR"
+                : ["evento", "variable"].includes(seleccion.dataset.grupo) ? "SOLICITAR AL DM"
+                : seleccion.dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO"
+                : ["obligatorio", "opcional"].includes(seleccion.dataset.grupo) ? "ACTIVAR SERVICIO"
+                : seleccion.dataset.source === "vivienda" ? (seleccion.dataset.id === "VIV-003" ? "ACTIVAR VIVIENDA" : "SOLICITAR AL DM")
+                : "COMPRAR";
         }
     }, true);
 
@@ -1085,3 +1334,4 @@ cargarTienda();
 </body>
 
 </html>
+

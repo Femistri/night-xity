@@ -175,6 +175,28 @@
     color: #ff5555;
 }
 
+.service-note {
+    margin: 12px 0 0;
+    color: #999;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.dm-access-link {
+    display: inline-block;
+    margin: 8px 12px 8px 0;
+    padding: 8px 14px;
+    border: 1px solid #00ff9c;
+    color: #00ff9c;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.dm-access-link:hover {
+    background: #00ff9c;
+    color: #0b0d0e;
+}
+
         .buy-button {
     margin-top: 15px;
     padding: 8px 14px;
@@ -402,6 +424,9 @@
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
             </div>
+            <p class="service-note">
+                Los servicios recurrentes se activan uno por uno. La activación cobra el primer ciclo; los ciclos mensuales duran 42 días y después el cobro es automático.
+            </p>
             <div id="compra-mensaje" role="status" aria-live="polite"></div>
 
         </section>
@@ -688,10 +713,32 @@ const objetos =
             .forEach(boton => {
 
                 boton.addEventListener("click", () => {
+                    const seleccionadosActuales = Array.from(
+                        document.querySelectorAll(".select-item.selected")
+                    );
+                    const esServicioRecurrente = elemento =>
+                        elemento.dataset.source === "gasto-vida" &&
+                        ["obligatorio", "opcional"].includes(elemento.dataset.grupo) &&
+                        ["mensual", "diaria"].includes(elemento.dataset.frequency);
+                    const estaSeleccionando = !boton.classList.contains("selected");
+                    const yaHayServicioRecurrente = seleccionadosActuales.some(esServicioRecurrente);
+                    const esRecurrente = esServicioRecurrente(boton);
+
+                    if (estaSeleccionando &&
+                        ((esRecurrente && seleccionadosActuales.length > 0) ||
+                         yaHayServicioRecurrente)) {
+                        const aviso = document.getElementById("compra-mensaje");
+                        aviso.textContent = "Activa un servicio recurrente por separado. Retira los demás artículos y deja solo un servicio en la selección.";
+                        aviso.classList.add("error");
+                        return;
+                    }
 
                     boton.classList.toggle("selected");
 
                     if (boton.classList.contains("selected")) {
+                        const aviso = document.getElementById("compra-mensaje");
+                        aviso.textContent = "";
+                        aviso.classList.remove("error");
                         boton.textContent = "SELECCIONADO";
                     } else {
                         if (boton.dataset.subscriptionState === "activa") boton.textContent = "SERVICIO ACTIVO";
@@ -987,13 +1034,6 @@ cargarTienda().finally(() => {
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         if (userError || !user) throw new Error("No se pudo identificar la sesión.");
 
-        const { data, error } = await supabaseClient
-            .from("asignaciones")
-            .select("personaje_id, personajes ( id, nombre_clave, clase )")
-            .eq("perfil_id", user.id);
-        if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
-
-        const personajes = (data || []).map(row => row.personajes).filter(Boolean);
         const perfilResult = await supabaseClient
             .from("perfiles")
             .select("rol")
@@ -1002,9 +1042,45 @@ cargarTienda().finally(() => {
         if (perfilResult.error || !perfilResult.data) {
             throw new Error("Tu perfil todavía no está listo. Confirma tu correo y vuelve a iniciar sesión.");
         }
-        if (perfilResult.data.rol !== "jugador") {
-            throw new Error("Esta página de acceso es para cuentas de jugador.");
+
+        if (perfilResult.data.rol === "dm") {
+            panel.style.display = "block";
+            formulario.hidden = true;
+            selectorContenedor.hidden = true;
+            mensaje.replaceChildren();
+
+            const avisoDM = document.createElement("p");
+            avisoDM.textContent = "Sesión del Arquitecto detectada. La gestión del DM se realiza en Citizen Net.";
+            const enlaceDM = document.createElement("a");
+            enlaceDM.href = "citizen.html";
+            enlaceDM.className = "dm-access-link";
+            enlaceDM.textContent = "ABRIR CITIZEN COMO DM";
+            const botonCerrarDM = document.createElement("button");
+            botonCerrarDM.type = "button";
+            botonCerrarDM.textContent = "CERRAR SESIÓN";
+            botonCerrarDM.addEventListener("click", async () => {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) {
+                    mensaje.textContent = "No se pudo cerrar sesión: " + error.message;
+                    return;
+                }
+                location.reload();
+            });
+
+            mensaje.append(avisoDM, enlaceDM, botonCerrarDM);
+            return;
         }
+
+        if (perfilResult.data.rol !== "jugador") {
+            throw new Error("Esta cuenta no tiene acceso a la tienda de jugadores.");
+        }
+
+        const { data, error } = await supabaseClient
+            .from("asignaciones")
+            .select("personaje_id, personajes ( id, nombre_clave, clase )")
+            .eq("perfil_id", user.id);
+        if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
+        const personajes = (data || []).map(row => row.personajes).filter(Boolean);
 
         selectorPersonaje.innerHTML = "";
         if (!personajes.length) {
@@ -1160,7 +1236,7 @@ cargarTienda().finally(() => {
                 await cargarEstadoEconomico(personajeId);
             } else if (serviciosRecurrentes.length) {
                 if (seleccionados.length !== 1) {
-                    throw new Error("Activa un servicio recurrente por separado.");
+                    throw new Error("Activa un servicio recurrente por separado. Retira los demás artículos y deja solo un servicio en la selección.");
                 }
                 const { data, error } = await supabaseClient.rpc(
                     "activar_servicio_gasto",

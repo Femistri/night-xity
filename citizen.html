@@ -171,6 +171,11 @@
             margin-top: 5px;
         }
 
+        #dm-variable-requests-panel,
+        #dm-payroll-panel {
+            grid-column: 1 / -1;
+        }
+
         #dm-variable-requests-panel {
             margin-top: 26px;
             padding-top: 18px;
@@ -459,6 +464,45 @@
     
    <div class="grid" id="citizen-content">
 
+<details id="dm-variable-requests-panel" hidden>
+    <summary>BANDEJA GLOBAL DE GASTOS VARIABLES // ARQUITECTO</summary>
+    <p>Bandeja general: reúne solicitudes pendientes de todos los personajes. Asigna el importe antes de aprobar; la aprobación registra el cargo.</p>
+    <div id="dm-variable-requests">CARGANDO...</div>
+    <div id="dm-variable-message" role="status" aria-live="polite"></div>
+</details>
+<details id="dm-payroll-panel" hidden>
+    <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
+    <p>Los salarios automáticos comienzan a los 42 días y se repiten cada 42 días. Los trabajos se pagan una sola vez.</p>
+    <label for="dm-payroll-character">PERSONAJE</label>
+    <select id="dm-payroll-character" class="value"></select>
+    <form id="dm-salary-form">
+        <h3>CREAR SALARIO PERIÓDICO</h3>
+        <label for="dm-salary-position">PUESTO</label>
+        <input id="dm-salary-position" required maxlength="120" placeholder="Puesto o empleo">
+        <label for="dm-salary-amount">MONTO POR CICLO</label>
+        <input id="dm-salary-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
+        <button type="submit">PROGRAMAR SALARIO</button>
+    </form>
+    <form id="dm-manual-payment-form">
+        <h3>PAGO PUNTUAL</h3>
+        <label for="dm-payment-type">TIPO</label>
+        <select id="dm-payment-type" class="value">
+            <option value="trabajo">TRABAJO</option>
+            <option value="salario_manual">SALARIO MANUAL</option>
+        </select>
+        <label for="dm-payment-concept">CONCEPTO</label>
+        <input id="dm-payment-concept" required maxlength="200" placeholder="Trabajo realizado o periodo">
+        <label for="dm-payment-amount">MONTO</label>
+        <input id="dm-payment-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
+        <button type="submit">EMITIR PAGO</button>
+    </form>
+    <div id="dm-payroll-message" role="status" aria-live="polite"></div>
+    <h3>SALARIOS ACTIVOS</h3>
+    <div id="dm-payroll-list">CARGANDO...</div>
+    <h3>PAGOS RECIENTES</h3>
+    <div id="dm-payment-history">CARGANDO...</div>
+</details>
+
 
     <!-- =========================
          IDENTIDAD
@@ -641,44 +685,6 @@
         <summary>SOLICITUDES DE VIVIENDA // ARQUITECTO</summary>
         <div id="dm-housing-requests">CARGANDO...</div>
     </details>
-</details>
-<details id="dm-variable-requests-panel" hidden>
-    <summary>BANDEJA GLOBAL DE GASTOS VARIABLES // ARQUITECTO</summary>
-    <p>Bandeja general: reúne solicitudes pendientes de todos los personajes. Asigna el importe antes de aprobar; la aprobación registra el cargo.</p>
-    <div id="dm-variable-requests">CARGANDO...</div>
-    <div id="dm-variable-message" role="status" aria-live="polite"></div>
-</details>
-<details id="dm-payroll-panel" hidden>
-    <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
-    <p>Los salarios automáticos comienzan a los 42 días y se repiten cada 42 días. Los trabajos se pagan una sola vez.</p>
-    <label for="dm-payroll-character">PERSONAJE</label>
-    <select id="dm-payroll-character" class="value"></select>
-    <form id="dm-salary-form">
-        <h3>CREAR SALARIO PERIÓDICO</h3>
-        <label for="dm-salary-position">PUESTO</label>
-        <input id="dm-salary-position" required maxlength="120" placeholder="Puesto o empleo">
-        <label for="dm-salary-amount">MONTO POR CICLO</label>
-        <input id="dm-salary-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
-        <button type="submit">PROGRAMAR SALARIO</button>
-    </form>
-    <form id="dm-manual-payment-form">
-        <h3>PAGO PUNTUAL</h3>
-        <label for="dm-payment-type">TIPO</label>
-        <select id="dm-payment-type" class="value">
-            <option value="trabajo">TRABAJO</option>
-            <option value="salario_manual">SALARIO MANUAL</option>
-        </select>
-        <label for="dm-payment-concept">CONCEPTO</label>
-        <input id="dm-payment-concept" required maxlength="200" placeholder="Trabajo realizado o periodo">
-        <label for="dm-payment-amount">MONTO</label>
-        <input id="dm-payment-amount" required type="number" min="0.01" step="0.01" placeholder="CORPOS">
-        <button type="submit">EMITIR PAGO</button>
-    </form>
-    <div id="dm-payroll-message" role="status" aria-live="polite"></div>
-    <h3>SALARIOS ACTIVOS</h3>
-    <div id="dm-payroll-list">CARGANDO...</div>
-    <h3>PAGOS RECIENTES</h3>
-    <div id="dm-payment-history">CARGANDO...</div>
 </details>
     </section>
 

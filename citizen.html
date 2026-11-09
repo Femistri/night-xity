@@ -171,6 +171,32 @@
             margin-top: 5px;
         }
 
+        #dm-variable-requests-panel {
+            margin-top: 26px;
+            padding-top: 18px;
+            border-top: 2px solid #00ff9c;
+        }
+
+        #dm-variable-requests-panel > p {
+            margin: 12px 0 18px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        .dm-global-request {
+            margin: 18px 0;
+            padding: 14px 12px;
+            border: 1px solid #333;
+        }
+
+        .dm-request-player {
+            display: block;
+            margin-bottom: 6px;
+            color: #00ff9c;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
 
         .body-placeholder {
             min-height: 400px;
@@ -617,8 +643,8 @@
     </details>
 </details>
 <details id="dm-variable-requests-panel" hidden>
-    <summary>SOLICITUDES DE GASTOS VARIABLES // ARQUITECTO</summary>
-    <p>Asigna el importe antes de aprobar. La aprobación registra el cargo según las reglas económicas.</p>
+    <summary>BANDEJA GLOBAL DE GASTOS VARIABLES // ARQUITECTO</summary>
+    <p>Bandeja general: reúne solicitudes pendientes de todos los personajes. Asigna el importe antes de aprobar; la aprobación registra el cargo.</p>
     <div id="dm-variable-requests">CARGANDO...</div>
     <div id="dm-variable-message" role="status" aria-live="polite"></div>
 </details>
@@ -1841,7 +1867,7 @@ if (esDM) {
         } else {
             solicitudesPendientes.forEach(solicitud => {
                 const tarjeta = document.createElement("div");
-                tarjeta.className = "item";
+                tarjeta.className = "item dm-global-request";
                 tarjeta.dataset.variableRequest = solicitud.id;
 
                 const titulo = document.createElement("div");
@@ -1852,9 +1878,12 @@ if (esDM) {
                 const gastoSolicitud = gastosVariables.find(
                     gasto => gasto.id === solicitud.gasto_id
                 );
-                titulo.textContent =
-                    (personajeSolicitud?.nombre_clave || "PERSONAJE") +
-                    " — " + (gastoSolicitud?.nombre || solicitud.gasto_id);
+                const nombreJugador = document.createElement("span");
+                nombreJugador.className = "dm-request-player";
+                nombreJugador.textContent = personajeSolicitud?.nombre_clave || "PERSONAJE";
+                const nombreGasto = document.createElement("span");
+                nombreGasto.textContent = gastoSolicitud?.nombre || solicitud.gasto_id;
+                titulo.append(nombreJugador, nombreGasto);
 
                 const fecha = document.createElement("div");
                 fecha.className = "item-info";

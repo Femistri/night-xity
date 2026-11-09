@@ -323,18 +323,26 @@
     <section class="panel" id="acceso-jugador" aria-live="polite">
         <h2>ACCESO CIUDADANO</h2>
         <div id="formulario-acceso">
-            <p>Inicia sesión para identificarte y consultar tus personajes asignados.</p>
+            <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
             <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
-            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" required>
+            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
             <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
+            <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
             <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
         </div>
         <div id="selector-personaje-contenedor" hidden>
             <p id="jugador-identificado"></p>
-            <label for="personaje-asignado">PERSONAJE:</label>
+            <label for="personaje-asignado">PERSONAJES DE TU CUENTA:</label>
             <select id="personaje-asignado">
-                <option value="">CARGANDO PERSONAJES...</option>
+                <option value="">AÚN NO TIENES PERSONAJES</option>
             </select>
+            <div id="personajes-disponibles-contenedor">
+                <p>ELIGE UN PERSONAJE DISPONIBLE (HASTA TRES POR CUENTA).</p>
+                <select id="personaje-disponible">
+                    <option value="">CARGANDO PERSONAJES DISPONIBLES...</option>
+                </select>
+                <button id="boton-elegir-personaje" type="button" disabled>ELEGIR PERSONAJE</button>
+            </div>
             <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
         <div id="acceso-mensaje"></div>
@@ -736,6 +744,29 @@ cargarTienda();
         panel.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
+    async function cargarPersonajesDisponibles() {
+        const contenedor = document.getElementById("personajes-disponibles-contenedor");
+        const selector = document.getElementById("personaje-disponible");
+        const boton = document.getElementById("boton-elegir-personaje");
+        const { data, error } = await supabaseClient.rpc("listar_personajes_disponibles");
+        if (error) throw new Error("No se pudieron cargar los personajes disponibles: " + error.message);
+        selector.innerHTML = "";
+        selector.add(new Option("ELIGE UN PERSONAJE", ""));
+        (data || []).forEach(personaje => {
+            selector.add(new Option(
+                `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                personaje.id
+            ));
+        });
+        const sinDisponibles = !data || data.length === 0;
+        if (sinDisponibles) {
+            selector.innerHTML = "";
+            selector.add(new Option("NO HAY PERSONAJES DISPONIBLES O YA ALCANZASTE EL LÍMITE", ""));
+        }
+        boton.disabled = sinDisponibles;
+        contenedor.hidden = false;
+    }
+
     async function cargarPersonajesAsignados() {
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         if (userError || !user) throw new Error("No se pudo identificar la sesión.");
@@ -744,53 +775,80 @@ cargarTienda();
             .from("asignaciones")
             .select("personaje_id, personajes ( id, nombre_clave, clase )")
             .eq("perfil_id", user.id);
-
         if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
 
-                selectorPersonaje.innerHTML = "";
         const personajes = (data || []).map(row => row.personajes).filter(Boolean);
-        const personajeGuardado =
-            localStorage.getItem("nightXity_personaje_activo");
-
-        if (!personajes.length) {
-            selectorPersonaje.innerHTML =
-                '<option value="">NO TIENES PERSONAJES ASIGNADOS</option>';
-        } else {
-            selectorPersonaje.add(new Option("SELECCIONA TU PERSONAJE", ""));
-            personajes.forEach(personaje => {
-                selectorPersonaje.add(new Option(
-                    `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
-                    personaje.id
-                ));
-            });
-
-            if (personajes.some(personaje => personaje.id === personajeGuardado)) {
-                selectorPersonaje.value = personajeGuardado;
-            }
-        }
-
-      selectorPersonaje.addEventListener("change", () => {
-    if (!selectorPersonaje.value) return;
-
-    localStorage.setItem(
-        "nightXity_personaje_activo",
-        selectorPersonaje.value
-    );
-
-    location.reload();
-});
-        const { data: perfil } = await supabaseClient
+        const perfilResult = await supabaseClient
             .from("perfiles")
             .select("rol")
             .eq("id", user.id)
             .maybeSingle();
+        if (perfilResult.error || !perfilResult.data) {
+            throw new Error("Tu perfil todavía no está listo. Confirma tu correo y vuelve a iniciar sesión.");
+        }
+        if (perfilResult.data.rol !== "jugador") {
+            throw new Error("Esta página de acceso es para cuentas de jugador.");
+        }
+
+        selectorPersonaje.innerHTML = "";
+        if (!personajes.length) {
+            selectorPersonaje.add(new Option("AÚN NO TIENES PERSONAJES ASIGNADOS", ""));
+        } else {
+            selectorPersonaje.add(new Option("SELECCIONA TU PERSONAJE ACTIVO", ""));
+            personajes.forEach(personaje => selectorPersonaje.add(new Option(
+                `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                personaje.id
+            )));
+            const guardado = localStorage.getItem("nightXity_personaje_activo");
+            if (personajes.some(personaje => personaje.id === guardado)) {
+                selectorPersonaje.value = guardado;
+            }
+        }
+
+        const perfil = perfilResult.data;
         document.getElementById("jugador-identificado").textContent =
-            `SESIÓN: ${user.email || "USUARIO AUTENTICADO"} // ROL: ${perfil?.rol || "JUGADOR"}`;
-       panel.style.display = "block";
-formulario.hidden = true;
-selectorContenedor.hidden = false;
-mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
+            `SESIÓN: ${user.email || "USUARIO AUTENTICADO"} // ROL: ${perfil.rol.toUpperCase()} // FICHAS: ${personajes.length}/3`;
+        panel.style.display = "block";
+        formulario.hidden = true;
+        selectorContenedor.hidden = false;
+        mensaje.textContent = personajes.length
+            ? "Identidad verificada. Selecciona una ficha o añade otra disponible."
+            : "Cuenta lista. Elige uno de los personajes disponibles.";
+
+        if (!selectorPersonaje.dataset.listenerAttached) {
+            selectorPersonaje.addEventListener("change", () => {
+                if (!selectorPersonaje.value) return;
+                localStorage.setItem("nightXity_personaje_activo", selectorPersonaje.value);
+                location.reload();
+            });
+            selectorPersonaje.dataset.listenerAttached = "true";
+        }
+        await cargarPersonajesDisponibles();
     }
+
+    document.getElementById("personaje-disponible").addEventListener("change", event => {
+        document.getElementById("boton-elegir-personaje").disabled = !event.target.value;
+    });
+
+    document.getElementById("boton-elegir-personaje").addEventListener("click", async event => {
+        const boton = event.currentTarget;
+        const personajeId = document.getElementById("personaje-disponible").value;
+        if (!personajeId) return;
+        boton.disabled = true;
+        mensaje.textContent = "Asignando personaje...";
+        const { error } = await supabaseClient.rpc("gestionar_mis_personajes", {
+            p_accion: "elegir",
+            p_personaje_id: personajeId
+        });
+        if (error) {
+            mensaje.textContent = "No se pudo asignar el personaje: " + error.message;
+            boton.disabled = false;
+            return;
+        }
+        localStorage.setItem("nightXity_personaje_activo", personajeId);
+        mensaje.textContent = "Personaje asignado. Actualizando tu acceso...";
+        location.reload();
+    });
 
         document.addEventListener("click", async event => {
         const boton = event.target.closest(".buy-button");
@@ -935,6 +993,34 @@ mensaje.textContent = "Identidad verificada. Selecciona uno de tus personajes.";
         : "COMPRAR";
         }
     }, true);
+
+    document.getElementById("boton-crear-cuenta").addEventListener("click", async () => {
+        const email = document.getElementById("acceso-correo").value.trim();
+        const password = document.getElementById("acceso-contrasena").value;
+        if (!email || !password) {
+            mensaje.textContent = "Escribe tu correo y una contraseña de al menos 8 caracteres.";
+            return;
+        }
+        if (password.length < 8) {
+            mensaje.textContent = "La contraseña debe tener al menos 8 caracteres.";
+            return;
+        }
+        mensaje.textContent = "Creando tu cuenta de jugador...";
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) {
+            mensaje.textContent = "No se pudo crear la cuenta: " + error.message;
+            return;
+        }
+        if (!data.session) {
+            mensaje.textContent = "Cuenta creada. Revisa tu correo, confirma la dirección y luego inicia sesión para elegir personaje.";
+            return;
+        }
+        try {
+            await cargarPersonajesAsignados();
+        } catch (error) {
+            mensaje.textContent = error.message;
+        }
+    });
 
     document.getElementById("boton-iniciar-sesion").addEventListener("click", async () => {
         const email = document.getElementById("acceso-correo").value.trim();

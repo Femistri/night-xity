@@ -232,6 +232,7 @@
             <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
             <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
             <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
+            <button id="boton-reenviar-confirmacion" type="button">REENVIAR CORREO DE CONFIRMACIÓN</button>
             <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
         </div>
         <div id="selector-personaje-contenedor" hidden>
@@ -1319,7 +1320,13 @@ cargarTienda().finally(() => {
             return;
         }
         mensaje.textContent = "Creando tu cuenta de jugador...";
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: "https://femistri.github.io/night-xity/tienda.html"
+            }
+        });
         if (error) {
             mensaje.textContent = "No se pudo crear la cuenta: " + error.message;
             return;
@@ -1333,6 +1340,25 @@ cargarTienda().finally(() => {
         } catch (error) {
             mensaje.textContent = error.message;
         }
+    });
+
+    document.getElementById("boton-reenviar-confirmacion").addEventListener("click", async () => {
+        const email = document.getElementById("acceso-correo").value.trim();
+        if (!email) {
+            mensaje.textContent = "Escribe el correo de la cuenta pendiente de confirmar.";
+            return;
+        }
+        mensaje.textContent = "Solicitando un nuevo correo de confirmación...";
+        const { error } = await supabaseClient.auth.resend({
+            type: "signup",
+            email,
+            options: {
+                emailRedirectTo: "https://femistri.github.io/night-xity/tienda.html"
+            }
+        });
+        mensaje.textContent = error
+            ? "No se pudo reenviar la confirmación: " + error.message
+            : "Si la cuenta sigue pendiente, enviaremos un nuevo enlace. Revisa tu correo y abre el mensaje más reciente.";
     });
 
     document.getElementById("boton-iniciar-sesion").addEventListener("click", async () => {

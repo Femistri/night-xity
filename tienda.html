@@ -115,6 +115,25 @@
     letter-spacing: 2px;
     line-height: 1.8;
 }
+
+.item-stock {
+    margin-top: 10px;
+    color: #00ff9c;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.item-stock.depleted {
+    color: #ff5555;
+}
+
+.select-item:disabled {
+    border-color: #444;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
         .selection-total {
     margin-top: 18px;
     color: #00ff9c;
@@ -611,13 +630,20 @@ const objetos =
                                 CORPOS
                             </div>
 
+                            ${objeto.restantes !== null && objeto.restantes !== undefined && objeto.restantes !== "null"
+                                ? `<div class="item-stock${Number(objeto.restantes) === 0 ? " depleted" : ""}" data-stock-id="${objeto.id}">EXISTENCIAS: ${Number(objeto.restantes).toLocaleString("es-MX")}</div>`
+                                : ""}
+
                           <button
     class="select-item"
     data-id="${objeto.id}"
     data-name="${objeto.nombre}"
     data-price="${objeto.costo}"
+    data-stock-managed="${objeto.restantes !== null && objeto.restantes !== undefined && objeto.restantes !== "null"}"
+    data-stock-count="${objeto.restantes ?? ""}"
+    ${objeto.restantes !== null && objeto.restantes !== undefined && objeto.restantes !== "null" && Number(objeto.restantes) <= 0 ? "disabled" : ""}
 >
-                                SELECCIONAR
+                                ${objeto.restantes !== null && objeto.restantes !== undefined && objeto.restantes !== "null" && Number(objeto.restantes) <= 0 ? "AGOTADO" : "SELECCIONAR"}
                             </button>
 
                         </div>
@@ -1208,6 +1234,31 @@ cargarTienda().finally(() => {
             throw new Error("Supabase no confirmó la compra.");
         }
 
+        (data.productos || []).forEach(producto => {
+            if (producto.restantes === null || producto.restantes === undefined) return;
+            const botonProducto = Array.from(
+                document.querySelectorAll(".select-item[data-id]")
+            ).find(item =>
+                item.dataset.id === producto.id &&
+                !item.dataset.source
+            );
+            if (!botonProducto) return;
+
+            botonProducto.dataset.stockManaged = "true";
+            botonProducto.dataset.stockCount = String(producto.restantes);
+            const estadoStock = botonProducto.closest(".item")?.querySelector(".item-stock");
+            if (estadoStock) {
+                estadoStock.textContent =
+                    "EXISTENCIAS: " + Number(producto.restantes).toLocaleString("es-MX");
+                estadoStock.classList.toggle("depleted", Number(producto.restantes) === 0);
+            }
+            if (Number(producto.restantes) === 0) {
+                botonProducto.disabled = true;
+                botonProducto.classList.remove("selected");
+                botonProducto.textContent = "AGOTADO";
+            }
+        });
+
         mensaje.textContent =
             "Compra confirmada para " + data.personaje +
             ". Total: " + Number(data.total).toLocaleString("es-MX") +
@@ -1219,6 +1270,11 @@ cargarTienda().finally(() => {
 
             seleccionados.forEach(item => {
                 item.classList.remove("selected");
+                if (item.dataset.stockManaged === "true" && Number(item.dataset.stockCount) <= 0) {
+                    item.disabled = true;
+                    item.textContent = "AGOTADO";
+                    return;
+                }
                 if (item.dataset.subscriptionState === "activa") item.textContent = "SERVICIO ACTIVO";
                 else if (item.dataset.subscriptionState === "suspendida") item.textContent = item.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                 else if (item.dataset.grupo === "variable") item.textContent = "SOLICITAR AL DM";
@@ -1334,4 +1390,5 @@ cargarTienda().finally(() => {
 </body>
 
 </html>
+
 

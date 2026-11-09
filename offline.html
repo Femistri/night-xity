@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Archivo de campaña de Night Xity: cronología canónica, world building, propaganda corporativa y memoria de las partidas dentro de HomieVerse.">
+  <title>OFFLINE // Archivo de Night Xity</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b0d0e; --panel:#111516; --ink:#eee; --muted:#9a9a9a; --line:#3c4445; --green:#00ff9c; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 Arial,Helvetica,sans-serif; }
+    a { color:var(--green); }
+    .archive { width:min(1160px,92%); margin:auto; padding:28px 0 64px; }
+    .top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; border-bottom:1px solid var(--line); padding-bottom:18px; }
+    .kicker { margin:0; color:var(--muted); font-size:.76rem; letter-spacing:.2em; text-transform:uppercase; }
+    .button { display:inline-block; padding:9px 14px; border:1px solid var(--green); color:var(--green); text-decoration:none; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
+    .button:hover { background:var(--green); color:var(--bg); }
+    .hero { padding:54px 0 38px; border-bottom:1px solid var(--line); }
+    .hero h1 { margin:8px 0 18px; font-size:clamp(3rem,10vw,7rem); line-height:.92; letter-spacing:.07em; }
+    .hero p { max-width:760px; color:#c5c5c5; }
+    .subline { color:var(--green)!important; font-size:.86rem; letter-spacing:.16em; text-transform:uppercase; }
+    .quicklinks { display:flex; flex-wrap:wrap; gap:9px; padding:22px 0; border-bottom:1px solid var(--line); }
+    .quicklinks a { padding:7px 10px; border:1px solid var(--line); text-decoration:none; color:var(--ink); font-size:.78rem; letter-spacing:.06em; }
+    .quicklinks a:hover { border-color:var(--green); color:var(--green); }
+    .section { padding:38px 0; border-bottom:1px solid var(--line); scroll-margin-top:18px; }
+    .section h2 { margin:6px 0 12px; font-size:clamp(1.7rem,4vw,2.6rem); line-height:1.15; }
+    .section-intro { max-width:780px; color:#bbb; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); gap:15px; margin-top:22px; }
+    .card { min-width:0; padding:18px; border:1px solid var(--line); background:linear-gradient(145deg,rgba(0,255,156,.035),transparent 55%); }
+    .card h3 { margin:0 0 8px; font-size:1.05rem; }
+    .card p { margin:8px 0; color:#b4b4b4; }
+    .year { color:var(--green); font-weight:700; letter-spacing:.12em; }
+    figure { margin:24px 0 0; padding:12px; border:1px solid var(--line); background:#080a0b; }
+    figure img { display:block; width:100%; height:auto; }
+    figcaption { padding:10px 4px 0; color:var(--muted); font-size:.85rem; }
+    .social-feed { display:block; width:100%; max-width:780px; height:720px; margin:24px auto 12px; border:1px solid var(--line); background:#080a0b; }
+    .feed-fallback { text-align:center; color:var(--muted); font-size:.9rem; }
+    .timeline-note { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr)); gap:12px; margin-top:20px; }
+    .timeline-note article { padding:14px; border-left:2px solid var(--green); background:var(--panel); }
+    .timeline-note p { margin:7px 0 0; color:#bbb; font-size:.92rem; }
+    .quote { margin:22px 0; padding:18px 20px; border-left:3px solid var(--green); background:var(--panel); font-size:1.15rem; letter-spacing:.08em; }
+    .footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:15px; padding-top:26px; color:var(--muted); font-size:.76rem; letter-spacing:.12em; }
+    @media(max-width:600px) { .archive { width:90%; } .hero { padding-top:38px; } .section { padding:30px 0; } }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+  <main class="archive">
+    <header class="top">
+      <p class="kicker">Night Xity // Archivo de campaña</p>
+      <a class="button" href="index.html">← Volver a la portada</a>
+    </header>
+
+    <section class="hero">
+      <p class="kicker">2066 // Sistema activo</p>
+      <h1>OFFLINE</h1>
+      <p class="subline">Cronología · world building · propaganda · memoria de las partidas</p>
+      <p>Este archivo reúne lo que existe fuera de Citizen Net: el contexto de la campaña, los hitos canónicos, la estética de la ciudad y los rastros que dejan sus habitantes. Night Xity es una parte del HomieVerse; su historia se juega en la mesa y se conserva aquí.</p>
+      <p>El archivo se actualiza conforme avanza la campaña. La cronología visual que acompaña esta página fija el marco histórico de 2020 a 2066.</p>
+    </section>
+
+    <nav class="quicklinks" aria-label="Secciones del archivo">
+      <a href="#cronologia">CRONOLOGÍA CANÓNICA</a>
+      <a href="#worldbuilding">WORLD BUILDING</a>
+      <a href="#corporativos">PROPAGANDA CORPORATIVA</a>
+      <a href="#partidas">FOTOS DE PARTIDAS</a>
+      <a href="#homieverse">HOMIEVERSE</a>
+    </nav>
+
+    <section class="section" id="cronologia">
+      <p class="kicker">01 // Historia canon</p>
+      <h2>Línea del colapso global</h2>
+      <p class="section-intro">El marco de campaña recorre el colapso global entre 2020 y 2066: crisis climática y económica, desaparición de instituciones, guerras corporativas y el ascenso de Xcatec. La línea visual conserva los hitos que fijan el trasfondo jugado.</p>
+      <figure>
+        <img src="Night_Xity_Linea_del_colapso_global_2020-2066.png" alt="Línea canónica de Night Xity: colapso global y trasfondo macroeconómico entre 2020 y 2066" loading="lazy" decoding="async">
+        <figcaption>Night Xity // Línea del colapso global y trasfondo macroeconómico, 2020–2066. “Todo deja huella. Todo tiene dueño.”</figcaption>
+      </figure>
+      <div class="timeline-note">
+        <article><span class="year">2020s</span><p>Pandemias, cambio climático, crisis económica y desertificación aceleran la caída de los estados de bienestar.</p></article>
+        <article><span class="year">2030s</span><p>Se fragmentan las naciones, crecen los éxodos y Xcatec reconoce y consolida un nuevo mercado corporativo.</p></article>
+        <article><span class="year">2040s</span><p>La escasez de agua y alimentos transforma territorios en zonas de disputa; la península de Yucatán enfrenta la subida del mar.</p></article>
+        <article><span class="year">2050s</span><p>Desaparecen organismos globales y superpotencias. Las guerras, la radiación y el aislamiento reordenan la vida civil.</p></article>
+        <article><span class="year">2061–2066</span><p>El éxodo alcanza las urbes fortificadas. Night Xity y Xcatec se consolidan como enclave de turismo de lujo y biotecnología.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="worldbuilding">
+      <p class="kicker">02 // El mundo de juego</p>
+      <h2>Una ciudad construida sobre las ruinas</h2>
+      <p class="section-intro">Night Xity es el paraíso que Xcatec construyó para preservar experiencias de un mundo que ya no existe. La ciudad combina corporaciones, barrios, tecnología y supervivencia en el año 2066.</p>
+      <blockquote class="quote">TODO DEJA HUELLA. TODO TIENE DUEÑO.</blockquote>
+      <div class="grid">
+        <article class="card"><h3>Xcatec</h3><p>El poder corporativo que impulsa la ciudad y convierte la preservación, el turismo y la biotecnología en negocio.</p></article>
+        <article class="card"><h3>La ciudad</h3><p>Un enclave fortificado para visitantes de alta gama y empresarios, levantado mientras el mundo exterior vive desplazamientos y crisis.</p></article>
+        <article class="card"><h3>La vida ciudadana</h3><p>Cada personaje navega una economía opresiva, compra bienes y servicios, y deja un rastro persistente en Citizen Net.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="corporativos">
+      <p class="kicker">03 // Imagen pública</p>
+      <h2>Propaganda corporativa</h2>
+      <p class="section-intro">La publicidad es parte del world building: Xcatec vende seguridad, lujo y futuro mientras la cronología registra el coste humano de ese paraíso. Los anuncios y piezas visuales se incorporarán aquí como documentos canónicos de campaña.</p>
+      <div class="grid">
+        <article class="card"><h3>Señales de Xcatec</h3><p>Logotipos, lemas, campañas y promesas corporativas que definen la estética oficial de Night Xity.</p><a class="button" href="https://www.facebook.com/NightXityCyberPunk" target="_blank" rel="noopener noreferrer">Ver publicaciones oficiales ↗</a></article>
+        <article class="card"><h3>Estética del mundo</h3><p>Carteles, anuncios, arquitectura, tecnología y escenas de campaña forman el archivo visual de la ciudad.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="partidas">
+      <p class="kicker">04 // Memoria de mesa</p>
+      <h2>Fotos y momentos de las partidas</h2>
+      <p class="section-intro">Las sesiones también forman parte del canon compartido: los encuentros, personajes, escenarios y decisiones que construyen Night Xity en la mesa.</p>
+      <div class="grid">
+        <article class="card"><h3>Registro fotográfico</h3><p>Publicaciones recientes de Night Xity: fotos, anuncios y memoria visual. Si Facebook no carga aquí, abre la página oficial.</p><a class="button" href="https://www.facebook.com/NightXityCyberPunk" target="_blank" rel="noopener noreferrer">Abrir Facebook de Night Xity ↗</a></article>
+        <article class="card"><h3>Momentos canon</h3><p>Los hitos de campaña se irán añadiendo junto con su fecha, contexto y material visual, manteniendo la línea temporal acordada en mesa.</p></article>
+      </div>
+      <iframe class="social-feed" title="Publicaciones, fotografías y anuncios de Night Xity en Facebook" src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FNightXityCyberPunk&amp;tabs=timeline&amp;width=780&amp;height=720&amp;small_header=true&amp;adapt_container_width=true&amp;hide_cover=false&amp;show_facepile=false" width="780" height="720" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <p class="feed-fallback"><a href="https://www.facebook.com/NightXityCyberPunk" target="_blank" rel="noopener noreferrer">Ver fotos y publicaciones directamente en Facebook ↗</a></p>
+    </section>
+
+    <section class="section" id="homieverse">
+      <p class="kicker">05 // Universo compartido</p>
+      <h2>Night Xity dentro de HomieVerse</h2>
+      <p class="section-intro">HomieVerse es el universo común donde viven las experiencias, historias y mesas de Homie Ludens. Night Xity aporta su propia ciudad, cronología y campaña a esa memoria colectiva.</p>
+      <div class="grid">
+        <article class="card"><h3>¿Qué es HomieVerse y qué lo hace complejo?</h3><p>Conecta con la explicación y el archivo histórico de HomieVerse.</p><a class="button" href="https://femistri.github.io/larp-homieverse/archivo.html#universo" target="_blank" rel="noopener noreferrer">Explorar HomieVerse ↗</a></article>
+        <article class="card"><h3>Memoria compartida</h3><p>La historia de Night Xity se conserva junto a las demás experiencias que construyen el universo de Homie Ludens.</p><a class="button" href="https://femistri.github.io/larp-homieverse/archivo.html" target="_blank" rel="noopener noreferrer">Abrir archivo histórico ↗</a></article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>NIGHT XITY // OFFLINE // 2066</span>
+      <a href="index.html">Volver a la portada</a>
+    </footer>
+  </main>
+</body>
+</html>

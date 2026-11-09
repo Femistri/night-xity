@@ -13,10 +13,13 @@
     <style>
         /* La identidad y el saldo solo se muestran después de iniciar sesión. */
         .citizen-balance { display: none !important; }
-        #acceso-jugador { display: none; margin-top: 22px; border-top: 1px solid #333; padding-top: 20px; }
+        #acceso-jugador { margin: 0 0 22px; }
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
+        #compra-mensaje { margin-top:12px; min-height:1.3em; color:#aaa; }
+        #compra-mensaje.error { color:#ff8585; }
+        #compra-mensaje:empty { display:none; }
         #estado-economico { margin-top:18px; padding-top:14px; border-top:1px solid #333; }
         #estado-economico .deuda { border:1px solid #654; padding:12px; margin:10px 0; }
         #estado-economico button { margin-top:8px; padding:8px 12px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
@@ -221,6 +224,39 @@
 
 <main>
 
+    <section class="panel" id="acceso-jugador" aria-live="polite">
+        <h2>ACCESO CIUDADANO</h2>
+        <div id="formulario-acceso">
+            <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
+            <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
+            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
+            <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
+            <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
+            <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
+        </div>
+        <div id="selector-personaje-contenedor" hidden>
+            <p id="jugador-identificado"></p>
+            <label for="personaje-asignado">PERSONAJES DE TU CUENTA:</label>
+            <select id="personaje-asignado">
+                <option value="">AÚN NO TIENES PERSONAJES</option>
+            </select>
+            <div id="personajes-disponibles-contenedor">
+                <p>ELIGE UN PERSONAJE DISPONIBLE (HASTA TRES POR CUENTA).</p>
+                <select id="personaje-disponible">
+                    <option value="">CARGANDO PERSONAJES DISPONIBLES...</option>
+                </select>
+                <button id="boton-elegir-personaje" type="button" disabled>ELEGIR PERSONAJE</button>
+            </div>
+            <div id="estado-economico" hidden>
+                <h3>SERVICIOS Y OBLIGACIONES</h3>
+                <div id="suscripciones-personaje"></div>
+                <div id="obligaciones-personaje"></div>
+            </div>
+            <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
+        </div>
+        <div id="acceso-mensaje" aria-live="polite"></div>
+    </section>
+
     <section class="panel">
 
         <h2>VIDA COTIDIANA</h2>
@@ -339,41 +375,9 @@
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
             </div>
+            <div id="compra-mensaje" role="status" aria-live="polite"></div>
 
         </section>
-    
-    <section class="panel" id="acceso-jugador" aria-live="polite">
-        <h2>ACCESO CIUDADANO</h2>
-        <div id="formulario-acceso">
-            <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
-            <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
-            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
-            <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
-            <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
-            <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
-        </div>
-        <div id="selector-personaje-contenedor" hidden>
-            <p id="jugador-identificado"></p>
-            <label for="personaje-asignado">PERSONAJES DE TU CUENTA:</label>
-            <select id="personaje-asignado">
-                <option value="">AÚN NO TIENES PERSONAJES</option>
-            </select>
-            <div id="personajes-disponibles-contenedor">
-                <p>ELIGE UN PERSONAJE DISPONIBLE (HASTA TRES POR CUENTA).</p>
-                <select id="personaje-disponible">
-                    <option value="">CARGANDO PERSONAJES DISPONIBLES...</option>
-                </select>
-                <button id="boton-elegir-personaje" type="button" disabled>ELEGIR PERSONAJE</button>
-            </div>
-            <div id="estado-economico" hidden>
-                <h3>SERVICIOS Y OBLIGACIONES</h3>
-                <div id="suscripciones-personaje"></div>
-                <div id="obligaciones-personaje"></div>
-            </div>
-            <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
-        </div>
-        <div id="acceso-mensaje"></div>
-    </section>
 </main>
 
 
@@ -812,6 +816,7 @@ cargarTienda().finally(() => {
 (() => {
     const panel = document.getElementById("acceso-jugador");
     const mensaje = document.getElementById("acceso-mensaje");
+    const mensajeCompra = document.getElementById("compra-mensaje");
     const formulario = document.getElementById("formulario-acceso");
     const selectorContenedor = document.getElementById("selector-personaje-contenedor");
     const selectorPersonaje = document.getElementById("personaje-asignado");
@@ -1070,6 +1075,8 @@ cargarTienda().finally(() => {
         event.preventDefault();
         event.stopImmediatePropagation();
 
+        mensajeCompra.textContent = "";
+        mensajeCompra.classList.remove("error");
         boton.disabled = true;
         boton.textContent = "PROCESANDO...";
 
@@ -1118,11 +1125,11 @@ cargarTienda().finally(() => {
                 );
                 if (error) throw error;
                 if (!data?.exito) {
-                    mensaje.textContent = data?.mensaje || `Saldo insuficiente. Liquidación: ${Number(data?.total || 0).toLocaleString("es-MX")} CORPOS; saldo: ${Number(data?.saldo_actual || 0).toLocaleString("es-MX")} CORPOS.`;
+                    mensajeCompra.textContent = data?.mensaje || `Saldo insuficiente. Liquidación: ${Number(data?.total || 0).toLocaleString("es-MX")} CORPOS; saldo: ${Number(data?.saldo_actual || 0).toLocaleString("es-MX")} CORPOS.`;
                     await cargarEstadoEconomico(personajeId);
                     return;
                 }
-                mensaje.textContent = `Servicio reactivado. Total liquidado: ${Number(data.total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
+                mensajeCompra.textContent = `Servicio reactivado. Total liquidado: ${Number(data.total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
                 await cargarEstadoEconomico(personajeId);
             } else if (serviciosRecurrentes.length) {
                 if (seleccionados.length !== 1) {
@@ -1134,11 +1141,11 @@ cargarTienda().finally(() => {
                 );
                 if (error) throw error;
                 if (!data?.exito) {
-                    mensaje.textContent = data?.mensaje || "No se pudo activar el servicio.";
+                    mensajeCompra.textContent = data?.mensaje || "No se pudo activar el servicio.";
                     await cargarEstadoEconomico(personajeId);
                     return;
                 }
-                mensaje.textContent = `Servicio activado. Primer ciclo: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS; siguiente cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
+                mensajeCompra.textContent = `Servicio activado. Primer ciclo: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS; siguiente cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
                 await cargarEstadoEconomico(personajeId);
             } else if (vivienda.length) {
                 if (seleccionados.length !== 1) {
@@ -1166,7 +1173,7 @@ cargarTienda().finally(() => {
                     throw new Error("Supabase no confirmó la operación de vivienda.");
                 }
 
-                mensaje.textContent = viviendaId === "VIV-003"
+                mensajeCompra.textContent = viviendaId === "VIV-003"
                     ? `Vivienda activada. Cargo inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`
                     : `Solicitud enviada al DM para ${data.vivienda}. No se cobrará hasta que la apruebe.`;
                 if (viviendaId === "VIV-003") await cargarEstadoEconomico(personajeId);
@@ -1195,7 +1202,7 @@ cargarTienda().finally(() => {
             throw new Error("Supabase no confirmó la solicitud del evento.");
         }
 
-        mensaje.textContent =
+        mensajeCompra.textContent =
             `Solicitud enviada al Arquitecto para ${data.evento}. No se cobrará hasta que la apruebe.`;
     } else {
         const variables = seleccionados.filter(
@@ -1210,7 +1217,7 @@ cargarTienda().finally(() => {
             });
             if (error) throw error;
             if (!data?.exito) throw new Error("Supabase no confirmó la solicitud variable.");
-            mensaje.textContent = `Solicitud enviada al DM para ${data.gasto}. No se cobrará hasta su aprobación.`;
+            mensajeCompra.textContent = `Solicitud enviada al DM para ${data.gasto}. No se cobrará hasta su aprobación.`;
         } else {
         if (seleccionados.some(
             item => item.dataset.source === "gasto-vida"
@@ -1259,7 +1266,7 @@ cargarTienda().finally(() => {
             }
         });
 
-        mensaje.textContent =
+        mensajeCompra.textContent =
             "Compra confirmada para " + data.personaje +
             ". Total: " + Number(data.total).toLocaleString("es-MX") +
             " CORPOS. Saldo restante: " +
@@ -1286,7 +1293,8 @@ cargarTienda().finally(() => {
             document.getElementById("selected-products").textContent =
                 "Operación registrada en DunoXusa.";
         } catch (error) {
-            mensaje.textContent = "Operación no completada: " + error.message;
+            mensajeCompra.textContent = "Operación no completada: " + error.message;
+            mensajeCompra.classList.add("error");
         } finally {
             boton.disabled = false;
             const seleccion = document.querySelector(".select-item.selected");

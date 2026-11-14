@@ -1026,6 +1026,18 @@ const supabaseClient = window.supabase.createClient(
 
 console.log("NIGHT XITY // SUPABASE CONECTADO");
 
+const etiquetaPersonaje = personaje => {
+    const clave = personaje?.nombre_clave || "PERSONAJE";
+    const nombre = (personaje?.nombre_jugador || "").trim();
+    return nombre && nombre !== clave ? nombre + " // " + clave : clave;
+};
+const escaparHTML = valor => String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
 async function cargarDatosCitizenNet() {
     try {
 
@@ -1061,7 +1073,7 @@ if (esDM) {
     const { data: personajes, error: errorPersonajes } =
         await supabaseClient
             .from("personajes")
-            .select("id, nombre_clave, clase, ficha")
+            .select("id, nombre_clave, nombre_jugador, clase, ficha")
             .order("nombre_clave", { ascending: true });
 
     if (errorPersonajes) {
@@ -1076,7 +1088,7 @@ if (esDM) {
     const { data: asignaciones, error: errorAsignaciones } =
         await supabaseClient
             .from("asignaciones")
-            .select("personaje_id, personajes ( id, nombre_clave, clase, ficha )")
+            .select("personaje_id, personajes ( id, nombre_clave, nombre_jugador, clase, ficha )")
             .eq("perfil_id", user.id);
 
     if (errorAsignaciones) {
@@ -1121,7 +1133,7 @@ if (esDM) {
 
     personajesAsignados.forEach(personaje => {
         selectorDM.add(
-            new Option(personaje.nombre_clave, personaje.id)
+            new Option(etiquetaPersonaje(personaje), personaje.id)
         );
     });
 
@@ -1194,7 +1206,7 @@ if (esDM) {
     panelPagos.hidden = false;
     selectorPago.replaceChildren(new Option("ELIGE PERSONAJE", ""));
     personajesAsignados.forEach(personaje =>
-        selectorPago.add(new Option(personaje.nombre_clave, personaje.id))
+        selectorPago.add(new Option(etiquetaPersonaje(personaje), personaje.id))
     );
     selectorPago.value = personajeActivo.id;
 
@@ -1203,10 +1215,10 @@ if (esDM) {
     const cargarNominasYPagos = async () => {
         const [{ data: nominas, error: errorNominas }, { data: pagos, error: errorPagos }] = await Promise.all([
             supabaseClient.from("nominas_jugadores")
-                .select("id, personaje_id, puesto, monto, proximo_pago, personajes(nombre_clave)")
+                .select("id, personaje_id, puesto, monto, proximo_pago, personajes(nombre_clave, nombre_jugador)")
                 .eq("estado", "activa").order("proximo_pago", { ascending: true }),
             supabaseClient.from("pagos_dm")
-                .select("id, personaje_id, tipo, monto, concepto, pagado_en, personajes(nombre_clave)")
+                .select("id, personaje_id, tipo, monto, concepto, pagado_en, personajes(nombre_clave, nombre_jugador)")
                 .order("pagado_en", { ascending: false }).limit(30)
         ]);
         if (errorNominas || errorPagos) {
@@ -1297,7 +1309,7 @@ selectorCitizen.innerHTML = "";
 personajesAsignados.forEach(personaje => {
     selectorCitizen.add(
         new Option(
-            personaje.nombre_clave,
+            etiquetaPersonaje(personaje),
             personaje.id
         )
     );
@@ -1426,7 +1438,7 @@ if (!errorPerfil && perfilActual?.rol === "dm") {
     const { data: solicitudesDM, error: errorSolicitudesDM } =
         await supabaseClient
             .from("solicitudes_gastos_vida")
-            .select("id, gasto_id, importe_solicitado, mensaje, fecha_solicitud, personajes(nombre_clave)")
+            .select("id, gasto_id, importe_solicitado, mensaje, fecha_solicitud, personajes(nombre_clave, nombre_jugador)")
             .eq("tipo_solicitud", "cambio_vivienda")
         .eq("personaje_id", personajeActivo.id)
             .eq("estado", "pendiente")
@@ -1443,7 +1455,7 @@ panelSolicitudesDM.open = true;
         listaSolicitudesDM.innerHTML = solicitudesDM.map(solicitud => `
             <div class="item">
                 <div class="item-name">
-                    ${solicitud.personajes?.nombre_clave || "PERSONAJE"}
+                    ${escaparHTML(etiquetaPersonaje(solicitud.personajes))}
                     — ${nombreVivienda(solicitud.gasto_id)}
                 </div>
                 <div class="item-info">
@@ -1495,6 +1507,8 @@ const ciudadano = {
     ...ficha,
     identidad: {
         ...(ficha.identidad || {}),
+        nombre_jugador:
+            personajeActivo.nombre_jugador || ficha.identidad?.nombre_jugador || null,
         nombre_clave:
             personajeActivo.nombre_clave
             || ficha.identidad?.nombre_clave
@@ -1886,7 +1900,7 @@ if (esDM) {
                 );
                 const nombreJugador = document.createElement("span");
                 nombreJugador.className = "dm-request-player";
-                nombreJugador.textContent = personajeSolicitud?.nombre_clave || "PERSONAJE";
+                nombreJugador.textContent = etiquetaPersonaje(personajeSolicitud);
                 const nombreGasto = document.createElement("span");
                 nombreGasto.textContent = gastoSolicitud?.nombre || solicitud.gasto_id;
                 titulo.append(nombreJugador, nombreGasto);

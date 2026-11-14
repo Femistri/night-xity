@@ -290,11 +290,27 @@
                 <option value="">AÚN NO TIENES PERSONAJES</option>
             </select>
             <div id="personajes-disponibles-contenedor">
-                <p>ELIGE UN PERSONAJE DISPONIBLE (HASTA TRES POR CUENTA).</p>
+                <p>ELIGE UNA FICHA DISPONIBLE (HASTA TRES POR CUENTA).</p>
                 <select id="personaje-disponible">
-                    <option value="">CARGANDO PERSONAJES DISPONIBLES...</option>
+                    <option value="">CARGANDO FICHAS DISPONIBLES...</option>
                 </select>
-                <button id="boton-elegir-personaje" type="button" disabled>ELEGIR PERSONAJE</button>
+                <button id="boton-elegir-personaje" type="button" disabled>ELEGIR FICHA EXISTENTE</button>
+            </div>
+            <div id="crear-personaje-contenedor" class="item">
+                <h3>CREAR UNA FICHA NUEVA</h3>
+                <p class="item-info">Escribe el nombre de tu personaje y elige su clase. Se creará una ficha básica para completar en Citizen Net. Saldo inicial: 4,710 CORPOS.</p>
+                <label for="nuevo-personaje-nombre">NOMBRE DEL PERSONAJE</label>
+                <input id="nuevo-personaje-nombre" type="text" maxlength="40" autocomplete="off" placeholder="ESCRIBE UN NOMBRE">
+                <label for="nuevo-personaje-clase">CLASE</label>
+                <select id="nuevo-personaje-clase">
+                    <option value="">ELIGE UNA CLASE</option>
+                    <option value="Link">Link</option>
+                    <option value="Data">Data</option>
+                    <option value="Microchip">Microchip</option>
+                    <option value="Backup">Backup</option>
+                </select>
+                <button id="boton-crear-personaje" type="button" disabled>CREAR PERSONAJE</button>
+                <div id="crear-personaje-mensaje" role="status" aria-live="polite"></div>
             </div>
             <div id="estado-economico" hidden>
                 <h3>SERVICIOS Y OBLIGACIONES</h3>
@@ -1022,7 +1038,7 @@ cargarTienda().finally(() => {
         selector.add(new Option("ELIGE UN PERSONAJE", ""));
         (data || []).forEach(personaje => {
             selector.add(new Option(
-                `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                `${personaje.nombre_jugador ? personaje.nombre_jugador + " // " : ""}${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
                 personaje.id
             ));
         });
@@ -1082,7 +1098,7 @@ cargarTienda().finally(() => {
 
         const { data, error } = await supabaseClient
             .from("asignaciones")
-            .select("personaje_id, personajes ( id, nombre_clave, clase )")
+            .select("personaje_id, personajes ( id, nombre_clave, nombre_jugador, clase )")
             .eq("perfil_id", user.id);
         if (error) throw new Error("No se pudieron consultar tus personajes: " + error.message);
         const personajes = (data || []).map(row => row.personajes).filter(Boolean);
@@ -1093,7 +1109,7 @@ cargarTienda().finally(() => {
         } else {
             selectorPersonaje.add(new Option("SELECCIONA TU PERSONAJE ACTIVO", ""));
             personajes.forEach(personaje => selectorPersonaje.add(new Option(
-                `${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                `${personaje.nombre_jugador ? personaje.nombre_jugador + " // " : ""}${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
                 personaje.id
             )));
             const guardado = localStorage.getItem("nightXity_personaje_activo");
@@ -1103,6 +1119,8 @@ cargarTienda().finally(() => {
         }
 
         const perfil = perfilResult.data;
+        const crearContenedor = document.getElementById("crear-personaje-contenedor");
+        if (crearContenedor) crearContenedor.hidden = personajes.length >= 3;
         document.getElementById("jugador-identificado").textContent =
             `SESIÓN: ${user.email || "USUARIO AUTENTICADO"} // ROL: ${perfil.rol.toUpperCase()} // FICHAS: ${personajes.length}/3`;
         panel.style.display = "block";
@@ -1123,6 +1141,36 @@ cargarTienda().finally(() => {
         await cargarPersonajesDisponibles();
         if (selectorPersonaje.value) await cargarEstadoEconomico(selectorPersonaje.value);
     }
+
+    const validarCreacionPersonaje = () => {
+        const nombre = document.getElementById("nuevo-personaje-nombre").value.trim();
+        const clase = document.getElementById("nuevo-personaje-clase").value;
+        document.getElementById("boton-crear-personaje").disabled =
+            !nombre || nombre.length > 40 || !clase;
+    };
+    document.getElementById("nuevo-personaje-nombre").addEventListener("input", validarCreacionPersonaje);
+    document.getElementById("nuevo-personaje-clase").addEventListener("change", validarCreacionPersonaje);
+    document.getElementById("boton-crear-personaje").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        const nombre = document.getElementById("nuevo-personaje-nombre").value.trim();
+        const clase = document.getElementById("nuevo-personaje-clase").value;
+        const status = document.getElementById("crear-personaje-mensaje");
+        if (!nombre || nombre.length > 40 || !clase) return;
+        button.disabled = true;
+        status.textContent = "CREANDO FICHA...";
+        const { data: personajeId, error } = await supabaseClient.rpc("crear_personaje_jugador", {
+            p_nombre_jugador: nombre,
+            p_clase: clase
+        });
+        if (error) {
+            status.textContent = "No se pudo crear el personaje: " + error.message;
+            validarCreacionPersonaje();
+            return;
+        }
+        localStorage.setItem("nightXity_personaje_activo", personajeId);
+        status.textContent = "Ficha creada. Abriendo Citizen Net...";
+        location.reload();
+    });
 
     document.getElementById("personaje-disponible").addEventListener("change", event => {
         document.getElementById("boton-elegir-personaje").disabled = !event.target.value;

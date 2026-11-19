@@ -172,7 +172,8 @@
         }
 
         #dm-variable-requests-panel,
-        #dm-payroll-panel {
+        #dm-payroll-panel,
+        #dm-living-costs-panel {
             grid-column: 1 / -1;
         }
 
@@ -469,6 +470,14 @@
     <p>Bandeja general: reúne solicitudes pendientes de todos los personajes. Asigna el importe antes de aprobar; la aprobación registra el cargo.</p>
     <div id="dm-variable-requests">CARGANDO...</div>
     <div id="dm-variable-message" role="status" aria-live="polite"></div>
+</details>
+<details id="dm-living-costs-panel" hidden>
+    <summary>ACTIVAR COSTOS DE VIDA // ARQUITECTO</summary>
+    <p>Activa un servicio periódico para el personaje seleccionado. Se cobra el primer ciclo ahora y después sigue su periodicidad: mensual cada 42 días o diaria cada día. Los gastos variables, eventos y vivienda conservan su flujo de solicitud/aprobación.</p>
+    <label for="dm-living-cost-selector">SERVICIO PERIÓDICO</label>
+    <select id="dm-living-cost-selector" class="value"></select>
+    <button id="dm-activate-living-cost" type="button">ACTIVAR Y COBRAR PRIMER CICLO</button>
+    <div id="dm-living-cost-message" role="status" aria-live="polite"></div>
 </details>
 <details id="dm-payroll-panel" hidden>
     <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
@@ -1867,6 +1876,78 @@ if (panelEventos) {
     }
 }
         
+if (esDM) {
+    const panelCostosDM = document.getElementById("dm-living-costs-panel");
+    const selectorCostoDM = document.getElementById("dm-living-cost-selector");
+    const botonCostoDM = document.getElementById("dm-activate-living-cost");
+    const mensajeCostoDM = document.getElementById("dm-living-cost-message");
+    panelCostosDM.hidden = false;
+
+    const gastosPeriodicosDM = [
+        ...(gastosVida.obligatorios || []),
+        ...(gastosVida.gastos_opcionales || [])
+    ].filter(gasto => ["mensual", "diaria"].includes(gasto.frecuencia));
+    const estadosPorGastoDM = new Map(
+        (suscripcionesEconomicas || []).map(item => [item.gasto_id, item.estado])
+    );
+    const opcionesDisponiblesDM = errorSuscripciones ? [] : gastosPeriodicosDM.filter(gasto =>
+        !estadosPorGastoDM.has(gasto.id)
+    );
+
+    selectorCostoDM.replaceChildren(new Option("ELIGE UN SERVICIO", ""));
+    opcionesDisponiblesDM.forEach(gasto => {
+        const frecuencia = gasto.frecuencia === "mensual" ? "42 DÍAS" : "DIARIO";
+        selectorCostoDM.add(new Option(
+            `${gasto.nombre} — ${Number(gasto.costo).toLocaleString("es-MX")} CORPOS / ${frecuencia}`,
+            gasto.id
+        ));
+    });
+
+    const gastosSuspendidosDM = gastosPeriodicosDM.filter(gasto =>
+        estadosPorGastoDM.get(gasto.id) === "suspendida"
+    );
+    if (errorSuscripciones) {
+        mensajeCostoDM.textContent = "No se pudieron cargar las suscripciones. Recarga Citizen antes de activar un costo.";
+    } else if (!opcionesDisponiblesDM.length) {
+        mensajeCostoDM.textContent = gastosSuspendidosDM.length
+            ? "No hay servicios nuevos. Hay servicios suspendidos; usa el flujo de reactivación para liquidar deuda y reconexión."
+            : "No hay servicios periódicos pendientes de activar.";
+    }
+
+    botonCostoDM.disabled = !!errorSuscripciones || !opcionesDisponiblesDM.length;
+    botonCostoDM.addEventListener("click", async () => {
+        if (errorSuscripciones) return;
+        const gastoId = selectorCostoDM.value;
+        if (!gastoId) {
+            mensajeCostoDM.textContent = "Elige un servicio periódico.";
+            return;
+        }
+        const gasto = opcionesDisponiblesDM.find(item => item.id === gastoId);
+        if (!gasto) return;
+        const costo = Number(gasto.costo);
+        const confirmado = window.confirm(
+            `Se registrará un egreso de ${costo.toLocaleString("es-MX")} CORPOS para ${etiquetaPersonaje(personajeActivo)} por ${gasto.nombre}. El siguiente cobro será automático según su periodicidad. ¿Continuar?`
+        );
+        if (!confirmado) return;
+
+        botonCostoDM.disabled = true;
+        mensajeCostoDM.textContent = "ACTIVANDO SERVICIO Y REGISTRANDO EGRESO...";
+        const { data, error } = await supabaseClient.rpc(
+            "activar_servicio_gasto_dm",
+            { p_personaje_id: personajeActivo.id, p_gasto_id: gastoId }
+        );
+        if (error || !data?.exito) {
+            mensajeCostoDM.textContent = "No se pudo activar: " +
+                (error?.message || data?.mensaje || "Supabase no confirmó la operación.");
+            botonCostoDM.disabled = false;
+            return;
+        }
+        mensajeCostoDM.textContent =
+            `Servicio activado. Egreso inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Próximo cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
+        location.reload();
+    });
+}
+
 if (esDM) {
     const panelVariables = document.getElementById("dm-variable-requests-panel");
     const listaVariables = document.getElementById("dm-variable-requests");

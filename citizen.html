@@ -1884,7 +1884,7 @@ if (esDM) {
     panelCostosDM.hidden = false;
 
     const gastosPeriodicosDM = [
-        ...(gastosVida.obligatorios || []),
+        ...(gastosVida.gastos_obligatorios || []),
         ...(gastosVida.gastos_opcionales || [])
     ].filter(gasto => ["mensual", "diaria"].includes(gasto.frecuencia));
     const estadosPorGastoDM = new Map(

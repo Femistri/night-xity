@@ -149,34 +149,34 @@
       "costo": 17,
       "frecuencia": "mensual",
       "descripcion": null
+    },
+    {
+      "id": "CV-018",
+      "nombre": "Aportación a servicios de emergencia",
+      "costo": 35,
+      "frecuencia": "mensual",
+      "capacidad_pasajeros": null
     }
   ],
   "gastos_opcionales": [
     {
       "id": "CV-017",
       "nombre": "Desactivar publicidad",
-      "costo": 15.0,
-      "frecuencia": "mensual",
-      "capacidad_pasajeros": null
-    },
-    {
-      "id": "CV-018",
-      "nombre": "Aportación a servicios de emergencia",
-      "costo": 35.0,
+      "costo": 15,
       "frecuencia": "mensual",
       "capacidad_pasajeros": null
     },
     {
       "id": "CV-019",
       "nombre": "Renta de vehículo",
-      "costo": 9.0,
+      "costo": 9,
       "frecuencia": "diaria",
-      "capacidad_pasajeros": 2.0
+      "capacidad_pasajeros": 2
     },
     {
       "id": "CV-020",
       "nombre": "Energía / combustible del vehículo",
-      "costo": 3.0,
+      "costo": 3,
       "frecuencia": "diaria",
       "capacidad_pasajeros": null
     },
@@ -235,14 +235,14 @@
       "id": "EV-001",
       "tipo": "evento",
       "nombre": "Atención para parto y primer mes de vida",
-      "costo": 1200.0,
+      "costo": 1200,
       "frecuencia": "por evento"
     },
     {
       "id": "EV-002",
       "tipo": "evento",
       "nombre": "Muerte / funeral",
-      "costo": 1950.0,
+      "costo": 1950,
       "frecuencia": "por evento"
     }
   ]

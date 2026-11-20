@@ -1659,8 +1659,7 @@ const gastosEventos =
 
 const formatoEstadoCobro = gasto => {
     const esPeriodico =
-        ["obligatorio", "opcional"].includes(gasto.grupo) &&
-        ["mensual", "diaria"].includes(gasto.frecuencia);
+     ["mensual", "diaria"].includes(gasto.frecuencia);
     if (!esPeriodico) return "SIN COBRO PROGRAMADO";
     if (errorSuscripciones) return "ESTADO DE COBRO NO DISPONIBLE";
 

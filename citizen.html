@@ -487,6 +487,46 @@
         <div id="dm-initial-housing-message" role="status" aria-live="polite"></div>
     </div>
 </details>
+<details id="dm-equipment-panel" hidden>
+    <summary>VENTAS, TRANSFERENCIAS Y BAJAS DE EQUIPO // ARQUITECTO</summary>
+    <p>Gestiona un implante o arma del personaje seleccionado. Las ventas a otro PJ mueven CORPOS entre ambas fichas; las ventas a PNJ acreditan al vendedor. Las transferencias no tienen costo ni requieren motivo.</p>
+    <label for="dm-equipment-item">OBJETO</label>
+    <select id="dm-equipment-item" class="value"></select>
+    <label for="dm-equipment-operation">OPERACIÓN</label>
+    <select id="dm-equipment-operation" class="value">
+        <option value="">ELIGE UNA OPERACIÓN</option>
+        <option value="baja">DAR DE BAJA</option>
+        <option value="venta">VENTA</option>
+        <option value="transferencia">TRANSFERENCIA SIN COSTO</option>
+    </select>
+    <div id="dm-equipment-destination-fields" hidden>
+        <label for="dm-equipment-destination-type">DESTINO</label>
+        <select id="dm-equipment-destination-type" class="value">
+            <option value="pj">OTRO PERSONAJE JUGADOR</option>
+            <option value="npc">PNJ / COMERCIO</option>
+        </select>
+        <div id="dm-equipment-recipient-wrap">
+            <label for="dm-equipment-recipient">PERSONAJE DESTINATARIO</label>
+            <select id="dm-equipment-recipient" class="value"></select>
+        </div>
+    </div>
+    <div id="dm-equipment-price-wrap" hidden>
+        <label for="dm-equipment-price">PRECIO DE VENTA (CORPOS)</label>
+        <input id="dm-equipment-price" type="number" min="0.01" step="0.01" placeholder="Importe acordado">
+    </div>
+    <div id="dm-equipment-reason-wrap" hidden>
+        <label for="dm-equipment-reason">MOTIVO DE BAJA</label>
+        <select id="dm-equipment-reason" class="value">
+            <option value="">ELIGE MOTIVO</option>
+            <option value="perdida">PÉRDIDA</option>
+            <option value="descompostura">DESCOMPUESTO</option>
+        </select>
+    </div>
+    <button id="dm-equipment-submit" type="button">REGISTRAR OPERACIÓN</button>
+    <div id="dm-equipment-message" role="status" aria-live="polite"></div>
+    <h3>MOVIMIENTOS RECIENTES DE EQUIPO</h3>
+    <div id="dm-equipment-history">CARGANDO...</div>
+</details>
 <details id="dm-payroll-panel" hidden>
     <summary>PAGOS A JUGADORES // ARQUITECTO</summary>
     <p>Los salarios automáticos comienzan a los 42 días y se repiten cada 42 días. Los trabajos se pagan una sola vez.</p>
@@ -2648,6 +2688,163 @@ const renderArmas = () => {
 };
 
 renderArmas();
+
+if (esDM) {
+    const panelEquipoDM = document.getElementById("dm-equipment-panel");
+    const selectorObjeto = document.getElementById("dm-equipment-item");
+    const selectorOperacion = document.getElementById("dm-equipment-operation");
+    const camposDestino = document.getElementById("dm-equipment-destination-fields");
+    const selectorTipoDestino = document.getElementById("dm-equipment-destination-type");
+    const envolturaDestinatario = document.getElementById("dm-equipment-recipient-wrap");
+    const selectorDestinatario = document.getElementById("dm-equipment-recipient");
+    const envolturaPrecio = document.getElementById("dm-equipment-price-wrap");
+    const campoPrecio = document.getElementById("dm-equipment-price");
+    const envolturaMotivo = document.getElementById("dm-equipment-reason-wrap");
+    const selectorMotivo = document.getElementById("dm-equipment-reason");
+    const botonOperacion = document.getElementById("dm-equipment-submit");
+    const mensajeOperacion = document.getElementById("dm-equipment-message");
+    const historialEquipo = document.getElementById("dm-equipment-history");
+    panelEquipoDM.hidden = false;
+
+    const objetosGestionables = inventarioDetallado.filter(objeto =>
+        ["Implantes", "Armas"].includes(objeto.categoria) && objeto.id_instancia
+    );
+    selectorObjeto.replaceChildren(new Option("ELIGE UN OBJETO", ""));
+    objetosGestionables.forEach(objeto => selectorObjeto.add(new Option(
+        `${objeto.categoria} · ${objeto.nombre || objeto.catalogo_id} · ${objeto.id_instancia}`,
+        objeto.id_instancia
+    )));
+
+    selectorDestinatario.replaceChildren(new Option("ELIGE OTRO PERSONAJE", ""));
+    personajesAsignados
+        .filter(personaje => personaje.id !== personajeActivo.id)
+        .forEach(personaje => selectorDestinatario.add(new Option(
+            etiquetaPersonaje(personaje), personaje.id
+        )));
+
+    const actualizarCamposEquipo = () => {
+        const operacion = selectorOperacion.value;
+        camposDestino.hidden = !["venta", "transferencia"].includes(operacion);
+        envolturaPrecio.hidden = operacion !== "venta";
+        envolturaMotivo.hidden = operacion !== "baja";
+        envolturaDestinatario.hidden =
+            operacion === "baja" || selectorTipoDestino.value !== "pj";
+    };
+    selectorOperacion.addEventListener("change", actualizarCamposEquipo);
+    selectorTipoDestino.addEventListener("change", actualizarCamposEquipo);
+    actualizarCamposEquipo();
+
+    if (!objetosGestionables.length) {
+        mensajeOperacion.textContent = "El personaje seleccionado no tiene implantes ni armas registrados para gestionar.";
+        botonOperacion.disabled = true;
+    }
+
+    const etiquetaDestinoEquipo = movimiento => {
+        if (movimiento.destino_tipo === "npc") return "PNJ / COMERCIO";
+        if (movimiento.destino_tipo === "baja") return "BAJA DEFINITIVA";
+        const persona = personajesAsignados.find(
+            item => item.id === movimiento.destino_personaje_id
+        );
+        return persona ? etiquetaPersonaje(persona) : "OTRO PJ";
+    };
+    const { data: movimientosEquipo, error: errorMovimientosEquipo } =
+        await supabaseClient
+            .from("movimientos_equipo")
+            .select("fecha, tipo, origen_personaje_id, destino_tipo, destino_personaje_id, objeto, monto, motivo")
+            .or(`origen_personaje_id.eq.${personajeActivo.id},destino_personaje_id.eq.${personajeActivo.id}`)
+            .order("fecha", { ascending: false })
+            .limit(10);
+
+    if (errorMovimientosEquipo) {
+        historialEquipo.textContent = "No se pudo cargar el historial de equipo.";
+    } else if (!movimientosEquipo?.length) {
+        historialEquipo.textContent = "SIN MOVIMIENTOS DE EQUIPO REGISTRADOS.";
+    } else {
+        historialEquipo.replaceChildren();
+        movimientosEquipo.forEach(movimiento => {
+            const fila = document.createElement("div");
+            fila.className = "item-info";
+            const origen = personajesAsignados.find(
+                item => item.id === movimiento.origen_personaje_id
+            );
+            const tipo = movimiento.tipo === "baja"
+                ? `BAJA · ${String(movimiento.motivo || "").toUpperCase()}`
+                : movimiento.tipo === "venta"
+                    ? `VENTA · ${Number(movimiento.monto).toLocaleString("es-MX")} CORPOS`
+                    : "TRANSFERENCIA SIN COSTO";
+            fila.textContent = `${tipo} — ${movimiento.objeto?.nombre || movimiento.objeto?.catalogo_id || "EQUIPO"} — ${origen ? etiquetaPersonaje(origen) : "ORIGEN"} → ${etiquetaDestinoEquipo(movimiento)} — ${new Date(movimiento.fecha).toLocaleString("es-MX", { timeZone: "America/Cancun" })}`;
+            historialEquipo.appendChild(fila);
+        });
+    }
+
+    botonOperacion.addEventListener("click", async () => {
+        const objeto = objetosGestionables.find(
+            item => item.id_instancia === selectorObjeto.value
+        );
+        const tipo = selectorOperacion.value;
+        if (!objeto || !tipo) {
+            mensajeOperacion.textContent = "Elige un objeto y una operación.";
+            return;
+        }
+
+        let destinoTipo = "baja";
+        let destinoPersonaje = null;
+        let precio = 0;
+        let motivo = selectorMotivo.value || null;
+        if (tipo !== "baja") {
+            destinoTipo = selectorTipoDestino.value;
+            if (destinoTipo === "pj") {
+                destinoPersonaje = selectorDestinatario.value || null;
+                if (!destinoPersonaje) {
+                    mensajeOperacion.textContent = "Elige el personaje destinatario.";
+                    return;
+                }
+            }
+            if (tipo === "venta") {
+                precio = Number(campoPrecio.value);
+                if (!Number.isFinite(precio) || precio <= 0) {
+                    mensajeOperacion.textContent = "Escribe un precio de venta mayor que cero.";
+                    return;
+                }
+            }
+            motivo = null;
+        } else if (!["perdida", "descompostura"].includes(motivo)) {
+            mensajeOperacion.textContent = "Indica si fue pérdida o descompostura.";
+            return;
+        }
+
+        const nombreDestino = destinoTipo === "npc"
+            ? "PNJ / COMERCIO"
+            : destinoTipo === "baja"
+                ? `BAJA POR ${motivo.toUpperCase()}`
+                : etiquetaPersonaje(personajesAsignados.find(item => item.id === destinoPersonaje));
+        const resumen = tipo === "venta"
+            ? `Vender ${objeto.nombre || objeto.catalogo_id} a ${nombreDestino} por ${precio.toLocaleString("es-MX")} CORPOS`
+            : tipo === "transferencia"
+                ? `Transferir ${objeto.nombre || objeto.catalogo_id} a ${nombreDestino} sin costo`
+                : `Dar de baja ${objeto.nombre || objeto.catalogo_id} por ${motivo}`;
+        if (!window.confirm(`${resumen}. ¿Continuar?`)) return;
+
+        botonOperacion.disabled = true;
+        mensajeOperacion.textContent = "REGISTRANDO OPERACIÓN DE EQUIPO...";
+        const { data, error } = await supabaseClient.rpc("gestionar_equipo_dm", {
+            p_origen_personaje_id: personajeActivo.id,
+            p_id_instancia: objeto.id_instancia,
+            p_tipo: tipo,
+            p_destino_tipo: destinoTipo,
+            p_destino_personaje_id: destinoPersonaje,
+            p_precio: precio,
+            p_motivo: motivo
+        });
+        if (error || !data?.exito) {
+            mensajeOperacion.textContent = "No se pudo registrar: " +
+                (error?.message || data?.mensaje || "Supabase no confirmó la operación.");
+            botonOperacion.disabled = false;
+            return;
+        }
+        location.reload();
+    });
+}
         
               /* =========================
    EQUIPO

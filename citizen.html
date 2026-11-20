@@ -693,6 +693,14 @@
     <details id="dm-housing-panel" hidden>
         <summary>SOLICITUDES DE VIVIENDA // ARQUITECTO</summary>
         <div id="dm-housing-requests">CARGANDO...</div>
+        <div id="dm-initial-housing-panel" class="item" hidden>
+            <h3>ASIGNAR PRIMERA VIVIENDA // ARQUITECTO</h3>
+            <p>Solo disponible si el personaje no tiene vivienda activa, suspendida ni una solicitud pendiente. Se cobra el primer ciclo y el siguiente vence en 42 días.</p>
+            <label for="dm-initial-housing-selector">VIVIENDA</label>
+            <select id="dm-initial-housing-selector" class="value"></select>
+            <button id="dm-assign-initial-housing" type="button">ASIGNAR Y COBRAR PRIMER CICLO</button>
+            <div id="dm-initial-housing-message" role="status" aria-live="polite"></div>
+        </div>
     </details>
 </details>
     </section>
@@ -1444,6 +1452,78 @@ resumenVivienda?.classList.toggle(
 if (!errorPerfil && perfilActual?.rol === "dm") {
     panelSolicitudesDM.hidden = false;
 
+    const panelAsignacionInicial = document.getElementById("dm-initial-housing-panel");
+    const selectorViviendaInicial = document.getElementById("dm-initial-housing-selector");
+    const botonAsignarVivienda = document.getElementById("dm-assign-initial-housing");
+    const mensajeViviendaInicial = document.getElementById("dm-initial-housing-message");
+    panelAsignacionInicial.hidden = false;
+
+    const yaTieneViviendaActiva = suscripcionesVivienda.some(item => item.estado === "activa");
+    const tieneViviendaSuspendida = suscripcionesVivienda.some(item => item.estado === "suspendida");
+    const tieneSolicitudViviendaPendiente = (solicitudesPropias || []).some(
+        solicitud => solicitud.estado === "pendiente"
+    );
+    const puedeAsignarViviendaInicial =
+        !errorSuscripciones && !errorSolicitudesPropias &&
+        !yaTieneViviendaActiva && !tieneViviendaSuspendida &&
+        !tieneSolicitudViviendaPendiente;
+
+    selectorViviendaInicial.replaceChildren(new Option("ELIGE UNA VIVIENDA", ""));
+    viviendasCatalogo.forEach(vivienda => {
+        const costo = Number(vivienda.costo_por_persona ?? vivienda.costo_total ?? vivienda.costo);
+        selectorViviendaInicial.add(new Option(
+            `${vivienda.descripcion} — ${costo.toLocaleString("es-MX")} CORPOS POR PERSONA / 42 DÍAS`,
+            vivienda.id
+        ));
+    });
+
+    if (errorSuscripciones || errorSolicitudesPropias) {
+        mensajeViviendaInicial.textContent = "No se pudo verificar el estado actual. Recarga Citizen antes de asignar vivienda.";
+    } else if (yaTieneViviendaActiva) {
+        mensajeViviendaInicial.textContent = "Este personaje ya tiene una vivienda activa. Para mudarse, resuelve una solicitud de cambio de vivienda.";
+    } else if (tieneViviendaSuspendida) {
+        mensajeViviendaInicial.textContent = "Tiene una vivienda suspendida. Resuelve primero el saldo pendiente.";
+    } else if (tieneSolicitudViviendaPendiente) {
+        mensajeViviendaInicial.textContent = "Tiene una solicitud de vivienda pendiente. Resuélvela primero.";
+    } else {
+        mensajeViviendaInicial.textContent = "Sin vivienda activa: puedes asignar su primera vivienda.";
+    }
+
+    selectorViviendaInicial.disabled = !puedeAsignarViviendaInicial;
+    botonAsignarVivienda.disabled = !puedeAsignarViviendaInicial;
+    botonAsignarVivienda.addEventListener("click", async () => {
+        if (!puedeAsignarViviendaInicial) return;
+        const vivienda = viviendasCatalogo.find(item => item.id === selectorViviendaInicial.value);
+        if (!vivienda) {
+            mensajeViviendaInicial.textContent = "Elige una vivienda.";
+            return;
+        }
+        const costo = Number(vivienda.costo_por_persona ?? vivienda.costo_total ?? vivienda.costo);
+        if (!Number.isFinite(costo) || costo <= 0) {
+            mensajeViviendaInicial.textContent = "El costo de esta vivienda no es válido.";
+            return;
+        }
+        if (!window.confirm(
+            `Se asignará ${vivienda.descripcion} a ${etiquetaPersonaje(personajeActivo)} y se cobrarán ${costo.toLocaleString("es-MX")} CORPOS por el primer ciclo. No se puede usar esta asignación si ya tiene vivienda activa. ¿Continuar?`
+        )) return;
+
+        botonAsignarVivienda.disabled = true;
+        selectorViviendaInicial.disabled = true;
+        mensajeViviendaInicial.textContent = "ASIGNANDO VIVIENDA Y REGISTRANDO EGRESO...";
+        const { data, error } = await supabaseClient.rpc(
+            "activar_vivienda_inicial_dm",
+            { p_personaje_id: personajeActivo.id, p_vivienda_id: vivienda.id }
+        );
+        if (error || !data?.exito) {
+            mensajeViviendaInicial.textContent = "No se pudo asignar: " +
+                (error?.message || data?.mensaje || "Supabase no confirmó la operación.");
+            botonAsignarVivienda.disabled = false;
+            selectorViviendaInicial.disabled = false;
+            return;
+        }
+        location.reload();
+    });
+
     const { data: solicitudesDM, error: errorSolicitudesDM } =
         await supabaseClient
             .from("solicitudes_gastos_vida")
@@ -1659,7 +1739,7 @@ const gastosEventos =
 
 const formatoEstadoCobro = gasto => {
     const esPeriodico =
-     ["mensual", "diaria"].includes(gasto.frecuencia);
+        ["mensual", "diaria"].includes(gasto.frecuencia);
     if (!esPeriodico) return "SIN COBRO PROGRAMADO";
     if (errorSuscripciones) return "ESTADO DE COBRO NO DISPONIBLE";
 

@@ -12,13 +12,13 @@
 
     <style>
         /* La identidad y el saldo solo se muestran después de iniciar sesión. */
-        .citizen-balance { display: none !important; }
         #acceso-jugador { margin: 0 0 22px; }
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
         #dm-store-notice { margin-bottom:18px; color:#aaa; }
         #dm-store-notice[hidden] { display:none; }
+        .details-close { display:block; margin:18px 0 6px auto; padding:8px 12px; border:1px solid #00ff9c; background:transparent; color:#00ff9c; cursor:pointer; font:inherit; font-size:12px; letter-spacing:1px; }
         .dm-purchase-target { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; font-size:13px; letter-spacing:1px; line-height:1.5; }
         .dm-purchase-target[hidden] { display:none; }
         #compra-mensaje { margin-top:12px; min-height:1.3em; color:#aaa; }
@@ -276,6 +276,17 @@
 
 <main>
 
+    <section class="panel" id="compra-destino-panel">
+        <h2>FICHA QUE REALIZA LA COMPRA</h2>
+        <div class="citizen-balance">
+            <label for="ciudadano-selector">CIUDADANO ACTIVO:</label>
+            <select id="ciudadano-selector">
+                <option value="">CARGANDO...</option>
+            </select>
+            <div id="citizen-balance">SALDO DISPONIBLE: CARGANDO...</div>
+        </div>
+    </section>
+
     <section class="panel" id="acceso-jugador" aria-live="polite">
         <div id="dm-store-notice" hidden></div>
         <h2>ACCESO CIUDADANO</h2>
@@ -428,29 +439,14 @@
 
     </section>
 
-      <section class="panel">
+       <section class="panel">
 
-   <div class="citizen-balance">
-    <div>
-        CIUDADANO ACTIVO:
-        <select id="ciudadano-selector">
-            <option value="">CARGANDO...</option>
-        </select>
-    </div>
-
-    <div id="citizen-balance">
-        SALDO DISPONIBLE: CARGANDO...
-    </div>
-</div>
     <h2>SELECCIÓN ACTUAL</h2>
 
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
             </div>
             <div id="dm-purchase-target" class="dm-purchase-target" hidden aria-live="polite"></div>
-            <p class="service-note">
-                Los servicios recurrentes se activan uno por uno. La activación cobra el primer ciclo; los ciclos mensuales duran 42 días y después el cobro es automático.
-            </p>
             <div id="compra-mensaje" role="status" aria-live="polite"></div>
 
         </section>
@@ -1623,6 +1619,26 @@ cargarTienda().finally(() => {
             mensaje.textContent = error.message;
         }
     });
+})();
+</script>
+
+<script>
+(() => {
+    const refreshCloseControls = () => document.querySelectorAll("details").forEach(details => {
+        const rows = [...details.querySelectorAll(".item, .entry, label, .catalog-item")]
+            .filter(row => row.closest("details") === details).length;
+        const button = [...details.children].find(child => child.matches?.(".details-close"));
+        if (rows > 15 && !button) {
+            const close = document.createElement("button");
+            close.type = "button";
+            close.className = "details-close";
+            close.textContent = "▲ CERRAR MENÚ";
+            close.addEventListener("click", () => { details.open = false; details.querySelector("summary")?.focus({ preventScroll: true }); });
+            details.append(close);
+        } else if (rows <= 15 && button) button.remove();
+    });
+    refreshCloseControls();
+    new MutationObserver(() => requestAnimationFrame(refreshCloseControls)).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
 

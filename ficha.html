@@ -23,7 +23,8 @@
     .panel{background:linear-gradient(145deg,rgba(25,35,34,.72),rgba(12,16,17,.92));border:1px solid var(--line);padding:20px;min-width:0}
     .identity{grid-row:span 2;position:relative;overflow:hidden}
     .identity:after{content:"NX // 2066";position:absolute;right:-6px;bottom:-16px;color:rgba(138,255,199,.06);font-weight:bold;font-size:46px;letter-spacing:3px;pointer-events:none}
-    .character-mark{height:140px;border:1px solid var(--line);display:grid;place-items:center;margin:5px 0 19px;background:repeating-linear-gradient(135deg,transparent 0 9px,rgba(138,255,199,.025) 9px 10px)}
+    .character-mark{height:140px;border:1px solid var(--line);display:grid;place-items:center;margin:5px 0 19px;background:repeating-linear-gradient(135deg,transparent 0 9px,rgba(138,255,199,.025) 9px 10px);overflow:hidden}
+    .character-mark img{width:100%;height:100%;object-fit:cover}
     .character-mark span{font-size:54px;font-weight:700;letter-spacing:8px;color:var(--acid);text-shadow:0 0 24px #45bd8b55}
     .character-name{font-size:27px;line-height:1.1;text-transform:uppercase;overflow-wrap:anywhere;margin:6px 0 16px}
     .facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -45,6 +46,9 @@
     .pv-input{width:100%;height:33px;background:#080b0c;border:1px solid #53615e;color:var(--text);text-align:center;font:inherit}
     .class-talents{font-size:12px;color:#c1ceca;margin:0 0 12px}
     .manual-caption{font-size:9px;letter-spacing:1px;color:#74817e;text-transform:uppercase}
+    .portrait-controls{display:grid;gap:6px;margin:-10px 0 16px}
+    .portrait-input{max-width:100%;font:12px Arial,sans-serif;color:var(--muted)}
+    .portrait-status{font-size:10px;color:var(--muted);min-height:14px}
     .derived-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
     .derived{border:1px solid var(--line);padding:9px;text-align:center}
     .derived .manual-box{margin-top:7px}
@@ -90,7 +94,8 @@
     <main id="sheet" class="sheet" hidden>
       <section class="panel identity">
         <div class="eyebrow">Identidad // Night Xity</div>
-        <div class="character-mark"><span id="monogram">NX</span></div><div class="manual-caption">Retrato // espacio para integrar después</div>
+        <div class="character-mark"><span id="monogram">NX</span><img id="portrait-image" alt="Retrato del personaje" hidden></div>
+        <div class="portrait-controls"><label class="manual-caption" for="portrait-file">Retrato // archivo privado · JPG, PNG o WebP · máximo 5 MB</label><input id="portrait-file" class="portrait-input" type="file" accept="image/jpeg,image/png,image/webp" disabled><div id="portrait-status" class="portrait-status" role="status" aria-live="polite">CARGANDO…</div></div>
         <div class="eyebrow">Nombre ciudadano</div><div id="character-name" class="character-name"></div>
         <label class="label" for="manual-alias">Alias // captura manual</label><input id="manual-alias" class="manual-text" type="text" maxlength="80" data-manual-input disabled placeholder="Alias del personaje">
         <div class="facts">
@@ -186,7 +191,7 @@
     const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
     const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
     const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
-    let manualSaveTimers=new Map(),manualReadyCharacter=null;
+    let manualSaveTimers=new Map(),manualReadyCharacter=null,manualPortraitPath=null;
     function classKey(value){const key=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return CLASS_RULES[key]?key:"";}
     function modifier(value){if(value===""||value==null)return "—";const score=Number(value);return MODIFIERS.find(([max])=>score<=max)?.[1]??"—";}
     function signed(value){const number=Number(value);return number>0?`+${number}`:String(number);}
@@ -206,7 +211,9 @@
     }
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
     function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){status.textContent="NO SE PUDO GUARDAR";status.classList.add("error");console.error(error);return;}if(manualReadyCharacter===characterId)status.textContent="GUARDADO";},350));}
-    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,alias,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();}
+    async function showPortrait(path,characterId){manualPortraitPath=path||null;const image=$("portrait-image"),caption=$("monogram");image.hidden=true;image.removeAttribute("src");caption.hidden=false;$("portrait-file").disabled=manualReadyCharacter!==characterId;$("portrait-status").textContent=path?"CARGANDO RETRATO…":"SIN RETRATO GUARDADO";if(!path)return;const {data,error}=await db.storage.from("retratos-personajes").createSignedUrl(path,3600);if(active?.id!==characterId)return;if(error){$("portrait-status").textContent="NO SE PUDO CARGAR EL RETRATO";console.error(error);return;}image.onload=()=>{image.hidden=false;caption.hidden=true;$("portrait-status").textContent="RETRATO PRIVADO CARGADO";};image.onerror=()=>{$("portrait-status").textContent="NO SE PUDO MOSTRAR EL RETRATO";};image.src=data.signedUrl;}
+    async function uploadPortrait(file){const characterId=active?.id;if(!characterId||manualReadyCharacter!==characterId||!file)return;const status=$("portrait-status");if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}const path=`${characterId}/portrait`;status.textContent="SUBIENDO RETRATO…";$("portrait-file").disabled=true;const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});if(uploadError){status.textContent="NO SE PUDO SUBIR EL RETRATO";console.error(uploadError);$("portrait-file").disabled=false;return;}const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});if(saveError){status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";console.error(saveError);$("portrait-file").disabled=false;return;}await showPortrait(path,characterId);$("portrait-file").disabled=false;}
+    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");$("portrait-file").disabled=true;$("portrait-status").textContent="CARGANDO…";document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");$("portrait-status").textContent="ERROR DE CARGA";return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("portrait-file").disabled=false;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();await showPortrait(row.retrato_path,characterId);}
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{
@@ -281,6 +288,7 @@
       $("services").innerHTML=subError?`<div class="empty">No se pudieron cargar los servicios.</div>`:subscriptionMarkup(services);
     }
     initializeManualEditors();
+    $("portrait-file").addEventListener("change",event=>{const file=event.target.files?.[0];uploadPortrait(file);event.target.value="";});
     start();
   </script>
 </body>

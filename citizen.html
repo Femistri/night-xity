@@ -159,6 +159,20 @@
             padding: 14px 0;
         }
 
+        .dm-group-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .dm-group-option input {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
+            accent-color: #00ff9c;
+        }
+
 
         .item-name {
             font-size: 16px;
@@ -473,19 +487,17 @@
 </details>
 <details id="dm-living-costs-panel" hidden>
     <summary>ACTIVAR COSTOS DE VIDA // ARQUITECTO</summary>
-    <p>Activa servicios periódicos o asigna la primera vivienda al personaje seleccionado. Cada activación cobra el primer ciclo ahora y programa los siguientes cobros. Los gastos variables, eventos y cambios de vivienda conservan su flujo de solicitud/aprobación.</p>
-    <label for="dm-living-cost-selector">SERVICIO PERIÓDICO</label>
-    <select id="dm-living-cost-selector" class="value"></select>
-    <button id="dm-activate-living-cost" type="button">ACTIVAR Y COBRAR PRIMER CICLO</button>
-    <div id="dm-living-cost-message" role="status" aria-live="polite"></div>
+    <p>Selecciona varios servicios y, si el personaje aún no tiene vivienda, una primera vivienda. Se validará y cobrará todo en una sola operación; si el saldo no alcanza o alguna selección no es válida, no se activará ni cobrará nada.</p>
+    <h3>SERVICIOS PERIÓDICOS</h3>
+    <div id="dm-living-cost-options" class="list"></div>
     <div id="dm-initial-housing-panel" class="item" hidden>
-        <h3>ASIGNAR PRIMERA VIVIENDA // ARQUITECTO</h3>
-        <p>Solo disponible si el personaje no tiene vivienda activa, suspendida ni una solicitud pendiente. Se cobra el primer ciclo y el siguiente vence en 42 días.</p>
+        <h3>PRIMERA VIVIENDA // ARQUITECTO (OPCIONAL)</h3>
+        <p>Disponible solo si no hay vivienda activa o suspendida ni una solicitud pendiente. Se cobra el primer ciclo y se programa el siguiente.</p>
         <label for="dm-initial-housing-selector">VIVIENDA</label>
         <select id="dm-initial-housing-selector" class="value"></select>
-        <button id="dm-assign-initial-housing" type="button">ASIGNAR Y COBRAR PRIMER CICLO</button>
-        <div id="dm-initial-housing-message" role="status" aria-live="polite"></div>
     </div>
+    <button id="dm-activate-living-cost-group" type="button">ACTIVAR SELECCIÓN Y COBRAR PRIMER CICLO</button>
+    <div id="dm-living-cost-message" role="status" aria-live="polite"></div>
 </details>
 <details id="dm-equipment-panel" hidden>
     <summary>VENTAS, TRANSFERENCIAS Y BAJAS DE EQUIPO // ARQUITECTO</summary>
@@ -745,15 +757,7 @@
 </details>
     </section>
 
-    <section class="panel" style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;">
-        <div>
-            <h2 style="margin-bottom:6px;">FICHA VISUAL</h2>
-            <div class="item-info">Consulta la ficha de personaje en formato visual.</div>
-        </div>
-        <div class="page-nav" style="margin-top:0;">
-            <a href="ficha.html">ABRIR FICHA</a>
-        </div>
-    </section>
+
 
     <!-- =========================
          CUERPO
@@ -976,16 +980,14 @@
 
 <section class="panel">
 
-    <details>
-        <summary style="cursor:pointer; font-size:18px; font-weight:700; letter-spacing:3px;">INVENTARIO // FICHAS INDIVIDUALES</summary>
+    <h2>INVENTARIO // FICHAS INDIVIDUALES</h2>
 
-        <div
-            class="item-info"
-            id="citizen-inventory-detailed"
-        >
-            SIN REGISTROS INDIVIDUALES
-        </div>
-    </details>
+    <div
+        class="item-info"
+        id="citizen-inventory-detailed"
+    >
+        SIN REGISTROS INDIVIDUALES
+    </div>
 
 </section>
 
@@ -1935,9 +1937,11 @@ if (panelEventos) {
         
 if (esDM) {
     const panelCostosDM = document.getElementById("dm-living-costs-panel");
-    const selectorCostoDM = document.getElementById("dm-living-cost-selector");
-    const botonCostoDM = document.getElementById("dm-activate-living-cost");
-    const mensajeCostoDM = document.getElementById("dm-living-cost-message");
+    const opcionesEl = document.getElementById("dm-living-cost-options");
+    const selectorViviendaInicial = document.getElementById("dm-initial-housing-selector");
+    const panelViviendaInicial = document.getElementById("dm-initial-housing-panel");
+    const botonGrupo = document.getElementById("dm-activate-living-cost-group");
+    const mensajeGrupo = document.getElementById("dm-living-cost-message");
     panelCostosDM.hidden = false;
 
     const gastosPeriodicosDM = [
@@ -1951,129 +1955,95 @@ if (esDM) {
         !estadosPorGastoDM.has(gasto.id)
     );
 
-    selectorCostoDM.replaceChildren(new Option("ELIGE UN SERVICIO", ""));
-    opcionesDisponiblesDM.forEach(gasto => {
-        const frecuencia = gasto.frecuencia === "mensual" ? "42 DÍAS" : "DIARIO";
-        selectorCostoDM.add(new Option(
-            `${gasto.nombre} — ${Number(gasto.costo).toLocaleString("es-MX")} CORPOS / ${frecuencia}`,
-            gasto.id
-        ));
-    });
-
-    const gastosSuspendidosDM = gastosPeriodicosDM.filter(gasto =>
-        estadosPorGastoDM.get(gasto.id) === "suspendida"
-    );
+    opcionesEl.replaceChildren();
     if (errorSuscripciones) {
-        mensajeCostoDM.textContent = "No se pudieron cargar las suscripciones. Recarga Citizen antes de activar un costo.";
+        opcionesEl.textContent = "No se pudieron cargar las suscripciones. Recarga Citizen antes de activar costos.";
     } else if (!opcionesDisponiblesDM.length) {
-        mensajeCostoDM.textContent = gastosSuspendidosDM.length
-            ? "No hay servicios nuevos. Hay servicios suspendidos; usa el flujo de reactivación para liquidar deuda y reconexión."
+        const suspendidos = gastosPeriodicosDM.some(gasto => estadosPorGastoDM.get(gasto.id) === "suspendida");
+        opcionesEl.textContent = suspendidos
+            ? "No hay servicios nuevos. Los suspendidos deben reactivarse por separado para liquidar su deuda."
             : "No hay servicios periódicos pendientes de activar.";
+    } else {
+        opcionesDisponiblesDM.forEach(gasto => {
+            const frecuencia = gasto.frecuencia === "mensual" ? "42 DÍAS" : "DIARIO";
+            const fila = document.createElement("label");
+            fila.className = "item dm-group-option";
+            const check = document.createElement("input");
+            check.type = "checkbox";
+            check.name = "dm-group-service";
+            check.value = gasto.id;
+            const descripcion = document.createElement("span");
+            descripcion.textContent = `${gasto.nombre} — ${Number(gasto.costo).toLocaleString("es-MX")} CORPOS / ${frecuencia}`;
+            fila.append(check, descripcion);
+            opcionesEl.append(fila);
+        });
     }
-
-    botonCostoDM.disabled = !!errorSuscripciones || !opcionesDisponiblesDM.length;
-    botonCostoDM.addEventListener("click", async () => {
-        if (errorSuscripciones) return;
-        const gastoId = selectorCostoDM.value;
-        if (!gastoId) {
-            mensajeCostoDM.textContent = "Elige un servicio periódico.";
-            return;
-        }
-        const gasto = opcionesDisponiblesDM.find(item => item.id === gastoId);
-        if (!gasto) return;
-        const costo = Number(gasto.costo);
-        const confirmado = window.confirm(
-            `Se registrará un egreso de ${costo.toLocaleString("es-MX")} CORPOS para ${etiquetaPersonaje(personajeActivo)} por ${gasto.nombre}. El siguiente cobro será automático según su periodicidad. ¿Continuar?`
-        );
-        if (!confirmado) return;
-
-        botonCostoDM.disabled = true;
-        mensajeCostoDM.textContent = "ACTIVANDO SERVICIO Y REGISTRANDO EGRESO...";
-        const { data, error } = await supabaseClient.rpc(
-            "activar_servicio_gasto_dm",
-            { p_personaje_id: personajeActivo.id, p_gasto_id: gastoId }
-        );
-        if (error || !data?.exito) {
-            mensajeCostoDM.textContent = "No se pudo activar: " +
-                (error?.message || data?.mensaje || "Supabase no confirmó la operación.");
-            botonCostoDM.disabled = false;
-            return;
-        }
-        mensajeCostoDM.textContent =
-            `Servicio activado. Egreso inicial: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS. Próximo cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
-        location.reload();
-    });
-
-    const panelAsignacionInicial = document.getElementById("dm-initial-housing-panel");
-    const selectorViviendaInicial = document.getElementById("dm-initial-housing-selector");
-    const botonAsignarVivienda = document.getElementById("dm-assign-initial-housing");
-    const mensajeViviendaInicial = document.getElementById("dm-initial-housing-message");
-    panelAsignacionInicial.hidden = false;
 
     const yaTieneViviendaActiva = suscripcionesVivienda.some(item => item.estado === "activa");
     const tieneViviendaSuspendida = suscripcionesVivienda.some(item => item.estado === "suspendida");
-    const tieneSolicitudViviendaPendiente = (solicitudesPropias || []).some(
-        solicitud => solicitud.estado === "pendiente"
-    );
-    const puedeAsignarViviendaInicial =
-        !errorSuscripciones && !errorSolicitudesPropias &&
-        !yaTieneViviendaActiva && !tieneViviendaSuspendida &&
-        !tieneSolicitudViviendaPendiente;
+    const tieneSolicitudViviendaPendiente = (solicitudesPropias || []).some(solicitud => solicitud.estado === "pendiente");
+    const puedeAsignarViviendaInicial = !errorSuscripciones && !errorSolicitudesPropias &&
+        !yaTieneViviendaActiva && !tieneViviendaSuspendida && !tieneSolicitudViviendaPendiente;
 
-    selectorViviendaInicial.replaceChildren(new Option("ELIGE UNA VIVIENDA", ""));
-    viviendasCatalogo.forEach(vivienda => {
-        const costo = Number(vivienda.costo_por_persona ?? vivienda.costo_total ?? vivienda.costo);
-        selectorViviendaInicial.add(new Option(
-            `${vivienda.descripcion} — ${costo.toLocaleString("es-MX")} CORPOS POR PERSONA / 42 DÍAS`,
-            vivienda.id
-        ));
-    });
-
+    panelViviendaInicial.hidden = false;
+    selectorViviendaInicial.replaceChildren(new Option("SIN VIVIENDA EN ESTA OPERACIÓN", ""));
+    if (puedeAsignarViviendaInicial) {
+        viviendasCatalogo.forEach(vivienda => {
+            const costo = Number(vivienda.costo_por_persona ?? vivienda.costo);
+            selectorViviendaInicial.add(new Option(
+                `${vivienda.descripcion} — ${costo.toLocaleString("es-MX")} CORPOS / 42 DÍAS`, vivienda.id
+            ));
+        });
+    }
+    selectorViviendaInicial.disabled = !puedeAsignarViviendaInicial;
     if (errorSuscripciones || errorSolicitudesPropias) {
-        mensajeViviendaInicial.textContent = "No se pudo verificar el estado actual. Recarga Citizen antes de asignar vivienda.";
+        panelViviendaInicial.querySelector("p").textContent = "No se pudo verificar el estado de vivienda; no se podrá incluir en el cobro grupal.";
     } else if (yaTieneViviendaActiva) {
-        mensajeViviendaInicial.textContent = "Este personaje ya tiene una vivienda activa. Para mudarse, resuelve una solicitud de cambio de vivienda.";
+        panelViviendaInicial.querySelector("p").textContent = "Ya tiene vivienda activa. Para mudarse, resuelve una solicitud de cambio de vivienda.";
     } else if (tieneViviendaSuspendida) {
-        mensajeViviendaInicial.textContent = "Tiene una vivienda suspendida. Resuelve primero el saldo pendiente.";
+        panelViviendaInicial.querySelector("p").textContent = "Tiene vivienda suspendida; resuelve primero el saldo pendiente.";
     } else if (tieneSolicitudViviendaPendiente) {
-        mensajeViviendaInicial.textContent = "Tiene una solicitud de vivienda pendiente. Resuélvela primero.";
-    } else {
-        mensajeViviendaInicial.textContent = "Sin vivienda activa: puedes asignar su primera vivienda.";
+        panelViviendaInicial.querySelector("p").textContent = "Tiene solicitud de vivienda pendiente; resuélvela primero.";
     }
 
-    selectorViviendaInicial.disabled = !puedeAsignarViviendaInicial;
-    botonAsignarVivienda.disabled = !puedeAsignarViviendaInicial;
-    botonAsignarVivienda.addEventListener("click", async () => {
-        if (!puedeAsignarViviendaInicial) return;
-        const vivienda = viviendasCatalogo.find(item => item.id === selectorViviendaInicial.value);
-        if (!vivienda) {
-            mensajeViviendaInicial.textContent = "Elige una vivienda.";
+    botonGrupo.disabled = !!errorSuscripciones || !opcionesDisponiblesDM.length && !puedeAsignarViviendaInicial;
+    botonGrupo.addEventListener("click", async () => {
+        if (errorSuscripciones || errorSolicitudesPropias) return;
+        const gastoIds = [...opcionesEl.querySelectorAll('input[name="dm-group-service"]:checked')].map(input => input.value);
+        const viviendaId = puedeAsignarViviendaInicial ? selectorViviendaInicial.value : "";
+        const gastos = gastoIds.map(id => opcionesDisponiblesDM.find(gasto => gasto.id === id)).filter(Boolean);
+        const vivienda = viviendaId ? viviendasCatalogo.find(item => item.id === viviendaId) : null;
+        if (!gastos.length && !vivienda) {
+            mensajeGrupo.textContent = "Selecciona uno o más servicios o una primera vivienda.";
             return;
         }
-        const costo = Number(vivienda.costo_por_persona ?? vivienda.costo_total ?? vivienda.costo);
-        if (!Number.isFinite(costo) || costo <= 0) {
-            mensajeViviendaInicial.textContent = "El costo de esta vivienda no es válido.";
+        const costos = gastos.map(gasto => Number(gasto.costo));
+        if (vivienda) costos.push(Number(vivienda.costo_por_persona ?? vivienda.costo));
+        if (costos.some(costo => !Number.isFinite(costo) || costo <= 0)) {
+            mensajeGrupo.textContent = "Hay un costo no válido en la selección; no se procesó ningún cobro.";
             return;
         }
+        const total = costos.reduce((sum, costo) => sum + costo, 0);
+        const conceptos = [...gastos.map(gasto => gasto.nombre), ...(vivienda ? [vivienda.descripcion] : [])];
         if (!window.confirm(
-            `Se asignará ${vivienda.descripcion} a ${etiquetaPersonaje(personajeActivo)} y se cobrarán ${costo.toLocaleString("es-MX")} CORPOS por el primer ciclo. No se puede usar esta asignación si ya tiene vivienda activa. ¿Continuar?`
+            `Se activarán ${conceptos.join(", ")} para ${etiquetaPersonaje(personajeActivo)}. Cargo inicial total: ${total.toLocaleString("es-MX")} CORPOS. Si el saldo no alcanza o una selección no se puede aplicar, no se procesará ninguna. ¿Continuar?`
         )) return;
 
-        botonAsignarVivienda.disabled = true;
-        selectorViviendaInicial.disabled = true;
-        mensajeViviendaInicial.textContent = "ASIGNANDO VIVIENDA Y REGISTRANDO EGRESO...";
-        const { data, error } = await supabaseClient.rpc(
-            "activar_vivienda_inicial_dm",
-            { p_personaje_id: personajeActivo.id, p_vivienda_id: vivienda.id }
-        );
+        botonGrupo.disabled = true;
+        mensajeGrupo.textContent = "VALIDANDO Y REGISTRANDO TODAS LAS ACTIVACIONES…";
+        const { data, error } = await supabaseClient.rpc("activar_costos_vida_grupo_dm", {
+            p_personaje_id: personajeActivo.id,
+            p_gasto_ids: gastoIds,
+            p_vivienda_id: viviendaId || null
+        });
         if (error || !data?.exito) {
-            mensajeViviendaInicial.textContent = "No se pudo asignar: " +
+            mensajeGrupo.textContent = "No se aplicó ningún cobro: " +
                 (error?.message || data?.mensaje || "Supabase no confirmó la operación.");
-            botonAsignarVivienda.disabled = false;
-            selectorViviendaInicial.disabled = false;
+            botonGrupo.disabled = false;
             return;
         }
-        location.reload();
+        mensajeGrupo.textContent = `${data.cantidad} activaciones registradas. Cargo total: ${Number(data.cargo_total).toLocaleString("es-MX")} CORPOS. Saldo: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
+        setTimeout(() => location.reload(), 1200);
     });
 }
 

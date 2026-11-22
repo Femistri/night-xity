@@ -23,8 +23,8 @@
     .panel{background:linear-gradient(145deg,rgba(25,35,34,.72),rgba(12,16,17,.92));border:1px solid var(--line);padding:20px;min-width:0}
     .identity{grid-row:span 2;position:relative;overflow:hidden}
     .identity:after{content:"NX // 2066";position:absolute;right:-6px;bottom:-16px;color:rgba(138,255,199,.06);font-weight:bold;font-size:46px;letter-spacing:3px;pointer-events:none}
-    .character-mark{height:140px;border:1px solid var(--line);display:grid;place-items:center;margin:5px 0 19px;background:repeating-linear-gradient(135deg,transparent 0 9px,rgba(138,255,199,.025) 9px 10px);overflow:hidden}
-    .character-mark img{width:100%;height:100%;object-fit:cover}
+    .character-mark{width:min(100%,360px);aspect-ratio:1/1;height:auto;border:1px solid var(--line);display:grid;place-items:center;margin:5px 0 19px;background:#000;overflow:hidden}
+    .character-mark img{display:block;width:100%;height:100%;object-fit:contain;background:#000}
     .character-mark span{font-size:54px;font-weight:700;letter-spacing:8px;color:var(--acid);text-shadow:0 0 24px #45bd8b55}
     .character-name{font-size:27px;line-height:1.1;text-transform:uppercase;overflow-wrap:anywhere;margin:6px 0 16px}
     .facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -52,9 +52,10 @@
     .derived-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
     .derived{border:1px solid var(--line);padding:9px;text-align:center}
     .derived .manual-box{margin-top:7px}
-    .skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .skill-slot{min-height:52px;border:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr) 65px;align-items:center;gap:8px}
-    .skill-select,.manual-text{width:100%;height:34px;border:1px solid #53615e;background:#080b0c;color:var(--text);padding:5px 8px;font:inherit}
+    .skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+    .skill-slot{min-height:52px;min-width:0;border:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr) 58px;align-items:center;gap:8px;overflow:hidden}
+    .skill-slot>*{min-width:0}
+    .skill-select,.manual-text{display:block;min-width:0;width:100%;height:34px;border:1px solid #53615e;background:#080b0c;color:var(--text);padding:5px 6px;font:inherit}
     .manual-text{max-width:460px}
     .contact-slot{min-height:36px;border-bottom:1px solid var(--line);padding:8px 3px;color:#75817e;font-size:12px;display:flex;align-items:center;gap:10px}
     .alias-box{min-height:33px;border:1px solid #53615e;padding:7px 9px;color:#71807c;margin:6px 0 13px;font-size:11px;letter-spacing:1px}
@@ -66,6 +67,7 @@
     .columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .list{display:grid;gap:8px}
     .entry{border-top:1px solid var(--line);padding:10px 0 3px}
+    .details-close{display:block;margin:18px 0 6px auto;padding:8px 12px;border:1px solid var(--acid);background:transparent;color:var(--acid);cursor:pointer;font:inherit;font-size:12px;letter-spacing:1px}
     .entry:first-child{border-top:0;padding-top:0}
     .entry-title{font-weight:700;overflow-wrap:anywhere}
     .entry-meta{font-size:11px;color:var(--muted);margin-top:3px}
@@ -105,6 +107,7 @@
           <div class="fact"><div class="label">Distrito</div><div class="value">NIGHT XITY</div></div>
         </div>
         <div class="fact" style="margin-top:15px"><div class="label">Trasfondo</div><p id="backstory" class="backstory"></p></div>
+        <p id="class-talents" class="class-talents"></p>
       </section>
       <section class="panel">
         <h2>Atributos // captura manual</h2>
@@ -130,7 +133,6 @@
           <div class="derived" title="Suma el modificador por DES y los bonos por Protecciones eImplantes para el total de DF" tabindex="0"><span class="attribute-name help-value">MOV</span><output id="indicator-mov" class="manual-box">10</output></div>
           <div class="derived"><span class="attribute-name">DA</span><output id="indicator-da" class="manual-box">—</output></div>
         </div>
-        <p id="class-talents" class="class-talents"></p>
       </section>
       <section class="panel">
         <h2>Habilidades // captura manual</h2>
@@ -191,7 +193,7 @@
     const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
     const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
     const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
-    let manualSaveTimers=new Map(),manualReadyCharacter=null,manualPortraitPath=null;
+    let manualSaveTimers=new Map(),manualSavePending=new Set(),manualSaveTasks=new Map(),manualReadyCharacter=null,manualPortraitPath=null,portraitUploadInProgress=false;
     function classKey(value){const key=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return CLASS_RULES[key]?key:"";}
     function modifier(value){if(value===""||value==null)return "—";const score=Number(value);return MODIFIERS.find(([max])=>score<=max)?.[1]??"—";}
     function signed(value){const number=Number(value);return number>0?`+${number}`:String(number);}
@@ -210,9 +212,16 @@
       $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
     }
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
-    function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){status.textContent="NO SE PUDO GUARDAR";status.classList.add("error");console.error(error);return;}if(manualReadyCharacter===characterId)status.textContent="GUARDADO";},350));}
+    async function writeManualData(characterId,payload){
+      if(manualSaveTasks.has(characterId))await manualSaveTasks.get(characterId);
+      const task=(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){manualSavePending.add(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent="NO SE PUDO GUARDAR";$("stats-save-status").classList.add("error");}console.error(error);return false;}if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent=manualSavePending.has(characterId)?"GUARDANDO…":"GUARDADO";$("stats-save-status").classList.remove("error");}return true;})();
+      manualSaveTasks.set(characterId,task);const result=await task;if(manualSaveTasks.get(characterId)===task)manualSaveTasks.delete(characterId);return result;
+    }
+    function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");manualSavePending.add(characterId);status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(()=>{manualSaveTimers.delete(characterId);writeManualData(characterId,payload);},350));}
+    async function flushManualSave(characterId){const timer=manualSaveTimers.get(characterId);if(timer){clearTimeout(timer);manualSaveTimers.delete(characterId);}if(!manualSavePending.has(characterId))return true;return writeManualData(characterId,manualPayload(characterId));}
+    window.addEventListener("beforeunload",event=>{if(!manualSavePending.size&&!manualSaveTasks.size&&!manualSaveTimers.size&&!portraitUploadInProgress)return;event.preventDefault();event.returnValue="";});
     async function showPortrait(path,characterId){manualPortraitPath=path||null;const image=$("portrait-image"),caption=$("monogram");image.hidden=true;image.removeAttribute("src");caption.hidden=false;$("portrait-file").disabled=manualReadyCharacter!==characterId;$("portrait-status").textContent=path?"CARGANDO RETRATO…":"SIN RETRATO GUARDADO";if(!path)return;const {data,error}=await db.storage.from("retratos-personajes").createSignedUrl(path,3600);if(active?.id!==characterId)return;if(error){$("portrait-status").textContent="NO SE PUDO CARGAR EL RETRATO";console.error(error);return;}image.onload=()=>{image.hidden=false;caption.hidden=true;$("portrait-status").textContent="RETRATO PRIVADO CARGADO";};image.onerror=()=>{$("portrait-status").textContent="NO SE PUDO MOSTRAR EL RETRATO";};image.src=data.signedUrl;}
-    async function uploadPortrait(file){const characterId=active?.id;if(!characterId||manualReadyCharacter!==characterId||!file)return;const status=$("portrait-status");if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}const path=`${characterId}/portrait`;status.textContent="SUBIENDO RETRATO…";$("portrait-file").disabled=true;const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});if(uploadError){status.textContent="NO SE PUDO SUBIR EL RETRATO";console.error(uploadError);$("portrait-file").disabled=false;return;}const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});if(saveError){status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";console.error(saveError);$("portrait-file").disabled=false;return;}await showPortrait(path,characterId);$("portrait-file").disabled=false;}
+    async function uploadPortrait(file){const characterId=active?.id;if(!characterId||manualReadyCharacter!==characterId||!file)return;const status=$("portrait-status");if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}const path=`${characterId}/portrait`;portraitUploadInProgress=true;status.textContent="SUBIENDO RETRATO…";$("portrait-file").disabled=true;const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});if(uploadError){status.textContent="NO SE PUDO SUBIR EL RETRATO";console.error(uploadError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});if(saveError){status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";console.error(saveError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}await showPortrait(path,characterId);$("portrait-file").disabled=false;portraitUploadInProgress=false;}
     async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");$("portrait-file").disabled=true;$("portrait-status").textContent="CARGANDO…";document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");$("portrait-status").textContent="ERROR DE CARGA";return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("portrait-file").disabled=false;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();await showPortrait(row.retrato_path,characterId);}
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
@@ -237,7 +246,7 @@
         active=characters.find(item=>item.id===(valid?stored:characters[0].id))||characters[0];
         if(!valid&&isDM){$("status").textContent="Selecciona el personaje que quieres consultar.";}
         const picker=$("character-picker");picker.replaceChildren(...characters.map(person=>new Option(label(person),person.id)));picker.value=active.id;picker.disabled=characters.length<2;
-        picker.addEventListener("change",()=>{active=characters.find(person=>person.id===picker.value);render(isDM);});
+          picker.addEventListener("change",async()=>{const previous=active?.id;const next=picker.value;if(previous&&!(await flushManualSave(previous))){picker.value=previous;return;}if(portraitUploadInProgress){picker.value=previous;$("portrait-status").textContent="ESPERA A QUE TERMINE LA SUBIDA DEL RETRATO.";return;}active=characters.find(person=>person.id===next);localStorage.setItem(key,next);await render(isDM);});
         await render(isDM);
       }catch(error){fail(error.message||"No se pudo cargar la ficha.");}
     }
@@ -290,6 +299,18 @@
     initializeManualEditors();
     $("portrait-file").addEventListener("change",event=>{const file=event.target.files?.[0];uploadPortrait(file);event.target.value="";});
     start();
+  </script>
+  <script>
+    (() => {
+      const refreshCloseControls=()=>document.querySelectorAll("details").forEach(details=>{
+        const rows=[...details.querySelectorAll(".item,.entry,label")].filter(row=>row.closest("details")===details).length;
+        const button=[...details.children].find(child=>child.matches?.(".details-close"));
+        if(rows>15&&!button){const close=document.createElement("button");close.type="button";close.className="details-close";close.textContent="▲ CERRAR MENÚ";close.addEventListener("click",()=>{details.open=false;details.querySelector("summary")?.focus({preventScroll:true});});details.append(close);}
+        else if(rows<=15&&button)button.remove();
+      });
+      refreshCloseControls();
+      new MutationObserver(()=>requestAnimationFrame(refreshCloseControls)).observe(document.body,{childList:true,subtree:true});
+    })();
   </script>
 </body>
 </html>

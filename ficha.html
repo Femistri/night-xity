@@ -117,25 +117,6 @@
         </div>
       </section>
       <section class="panel">
-        <h2>Economía</h2>
-        <div class="label">Saldo disponible</div><div id="balance" class="balance">— CORPOS</div>
-        <details><summary>Historial económico</summary><div id="history" class="list" style="margin-top:12px"></div></details>
-      </section>
-      <section class="panel wide">
-        <h2>Armamento // datos de Citizen</h2>
-        <div id="weapons"></div>
-      </section>
-      <section class="panel wide">
-        <h2>Inventario // fichas individuales</h2>
-        <div id="inventory" class="columns"></div>
-      </section>
-      <section class="panel">
-        <h2>Talentos</h2><div id="talents" class="list"></div>
-      </section>
-      <section class="panel">
-        <h2>Rasgos registrados</h2><div id="traits"></div>
-      </section>
-      <section class="panel">
         <h2>Habilidades // captura manual</h2>
         <div class="skill-grid">
           <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 01</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 02</span></div>
@@ -147,8 +128,30 @@
         <h2>Contactos // captura manual</h2>
         <div class="contact-slot">CONTACTO 01 —</div><div class="contact-slot">CONTACTO 02 —</div><div class="contact-slot">CONTACTO 03 —</div><div class="contact-slot">CONTACTO 04 —</div>
       </section>
+      <section class="panel">
+        <h2>Economía</h2>
+        <div class="label">Saldo disponible</div><div id="balance" class="balance">— CORPOS</div>
+        <details><summary>Historial económico</summary><div id="history" class="list" style="margin-top:12px"></div></details>
+        <details><summary>Vivienda</summary><div id="housing" class="list" style="margin-top:12px"></div></details>
+        <details><summary>Servicios</summary><div id="services" class="list" style="margin-top:12px"></div></details>
+      </section>
+      <section class="panel">
+        <h2>Talentos</h2><div id="talents" class="list"></div>
+      </section>
+      <section class="panel">
+        <h2>Rasgos registrados</h2><div id="traits"></div>
+      </section>
       <section class="panel wide">
-        <h2>Vivienda y servicios</h2><div id="services" class="columns"></div>
+        <h2>Manías y fobias // Citizen</h2>
+        <div class="columns"><div><h3>Manías</h3><div id="manias" class="list"></div></div><div><h3>Fobias</h3><div id="phobias" class="list"></div></div></div>
+      </section>
+      <section class="panel wide">
+        <h2>Armamento // datos de Citizen</h2>
+        <div id="weapons"></div>
+      </section>
+      <section class="panel wide">
+        <h2>Inventario // fichas individuales</h2>
+        <div id="inventory" class="columns"></div>
       </section>
     </main>
     <footer>NIGHT XITY // FICHA DE CONSULTA // CAMPOS MANUALES PENDIENTES DE CAPTURA</footer>
@@ -162,7 +165,7 @@
     const fmt = value => Number(value || 0).toLocaleString("es-MX");
     const label = person => { const key=person?.nombre_clave||"PERSONAJE"; const player=(person?.nombre_jugador||"").trim(); return player&&player!==key ? `${player} // ${key}` : key; };
     const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
-    let characters=[], active=null, livingCatalog={}, core={}, productCatalog={};
+    let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={};
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{
@@ -179,7 +182,7 @@
           if(error)throw error; characters=(data||[]).map(row=>row.personajes).filter(Boolean);
         }
         if(!characters.length){fail(isDM?"No hay personajes registrados.":"Tu cuenta todavía no tiene personajes asignados.");return;}
-        [livingCatalog,core,productCatalog]=await Promise.all([json("Gastos_de_vida_CBPunk_v1.json"),json("Night_Xity_Citizen_Nucleo_v1.json?v=14"),json("catalogo_night_xity_web_v1.json?v=8")]);
+        [livingCatalog,core,productCatalog,mentalCatalog]=await Promise.all([json("Gastos_de_vida_CBPunk_v1.json"),json("Night_Xity_Citizen_Nucleo_v1.json?v=14"),json("catalogo_night_xity_web_v1.json?v=8"),json("salud_mental_night_xity_v1.json?v=3")]);
         const key=isDM?"nightXity_personaje_dm_activo":"nightXity_personaje_activo";
         const stored=localStorage.getItem(key);
         const valid=characters.some(item=>item.id===stored);
@@ -219,12 +222,19 @@
       $("inventory").innerHTML=inventoryMarkup(items);
       const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
       const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
+      const mental=identity.salud_mental||{};
+      const manias=(mental.manias||[]).map(Number);
+      const fobias=(mental.fobias||[]).map(Number);
+      const renderMental=(catalog,selected)=>{const matches=(catalog||[]).filter(row=>selected.includes(Number(row.d100)));return matches.length?matches.map(row=>`<article class="entry"><div class="entry-title">${safe(row.termino)}</div><div class="entry-desc">${safe(row.descripcion||"")}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;};
+      $("manias").innerHTML=renderMental(mentalCatalog.manias,manias);
+      $("phobias").innerHTML=renderMental(mentalCatalog.fobias,fobias);
       const {data:subs,error:subError}=await db.from("suscripciones_gastos_vida").select("gasto_id,costo,frecuencia,estado,proximo_cobro").eq("personaje_id",active.id);
       const {data:requests,error:reqError}=await db.from("solicitudes_gastos_vida").select("gasto_id,estado,importe_solicitado,fecha_solicitud,tipo_solicitud").eq("personaje_id",active.id).eq("tipo_solicitud","cambio_vivienda").order("fecha_solicitud",{ascending:false}).limit(5);
       const housing=(subs||[]).filter(row=>row.gasto_id.startsWith("VIV-"));const services=(subs||[]).filter(row=>!row.gasto_id.startsWith("VIV-"));
       const subscriptionMarkup=(rows)=>rows.length?rows.map(row=>`<article class="entry"><div class="entry-title">${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${fmt(row.costo)} CORPOS · ${safe(row.frecuencia||"").toUpperCase()} · ${safe(row.estado||"").toUpperCase()}${row.proximo_cobro?` · SIGUIENTE: ${new Date(row.proximo_cobro).toLocaleDateString("es-MX")}`:""}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;
       let housingHtml=subscriptionMarkup(housing);if(requests?.length)housingHtml+=requests.map(row=>`<article class="entry"><div class="entry-title">Solicitud: ${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${safe(row.estado).toUpperCase()} · ${row.fecha_solicitud?new Date(row.fecha_solicitud).toLocaleDateString("es-MX"):""}</div></article>`).join("");
-      $("services").innerHTML=`<div><h3>Vivienda</h3><div class="list">${subError||reqError?`<div class="empty">No se pudieron cargar los datos de vivienda.</div>`:housingHtml}</div></div><div><h3>Servicios recurrentes</h3><div class="list">${subError?`<div class="empty">No se pudieron cargar los servicios.</div>`:subscriptionMarkup(services)}</div></div>`;
+      $("housing").innerHTML=subError||reqError?`<div class="empty">No se pudieron cargar los datos de vivienda.</div>`:housingHtml;
+      $("services").innerHTML=subError?`<div class="empty">No se pudieron cargar los servicios.</div>`:subscriptionMarkup(services);
     }
     start();
   </script>

@@ -32,6 +32,23 @@
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
     .stat{border:1px solid var(--line);padding:12px;min-height:72px}
     .stat strong{display:block;font-size:21px;color:var(--acid);margin-top:4px}
+    .attribute-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .attribute{display:grid;grid-template-columns:minmax(30px,.6fr) minmax(35px,1fr) 30px minmax(35px,.65fr);gap:6px;align-items:center;border:1px solid var(--line);padding:8px}
+    .attribute-name{font-size:12px;font-weight:bold;letter-spacing:1.5px}
+    .manual-box{height:33px;border:1px solid #53615e;background:#080b0c;display:grid;place-items:center;color:#71807c;font-size:12px}
+    .manual-caption{font-size:9px;letter-spacing:1px;color:#74817e;text-transform:uppercase}
+    .derived-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .derived{border:1px solid var(--line);padding:9px;text-align:center}
+    .derived .manual-box{margin-top:7px}
+    .skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .skill-slot{min-height:52px;border:1px solid var(--line);padding:8px;display:flex;align-items:center;gap:8px}
+    .skill-mark{width:20px;height:20px;border:1px solid #64716d;flex:none}
+    .contact-slot{min-height:36px;border-bottom:1px solid var(--line);padding:8px 3px;color:#75817e;font-size:12px}
+    .alias-box{min-height:33px;border:1px solid #53615e;padding:7px 9px;color:#71807c;margin:6px 0 13px;font-size:11px;letter-spacing:1px}
+    .weapon-table{width:100%;border-collapse:collapse;font-size:12px}
+    .weapon-table th,.weapon-table td{text-align:left;vertical-align:top;padding:9px 7px;border-bottom:1px solid var(--line)}
+    .weapon-table th{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+    .weapon-table td:first-child{font-weight:700}
     .balance{font-size:34px;letter-spacing:1px;color:var(--acid);margin:4px 0 16px}
     .columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .list{display:grid;gap:8px}
@@ -51,7 +68,7 @@
     .error{border-color:#8d3834;color:#ffd2cf}
     footer{padding:25px 0;color:var(--muted);font-size:10px;letter-spacing:2px;text-align:center}
     @media(max-width:820px){.sheet{grid-template-columns:1fr}.identity{grid-row:auto}.wide{grid-column:auto}}
-    @media(max-width:520px){.wrap{padding:14px}.columns{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.panel{padding:15px}header{align-items:flex-start;flex-direction:column}.top-actions{width:100%}.top-actions select{flex:1}}
+    @media(max-width:520px){.wrap{padding:14px}.columns{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.panel{padding:15px}header{align-items:flex-start;flex-direction:column}.top-actions{width:100%}.top-actions select{flex:1}.derived-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -64,8 +81,9 @@
     <main id="sheet" class="sheet" hidden>
       <section class="panel identity">
         <div class="eyebrow">Identidad // Night Xity</div>
-        <div class="character-mark" aria-hidden="true"><span id="monogram">NX</span></div>
+        <div class="character-mark"><span id="monogram">NX</span></div><div class="manual-caption">Retrato // espacio para integrar después</div>
         <div class="eyebrow">Nombre ciudadano</div><div id="character-name" class="character-name"></div>
+        <div class="label">Alias // captura manual</div><div class="alias-box">PENDIENTE</div>
         <div class="facts">
           <div class="fact"><div class="label">Clase</div><div id="character-class" class="value"></div></div>
           <div class="fact"><div class="label">Puntos de alma</div><div id="soul-points" class="value"></div></div>
@@ -75,18 +93,37 @@
         <div class="fact" style="margin-top:15px"><div class="label">Trasfondo</div><p id="backstory" class="backstory"></p></div>
       </section>
       <section class="panel">
-        <h2>Estado de la ficha</h2>
-        <div class="stats">
-          <div class="stat"><span class="label">Clase</span><strong id="stat-class">—</strong></div>
-          <div class="stat"><span class="label">Alma</span><strong id="stat-soul">—</strong></div>
-          <div class="stat"><span class="label">Objetos</span><strong id="stat-items">0</strong></div>
+        <h2>Atributos // captura manual</h2>
+        <div class="attribute-grid" aria-label="Espacios de atributos pendientes de captura manual">
+          <div class="attribute"><span class="attribute-name">FUE</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+          <div class="attribute"><span class="attribute-name">DES</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+          <div class="attribute"><span class="attribute-name">CON</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+          <div class="attribute"><span class="attribute-name">INT</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+          <div class="attribute"><span class="attribute-name">SAB</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+          <div class="attribute"><span class="attribute-name">CAR</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
         </div>
-        <p class="entry-meta" style="margin-top:12px">Vista de consulta. Los datos se leen desde la ficha de Citizen.</p>
+        <p class="manual-caption" style="margin:10px 0 0">Casillas reservadas para completar manualmente</p>
+      </section>
+      <section class="panel">
+        <h2>Indicadores // captura manual</h2>
+        <div class="derived-grid">
+          <div class="derived"><span class="attribute-name">POD</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">POW</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">DEF</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">ATA</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">INS</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">MOV</span><div class="manual-box">—</div></div>
+          <div class="derived"><span class="attribute-name">SAL</span><div class="manual-box">—</div></div>
+        </div>
       </section>
       <section class="panel">
         <h2>Economía</h2>
         <div class="label">Saldo disponible</div><div id="balance" class="balance">— CORPOS</div>
         <details><summary>Historial económico</summary><div id="history" class="list" style="margin-top:12px"></div></details>
+      </section>
+      <section class="panel wide">
+        <h2>Armamento // datos de Citizen</h2>
+        <div id="weapons"></div>
       </section>
       <section class="panel wide">
         <h2>Inventario // fichas individuales</h2>
@@ -98,11 +135,23 @@
       <section class="panel">
         <h2>Rasgos registrados</h2><div id="traits"></div>
       </section>
+      <section class="panel">
+        <h2>Habilidades // captura manual</h2>
+        <div class="skill-grid">
+          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 01</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 02</span></div>
+          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 03</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 04</span></div>
+          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 05</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Habilidad 06</span></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Contactos // captura manual</h2>
+        <div class="contact-slot">CONTACTO 01 —</div><div class="contact-slot">CONTACTO 02 —</div><div class="contact-slot">CONTACTO 03 —</div><div class="contact-slot">CONTACTO 04 —</div>
+      </section>
       <section class="panel wide">
         <h2>Vivienda y servicios</h2><div id="services" class="columns"></div>
       </section>
     </main>
-    <footer>NIGHT XITY // FICHA DE CONSULTA // LOS DATOS SE ADMINISTRAN EN CITIZEN</footer>
+    <footer>NIGHT XITY // FICHA DE CONSULTA // CAMPOS MANUALES PENDIENTES DE CAPTURA</footer>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="motor_economico_night_xity_v1.js"></script>
@@ -143,8 +192,13 @@
     }
     function itemCatalog(item){return (productCatalog.items||[]).find(row=>row.id===item.catalogo_id)||{};}
     function namedExpense(id){for(const [key,value] of Object.entries(livingCatalog)){if(Array.isArray(value)){const hit=value.find(row=>row.id===id);if(hit)return hit.descripcion||hit.nombre||id;}}return id;}
+    function weaponMarkup(items){
+      const weapons=(items||[]).filter(item=>item.categoria==="Armas");
+      if(!weapons.length)return `<div class="empty">SIN ARMAS REGISTRADAS EN CITIZEN</div>`;
+      return `<div style="overflow-x:auto"><table class="weapon-table"><thead><tr><th>Arma</th><th>Tipo</th><th>Alcance</th><th>TT</th><th>RF</th><th>FA</th><th>Estado</th></tr></thead><tbody>${weapons.map(item=>{const product=itemCatalog(item),combat=product.combate||{};return `<tr><td>${safe(item.nombre||product.nombre||"Arma")}</td><td>${safe(product.tipo||"—")}</td><td>${safe(product.alcance??"—")}</td><td>${safe(combat.TT?.tirada||"—")}</td><td>${safe(combat.RF?.tirada||"—")}</td><td>${safe(combat.FA?.tirada||"—")}</td><td>${safe(item.estado||"REGISTRADA")}</td></tr>`;}).join("")}</tbody></table></div>`;
+    }
     function inventoryMarkup(items){
-      const buckets=new Map();(items||[]).forEach(item=>{const category=item.categoria||"Varios";if(!buckets.has(category))buckets.set(category,[]);buckets.get(category).push(item);});
+      const buckets=new Map();(items||[]).filter(item=>item.categoria!=="Armas").forEach(item=>{const category=item.categoria||"Varios";if(!buckets.has(category))buckets.set(category,[]);buckets.get(category).push(item);});
       const preferred=["Armas","Implantes","Programas","Accesorios","Blindajes","Terminales","MediCare","Drogas","Vehiculos","Varios","Cotidiano"];
       const categories=[...preferred.filter(name=>buckets.has(name)),...Array.from(buckets.keys()).filter(name=>!preferred.includes(name))];
       if(!categories.length)return `<div class="empty">SIN OBJETOS REGISTRADOS</div>`;
@@ -157,10 +211,11 @@
       const state=MotorEconomico.crearEstadoInicial(person), items=Array.isArray(ficha.inventario_detallado)?ficha.inventario_detallado:[];
       $("status").textContent=isDM?"Modo Arquitecto // ficha de consulta":"Ficha sincronizada desde Citizen Net // solo consulta";
       $("sheet").hidden=false;
-      const displayName=label(identity);$("character-name").textContent=displayName;$("character-class").textContent=identity.clase||"SIN REGISTRO";$("soul-points").textContent=identity.puntos_alma??"SIN REGISTRO";$("stat-class").textContent=identity.clase||"—";$("stat-soul").textContent=identity.puntos_alma??"—";$("stat-items").textContent=items.length;$("backstory").textContent=identity.trasfondo||"SIN TRASFONDO REGISTRADO";
+      const displayName=label(identity);$("character-name").textContent=displayName;$("character-class").textContent=identity.clase||"SIN REGISTRO";$("soul-points").textContent=identity.puntos_alma??"SIN REGISTRO";$("backstory").textContent=identity.trasfondo||"SIN TRASFONDO REGISTRADO";
       const initials=(displayName.match(/[\p{L}\p{N}]+/gu)||["NX"]).slice(0,2).map(word=>word[0]).join("").toUpperCase();$("monogram").textContent=initials;
       $("balance").textContent=`${fmt(state.saldo_actual)} CORPOS`;
       const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
+      $("weapons").innerHTML=weaponMarkup(items);
       $("inventory").innerHTML=inventoryMarkup(items);
       const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
       const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;

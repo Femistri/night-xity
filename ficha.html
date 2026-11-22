@@ -36,6 +36,13 @@
     .attribute{display:grid;grid-template-columns:minmax(30px,.6fr) minmax(35px,1fr) 30px minmax(35px,.65fr);gap:6px;align-items:center;border:1px solid var(--line);padding:8px}
     .attribute-name{font-size:12px;font-weight:bold;letter-spacing:1.5px}
     .manual-box{height:33px;border:1px solid #53615e;background:#080b0c;display:grid;place-items:center;color:#71807c;font-size:12px}
+    .manual-select{width:100%;height:33px;border:1px solid #53615e;background:#080b0c;color:var(--text);padding:4px;font:inherit;text-align:center}
+    .level-row{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+    .level-select{min-width:75px;padding:5px 8px}
+    .save-status{margin-left:auto;color:var(--muted);font-size:10px;letter-spacing:1px}
+    .help-value{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+    .pv-input{width:100%;height:33px;background:#080b0c;border:1px solid #53615e;color:var(--text);text-align:center;font:inherit}
+    .class-talents{font-size:12px;color:#c1ceca;margin:0 0 12px}
     .manual-caption{font-size:9px;letter-spacing:1px;color:#74817e;text-transform:uppercase}
     .derived-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
     .derived{border:1px solid var(--line);padding:9px;text-align:center}
@@ -86,7 +93,7 @@
         <div class="label">Alias // captura manual</div><div class="alias-box">PENDIENTE</div>
         <div class="facts">
           <div class="fact"><div class="label">Clase</div><div id="character-class" class="value"></div></div>
-          <div class="fact"><div class="label">Puntos de alma</div><div id="soul-points" class="value"></div></div>
+          <div class="fact" title="Anota un 4 en Alma y redúcelo en 1 por cada implante que te instales. Los puntos de Alma perdidos no se pueden recuperar de ninguna forma. La pérdida de Alma no implica la muerte o sustracción del personaje por parte del Arquitecto para convertirlo en Personaje No Jugador. Cuando un personaje llega a 0 puntos de Alma seguirá siendo humano, muy similar a un sintético, pero humano a fin de cuentas." tabindex="0"><div class="label">Puntos de alma</div><div id="soul-points" class="value"></div></div>
           <div class="fact"><div class="label">Ocupación</div><div id="occupation" class="value">TRABAJADOR INDEPENDIENTE</div></div>
           <div class="fact"><div class="label">Distrito</div><div class="value">NIGHT XITY</div></div>
         </div>
@@ -94,27 +101,29 @@
       </section>
       <section class="panel">
         <h2>Atributos // captura manual</h2>
-        <div class="attribute-grid" aria-label="Espacios de atributos pendientes de captura manual">
-          <div class="attribute"><span class="attribute-name">FUE</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
-          <div class="attribute"><span class="attribute-name">DES</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
-          <div class="attribute"><span class="attribute-name">CON</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
-          <div class="attribute"><span class="attribute-name">INT</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
-          <div class="attribute"><span class="attribute-name">SAB</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
-          <div class="attribute"><span class="attribute-name">CAR</span><span class="manual-box">—</span><span class="manual-caption">MOD</span><span class="manual-box">—</span></div>
+        <div class="level-row"><span class="label">NIVEL</span><select id="character-level" class="manual-select level-select" data-manual-input disabled aria-label="Nivel"></select><span id="stats-save-status" class="save-status" role="status" aria-live="polite">CARGANDO...</span></div>
+        <div class="attribute-grid" aria-label="Atributos elegibles de 3 a 18; modificador calculado automáticamente">
+          <div class="attribute"><span class="attribute-name">FUE</span><select id="attribute-fue" class="manual-select" data-attribute="fue" data-manual-input disabled aria-label="Fuerza"></select><span class="manual-caption">MOD</span><output id="modifier-fue" class="manual-box">—</output></div>
+          <div class="attribute"><span class="attribute-name">DES</span><select id="attribute-des" class="manual-select" data-attribute="des" data-manual-input disabled aria-label="Destreza"></select><span class="manual-caption">MOD</span><output id="modifier-des" class="manual-box">—</output></div>
+          <div class="attribute"><span class="attribute-name">CON</span><select id="attribute-con" class="manual-select" data-attribute="con" data-manual-input disabled aria-label="Constitución"></select><span class="manual-caption">MOD</span><output id="modifier-con" class="manual-box">—</output></div>
+          <div class="attribute"><span class="attribute-name">INT</span><select id="attribute-int" class="manual-select" data-attribute="int" data-manual-input disabled aria-label="Inteligencia"></select><span class="manual-caption">MOD</span><output id="modifier-int" class="manual-box">—</output></div>
+          <div class="attribute"><span class="attribute-name">SAB</span><select id="attribute-sab" class="manual-select" data-attribute="sab" data-manual-input disabled aria-label="Sabiduría"></select><span class="manual-caption">MOD</span><output id="modifier-sab" class="manual-box">—</output></div>
+          <div class="attribute"><span class="attribute-name">CAR</span><select id="attribute-car" class="manual-select" data-attribute="car" data-manual-input disabled aria-label="Carisma"></select><span class="manual-caption">MOD</span><output id="modifier-car" class="manual-box">—</output></div>
         </div>
-        <p class="manual-caption" style="margin:10px 0 0">Casillas reservadas para completar manualmente</p>
+        <p class="manual-caption" style="margin:10px 0 0">El jugador elige cada atributo. El modificador se calcula con la tabla.</p>
       </section>
       <section class="panel">
-        <h2>Indicadores // captura manual</h2>
+        <h2>Indicadores // datos y cálculos</h2>
         <div class="derived-grid">
-          <div class="derived"><span class="attribute-name">PV</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">POW</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">DEF</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">ATA</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">INS</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">MOV</span><div class="manual-box">—</div></div>
-          <div class="derived"><span class="attribute-name">DA</span><div class="manual-box">—</div></div>
+          <div class="derived" title="En nivel 1: tira un DA y suma CON para obtener los PV iniciales. En cada nivel posterior, tira un DA y súmalo al total de PV. El jugador anota el total." tabindex="0"><span class="attribute-name help-value">PV</span><input id="manual-pv" class="pv-input" type="number" min="0" step="1" data-manual-input disabled aria-label="Puntos de vida actuales"></div>
+          <div class="derived" title="Pueden gastarse para realizar cualquier prueba con Ventaja, anular una Desventaja propia, causar una Desventaja a un oponente o activar aquellos Talentos que lo requieran. Los PowerUps gastados se recuperan —hasta el total de Alma actual del personaje— al iniciar una nueva sesión de juego o después de un descanso de 8 horas." tabindex="0"><span class="attribute-name help-value">POW</span><output id="indicator-pow" class="manual-box">—</output></div>
+          <div class="derived" title="Suma el modificador por DES y los bonos por Protecciones eImplantes para el total de DF" tabindex="0"><span class="attribute-name help-value">DF</span><output id="indicator-df" class="manual-box">10</output></div>
+          <div class="derived" title="Para los ataques cuerpo a cuerpo añade tu modificador de FUE (también al daño que hagas). Para proyectiles suma el de DES" tabindex="0"><span class="attribute-name help-value">ATQ</span><output id="indicator-atq" class="manual-box">—</output></div>
+          <div class="derived"><span class="attribute-name">INS</span><output id="indicator-ins" class="manual-box">—</output></div>
+          <div class="derived" title="Suma el modificador por DES y los bonos por Protecciones eImplantes para el total de DF" tabindex="0"><span class="attribute-name help-value">MOV</span><output id="indicator-mov" class="manual-box">10</output></div>
+          <div class="derived"><span class="attribute-name">DA</span><output id="indicator-da" class="manual-box">—</output></div>
         </div>
+        <p id="class-talents" class="class-talents"></p>
       </section>
       <section class="panel">
         <h2>Habilidades // captura manual</h2>
@@ -132,7 +141,7 @@
         <details><summary>Servicios</summary><div id="services" class="list" style="margin-top:12px"></div></details>
       </section>
       <section class="panel">
-        <h2>Talentos</h2><div id="talents" class="list"></div>
+        <h2>Talentos</h2><div id="class-talents-list" class="class-talents"></div><div id="talents" class="list"></div>
       </section>
       <section class="panel">
         <h2>Rasgos registrados</h2><div id="traits"></div>
@@ -154,7 +163,7 @@
         <div class="contact-slot">CONTACTO 01 —</div><div class="contact-slot">CONTACTO 02 —</div><div class="contact-slot">CONTACTO 03 —</div><div class="contact-slot">CONTACTO 04 —</div>
       </section>
     </main>
-    <footer>NIGHT XITY // FICHA DE CONSULTA // CAMPOS MANUALES PENDIENTES DE CAPTURA</footer>
+    <footer>NIGHT XITY // DATOS DE CITIZEN EN CONSULTA // NIVEL, ATRIBUTOS Y PV EDITABLES</footer>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="motor_economico_night_xity_v1.js"></script>
@@ -166,6 +175,30 @@
     const label = person => { const key=person?.nombre_clave||"PERSONAJE"; const player=(person?.nombre_jugador||"").trim(); return player&&player!==key ? `${player} // ${key}` : key; };
     const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
     let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={};
+    const ATTRIBUTES=["fue","des","con","int","sab","car"];
+    const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
+    const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
+    const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
+    let manualSaveTimers=new Map(),manualReadyCharacter=null;
+    function classKey(value){const key=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return CLASS_RULES[key]?key:"";}
+    function modifier(value){if(value===""||value==null)return "—";const score=Number(value);return MODIFIERS.find(([max])=>score<=max)?.[1]??"—";}
+    function signed(value){const number=Number(value);return number>0?`+${number}`:String(number);}
+    function initializeManualEditors(){
+      $("character-level").replaceChildren(...Array.from({length:10},(_,index)=>new Option(String(index+1),String(index+1))));
+      ATTRIBUTES.forEach(attribute=>{$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3))));});
+      document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{if(!manualReadyCharacter)return;refreshDerived();queueManualSave(manualReadyCharacter);}));
+      document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
+    }
+    function refreshDerived(){
+      ATTRIBUTES.forEach(attribute=>$(`modifier-${attribute}`).textContent=modifier($(`attribute-${attribute}`).value));
+      const identity=active?.ficha?.identidad||{};const key=classKey(active?.clase||identity.clase);const level=Number($("character-level").value||1);const [attack,institute]=(ADVANCEMENT[key]||[])[level-1]||[null,null];
+      $("indicator-atq").textContent=attack==null?"—":signed(attack);$("indicator-ins").textContent=institute==null?"—":signed(institute);$("indicator-da").textContent=CLASS_RULES[key]?.da||"—";$("indicator-pow").textContent=$("soul-points").textContent||"—";
+      const talents=CLASS_RULES[key]?.talents||[];$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
+      $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
+    }
+    function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value)};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));return payload;}
+    function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){status.textContent="NO SE PUDO GUARDAR";status.classList.add("error");console.error(error);return;}if(manualReadyCharacter===characterId)status.textContent="GUARDADO";},350));}
+    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const {data,error}=await db.from("ficha_datos_manuales").select("nivel,fue,des,con,int,sab,car,puntos_vida_manual").eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();}
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{
@@ -212,9 +245,10 @@
       const ficha=active.ficha||{}, identity={...(ficha.identidad||{}),nombre_clave:active.nombre_clave||ficha.identidad?.nombre_clave||"SIN NOMBRE",nombre_jugador:active.nombre_jugador||ficha.identidad?.nombre_jugador||"",clase:active.clase||ficha.identidad?.clase||""};
       const person={...ficha,identidad:identity,economia:{...(ficha.economia||{}),saldo_inicial:Number(ficha.economia?.saldo_inicial||0),movimientos:Array.isArray(ficha.economia?.movimientos)?ficha.economia.movimientos:[]},inventario:ficha.inventario||{}};
       const state=MotorEconomico.crearEstadoInicial(person), items=Array.isArray(ficha.inventario_detallado)?ficha.inventario_detallado:[];
-      $("status").textContent=isDM?"Modo Arquitecto // ficha de consulta":"Ficha sincronizada desde Citizen Net // solo consulta";
+      $("status").textContent=isDM?"Modo Arquitecto // puedes corregir nivel, atributos y PV":"Ficha sincronizada desde Citizen Net // puedes editar nivel, atributos y PV";
       $("sheet").hidden=false;
       const displayName=label(identity);$("character-name").textContent=displayName;$("character-class").textContent=identity.clase||"SIN REGISTRO";$("soul-points").textContent=identity.puntos_alma??"SIN REGISTRO";$("backstory").textContent=identity.trasfondo||"SIN TRASFONDO REGISTRADO";
+      await loadManualData(active.id);
       const initials=(displayName.match(/[\p{L}\p{N}]+/gu)||["NX"]).slice(0,2).map(word=>word[0]).join("").toUpperCase();$("monogram").textContent=initials;
       $("balance").textContent=`${fmt(state.saldo_actual)} CORPOS`;
       const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
@@ -236,6 +270,7 @@
       $("housing").innerHTML=subError||reqError?`<div class="empty">No se pudieron cargar los datos de vivienda.</div>`:housingHtml;
       $("services").innerHTML=subError?`<div class="empty">No se pudieron cargar los servicios.</div>`:subscriptionMarkup(services);
     }
+    initializeManualEditors();
     start();
   </script>
 </body>

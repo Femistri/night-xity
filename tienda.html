@@ -27,6 +27,16 @@
         #estado-economico { margin-top:18px; padding-top:14px; border-top:1px solid #333; }
         #estado-economico .deuda { border:1px solid #654; padding:12px; margin:10px 0; }
         #estado-economico button { margin-top:8px; padding:8px 12px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
+        #dm-group-activation { margin:18px 0; }
+        #dm-group-activation[hidden] { display:none; }
+        #dm-group-activation .dm-group-options { margin:14px 0; }
+        #dm-group-activation .dm-group-option { display:flex; gap:12px; align-items:center; border-bottom:1px solid #333; padding:12px 0; }
+        #dm-group-activation .dm-group-option input { accent-color:#00ff9c; }
+        #dm-group-activation select { display:block; width:100%; max-width:520px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
+        #dm-group-activation button { margin:10px 8px 8px 0; padding:10px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
+        #dm-group-activation button:disabled { opacity:.55; cursor:not-allowed; }
+        #dm-group-activation-message { margin-top:10px; color:#aaa; }
+        #dm-group-activation-message.error { color:#ff8585; }
 
         * {
             box-sizing: border-box;
@@ -276,29 +286,8 @@
 
 <main>
 
-    <section class="panel" id="compra-destino-panel">
-        <h2>FICHA QUE REALIZA LA COMPRA</h2>
-        <div class="citizen-balance">
-            <label for="ciudadano-selector">CIUDADANO ACTIVO:</label>
-            <select id="ciudadano-selector">
-                <option value="">CARGANDO...</option>
-            </select>
-            <div id="citizen-balance">SALDO DISPONIBLE: CARGANDO...</div>
-        </div>
-    </section>
-
     <section class="panel" id="acceso-jugador" aria-live="polite">
         <div id="dm-store-notice" hidden></div>
-        <h2>ACCESO CIUDADANO</h2>
-        <div id="formulario-acceso">
-            <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
-            <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
-            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
-            <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
-            <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
-            <button id="boton-reenviar-confirmacion" type="button">REENVIAR CORREO DE CONFIRMACIÓN</button>
-            <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
-        </div>
         <div id="selector-personaje-contenedor" hidden>
             <p id="jugador-identificado"></p>
             <label for="personaje-asignado">PERSONAJES DE TU CUENTA:</label>
@@ -337,6 +326,16 @@
             </div>
             <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
+        <h2>ACCESO CIUDADANO</h2>
+        <div id="formulario-acceso">
+            <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
+            <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
+            <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
+            <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
+            <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
+            <button id="boton-reenviar-confirmacion" type="button">REENVIAR CORREO DE CONFIRMACIÓN</button>
+            <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
+        </div>
         <div id="acceso-mensaje" aria-live="polite"></div>
     </section>
 
@@ -349,6 +348,22 @@
             <div class="category-content">
                 CATÁLOGO EN CARGA...
             </div>
+        </details>
+        <details id="dm-group-activation" hidden>
+            <summary>ACTIVAR COSTOS DE VIDA EN GRUPO // ARQUITECTO</summary>
+            <p>Elige varios servicios y, si el personaje aún no tiene vivienda, puedes asignar una primera vivienda. Se validará y cobrará todo en una sola operación; si algo no es válido o el saldo no alcanza, no se aplicará ningún cargo.</p>
+            <h3>SERVICIOS PERIÓDICOS</h3>
+            <div id="dm-group-options" class="dm-group-options">Selecciona una ficha para cargar sus opciones.</div>
+            <div id="dm-group-housing-panel">
+                <label for="dm-group-housing">PRIMERA VIVIENDA (OPCIONAL)</label>
+                <select id="dm-group-housing" disabled>
+                    <option value="">SIN VIVIENDA EN ESTA OPERACIÓN</option>
+                </select>
+                <p id="dm-group-housing-note" class="item-info">Solo se puede asignar si la ficha no tiene una vivienda activa, suspendida ni pendiente.</p>
+            </div>
+            <div><strong>TOTAL DEL PRIMER COBRO: <span id="dm-group-total">0 CORPOS</span></strong></div>
+            <button id="dm-group-submit" type="button" disabled>ACTIVAR Y COBRAR EN GRUPO</button>
+            <div id="dm-group-activation-message" role="status" aria-live="polite"></div>
         </details>
 
     </section>
@@ -517,6 +532,7 @@ const cargarTienda = async () => {
                 .filter(gasto => gasto.grupo === "variable" || gasto.grupo === "evento")
                 .map(gasto => ({ ...gasto, tipo: gasto.grupo }))
         };
+        window.nightXityGastosVida = gastosVida;
         console.log("TIENDA // DunoXusa conectado:", {
             productos: productosResult.data?.length || 0,
             gastosVida: gastosRows.length
@@ -920,6 +936,13 @@ cargarTienda().finally(() => {
     const selectorContenedor = document.getElementById("selector-personaje-contenedor");
     const selectorPersonaje = document.getElementById("personaje-asignado");
     const destinoCompraDM = document.getElementById("dm-purchase-target");
+    const activacionGrupoDM = document.getElementById("dm-group-activation");
+    const opcionesGrupoDM = document.getElementById("dm-group-options");
+    const selectorViviendaGrupoDM = document.getElementById("dm-group-housing");
+    const notaViviendaGrupoDM = document.getElementById("dm-group-housing-note");
+    const totalGrupoDM = document.getElementById("dm-group-total");
+    const botonGrupoDM = document.getElementById("dm-group-submit");
+    const mensajeGrupoDM = document.getElementById("dm-group-activation-message");
     let usuarioEsDM = false;
 
     function actualizarDestinoCompraDM() {
@@ -935,6 +958,146 @@ cargarTienda().finally(() => {
         panel.style.display = "block";
         panel.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+
+    function actualizarTotalGrupoDM() {
+        const gastos = window.nightXityGastosVida || {};
+        const disponibles = [
+            ...(gastos.gastos_obligatorios || []),
+            ...(gastos.gastos_opcionales || [])
+        ];
+        const seleccionados = [...opcionesGrupoDM.querySelectorAll('input[name="dm-group-service"]:checked')];
+        const totalServicios = seleccionados.reduce((total, input) => {
+            const gasto = disponibles.find(item => item.id === input.value);
+            return total + Number(gasto?.costo || 0);
+        }, 0);
+        const vivienda = (gastos.viviendas || []).find(item => item.id === selectorViviendaGrupoDM.value);
+        const total = totalServicios + (vivienda ? Number(vivienda.costo_por_persona ?? vivienda.costo ?? 0) : 0);
+        totalGrupoDM.textContent = `${total.toLocaleString("es-MX")} CORPOS`;
+        botonGrupoDM.disabled = !selectorPersonaje.value || total <= 0;
+    }
+
+    async function cargarActivacionGrupoDM(personajeId, suscripciones) {
+        if (!usuarioEsDM || !activacionGrupoDM) return;
+        activacionGrupoDM.hidden = false;
+        const gastos = window.nightXityGastosVida || {};
+        const gruposPeriodicos = [
+            ["OBLIGATORIOS", gastos.gastos_obligatorios || []],
+            ["OPCIONALES", gastos.gastos_opcionales || []]
+        ].map(([nombre, lista]) => [nombre, lista.filter(gasto => ["mensual", "diaria"].includes(gasto.frecuencia))]);
+        const estados = new Map((suscripciones || []).map(item => [item.gasto_id, item.estado]));
+        const disponibles = gruposPeriodicos.flatMap(([, lista]) => lista).filter(gasto => !estados.has(gasto.id));
+
+        opcionesGrupoDM.replaceChildren();
+        if (!personajeId) {
+            opcionesGrupoDM.textContent = "Selecciona una ficha para cargar sus opciones.";
+        } else if (!disponibles.length) {
+            opcionesGrupoDM.textContent = "No hay servicios nuevos para activar. Los servicios suspendidos deben reactivarse por separado para liquidar su deuda.";
+        } else {
+            gruposPeriodicos.forEach(([nombre, lista]) => {
+                const listaDisponible = lista.filter(gasto => !estados.has(gasto.id));
+                if (!listaDisponible.length) return;
+                const titulo = document.createElement("h4");
+                titulo.textContent = nombre;
+                opcionesGrupoDM.append(titulo);
+                listaDisponible.forEach(gasto => {
+                    const fila = document.createElement("label");
+                    fila.className = "dm-group-option";
+                    const check = document.createElement("input");
+                    check.type = "checkbox";
+                    check.name = "dm-group-service";
+                    check.value = gasto.id;
+                    check.addEventListener("change", actualizarTotalGrupoDM);
+                    const texto = document.createElement("span");
+                    const frecuencia = gasto.frecuencia === "mensual" ? "42 DÍAS" : "DIARIO";
+                    texto.textContent = `${gasto.nombre} — ${Number(gasto.costo).toLocaleString("es-MX")} CORPOS / ${frecuencia}`;
+                    fila.append(check, texto);
+                    opcionesGrupoDM.append(fila);
+                });
+            });
+        }
+
+        selectorViviendaGrupoDM.replaceChildren(new Option("SIN VIVIENDA EN ESTA OPERACIÓN", ""));
+        selectorViviendaGrupoDM.disabled = true;
+        notaViviendaGrupoDM.textContent = "Solo se puede asignar si la ficha no tiene una vivienda activa, suspendida ni pendiente.";
+        if (personajeId) {
+            const { data: solicitudes, error: errorSolicitudes } = await supabaseClient
+                .from("solicitudes_gastos_vida")
+                .select("gasto_id,estado")
+                .eq("personaje_id", personajeId)
+                .eq("tipo_solicitud", "cambio_vivienda")
+                .eq("estado", "pendiente");
+            if (errorSolicitudes) {
+                notaViviendaGrupoDM.textContent = "No se pudo verificar la vivienda; no se podrá incluir en la activación grupal.";
+            } else {
+                const viviendas = (gastos.viviendas || []).map(item => ({ ...item, id: item.id || item.gasto_id }));
+                const tieneVivienda = (suscripciones || []).some(item =>
+                    String(item.gasto_id || "").startsWith("VIV-") && ["activa", "suspendida"].includes(item.estado)
+                );
+                if (tieneVivienda) {
+                    notaViviendaGrupoDM.textContent = "Esta ficha ya tiene vivienda activa o suspendida. La asignación grupal solo sirve para una primera vivienda.";
+                } else if ((solicitudes || []).length) {
+                    notaViviendaGrupoDM.textContent = "Hay una solicitud de vivienda pendiente; debe resolverse antes de asignar una primera vivienda.";
+                } else {
+                    viviendas.forEach(vivienda => {
+                        const costo = Number(vivienda.costo_por_persona ?? vivienda.costo);
+                        selectorViviendaGrupoDM.add(new Option(
+                            `${vivienda.descripcion || vivienda.nombre} — ${costo.toLocaleString("es-MX")} CORPOS / 42 DÍAS`,
+                            vivienda.id
+                        ));
+                    });
+                    selectorViviendaGrupoDM.disabled = !viviendas.length;
+                    notaViviendaGrupoDM.textContent = "La primera vivienda es opcional y se cobrará en la misma operación que los servicios elegidos.";
+                }
+            }
+        }
+        actualizarTotalGrupoDM();
+    }
+
+    selectorViviendaGrupoDM.addEventListener("change", actualizarTotalGrupoDM);
+
+    botonGrupoDM.addEventListener("click", async () => {
+        const personajeId = selectorPersonaje.value;
+        if (!usuarioEsDM || !personajeId) {
+            mensajeGrupoDM.textContent = "Selecciona primero el personaje que recibirá los servicios.";
+            mensajeGrupoDM.classList.add("error");
+            return;
+        }
+        const gastoIds = [...opcionesGrupoDM.querySelectorAll('input[name="dm-group-service"]:checked')].map(input => input.value);
+        const viviendaId = selectorViviendaGrupoDM.disabled ? "" : selectorViviendaGrupoDM.value;
+        if (!gastoIds.length && !viviendaId) {
+            mensajeGrupoDM.textContent = "Selecciona uno o más servicios, o una primera vivienda.";
+            mensajeGrupoDM.classList.add("error");
+            return;
+        }
+        const seleccionado = selectorPersonaje.selectedOptions[0]?.textContent.trim() || "la ficha seleccionada";
+        const gastos = window.nightXityGastosVida || {};
+        const catalogoServicios = [...(gastos.gastos_obligatorios || []), ...(gastos.gastos_opcionales || [])];
+        const conceptos = gastoIds.map(id => catalogoServicios.find(item => item.id === id)?.nombre || id);
+        const vivienda = (gastos.viviendas || []).find(item => item.id === viviendaId);
+        if (vivienda) conceptos.push(vivienda.descripcion || vivienda.nombre || viviendaId);
+        const total = Number(totalGrupoDM.textContent.replace(/[^0-9,.-]/g, "").replace(/,/g, "")) || 0;
+        if (!window.confirm(`Se activarán ${conceptos.join(", ")} para ${seleccionado}. Cargo inicial estimado: ${total.toLocaleString("es-MX")} CORPOS. La operación se aplicará completa o no se cobrará nada. ¿Continuar?`)) return;
+
+        botonGrupoDM.disabled = true;
+        mensajeGrupoDM.classList.remove("error");
+        mensajeGrupoDM.textContent = "VALIDANDO Y REGISTRANDO TODAS LAS ACTIVACIONES…";
+        try {
+            const { data, error } = await supabaseClient.rpc("activar_costos_vida_grupo_dm", {
+                p_personaje_id: personajeId,
+                p_gasto_ids: gastoIds,
+                p_vivienda_id: viviendaId || null
+            });
+            if (error) throw error;
+            if (!data?.exito) throw new Error(data?.mensaje || "Supabase no confirmó la operación.");
+            mensajeGrupoDM.textContent = `${data.cantidad} activaciones registradas. Cargo total: ${Number(data.cargo_total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
+            await cargarEstadoEconomico(personajeId);
+        } catch (error) {
+            mensajeGrupoDM.textContent = "No se aplicó ningún cobro: " + error.message;
+            mensajeGrupoDM.classList.add("error");
+        } finally {
+            actualizarTotalGrupoDM();
+        }
+    });
 
     async function cargarEstadoEconomico(personajeId) {
         const panelEconomico = document.getElementById("estado-economico");
@@ -964,7 +1127,7 @@ cargarTienda().finally(() => {
 
         const suscripciones = suscripcionesResult.data || [];
         const porGasto = new Map(suscripciones.map(item => [item.gasto_id, item]));
-        document.querySelectorAll('.select-item[data-source="gasto-vida"]').forEach(boton => {
+        document.querySelectorAll('.select-item[data-source="gasto-vida"], .select-item[data-source="vivienda"]').forEach(boton => {
             const grupo = boton.dataset.grupo;
             if (!["obligatorio", "opcional", "vivienda"].includes(grupo)) return;
             const suscripcion = porGasto.get(boton.dataset.id);
@@ -985,6 +1148,20 @@ cargarTienda().finally(() => {
                 boton.textContent = "ACTIVAR SERVICIO";
             }
         });
+
+        if (usuarioEsDM) {
+            document.querySelectorAll('.select-item[data-source="gasto-vida"], .select-item[data-source="vivienda"]').forEach(boton => {
+                const esServicioPeriodico = ["obligatorio", "opcional"].includes(boton.dataset.grupo) && ["mensual", "diaria"].includes(boton.dataset.frequency);
+                if (!esServicioPeriodico && boton.dataset.source !== "vivienda") return;
+                if (boton.classList.contains("selected")) boton.click();
+                if (boton.dataset.subscriptionState === "suspendida") return;
+                boton.disabled = true;
+                boton.classList.remove("selected");
+                boton.textContent = boton.dataset.subscriptionState === "activa" ? "SERVICIO ACTIVO" : "ACTIVAR EN GRUPO ABAJO";
+                boton.title = "El Arquitecto puede activar varios servicios desde el apartado de activación grupal.";
+            });
+            await cargarActivacionGrupoDM(personajeId, suscripciones);
+        }
 
         listaServicios.replaceChildren();
         if (!suscripciones.length) {
@@ -1302,7 +1479,7 @@ cargarTienda().finally(() => {
                 throw new Error("No hay productos ni viviendas seleccionados.");
             }
             if (usuarioEsDM && seleccionados.some(item => item.dataset.source)) {
-                throw new Error("Como Arquitecto, desde Tienda solo puedes comprar artículos de catálogo para la ficha seleccionada. Las activaciones de servicios y vivienda se gestionan en Citizen Net.");
+                throw new Error("Para activar varios servicios en una sola operación, usa ACTIVAR COSTOS DE VIDA EN GRUPO en la sección Vida Cotidiana.");
             }
 
             const vivienda = seleccionados.filter(
@@ -1627,15 +1804,17 @@ cargarTienda().finally(() => {
     const refreshCloseControls = () => document.querySelectorAll("details").forEach(details => {
         const rows = [...details.querySelectorAll(".item, .entry, label, .catalog-item")]
             .filter(row => row.closest("details") === details).length;
+        const category = details.querySelector(":scope > summary")?.textContent.trim().toLocaleUpperCase("es-MX");
+        const alwaysClosable = ["VEHÍCULOS", "VARIOS"].includes(category);
         const button = [...details.children].find(child => child.matches?.(".details-close"));
-        if (rows > 15 && !button) {
+        if ((rows > 15 || alwaysClosable) && !button) {
             const close = document.createElement("button");
             close.type = "button";
             close.className = "details-close";
             close.textContent = "▲ CERRAR MENÚ";
             close.addEventListener("click", () => { details.open = false; details.querySelector("summary")?.focus({ preventScroll: true }); });
             details.append(close);
-        } else if (rows <= 15 && button) button.remove();
+        } else if (rows <= 15 && !alwaysClosable && button) button.remove();
     });
     refreshCloseControls();
     new MutationObserver(() => requestAnimationFrame(refreshCloseControls)).observe(document.body, { childList: true, subtree: true });

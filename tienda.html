@@ -17,6 +17,8 @@
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
+        #dm-store-notice { margin-bottom:18px; color:#aaa; }
+        #dm-store-notice[hidden] { display:none; }
         .dm-purchase-target { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; font-size:13px; letter-spacing:1px; line-height:1.5; }
         .dm-purchase-target[hidden] { display:none; }
         #compra-mensaje { margin-top:12px; min-height:1.3em; color:#aaa; }
@@ -275,6 +277,7 @@
 <main>
 
     <section class="panel" id="acceso-jugador" aria-live="polite">
+        <div id="dm-store-notice" hidden></div>
         <h2>ACCESO CIUDADANO</h2>
         <div id="formulario-acceso">
             <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
@@ -315,9 +318,11 @@
                 <div id="crear-personaje-mensaje" role="status" aria-live="polite"></div>
             </div>
             <div id="estado-economico" hidden>
-                <h3>SERVICIOS Y OBLIGACIONES</h3>
-                <div id="suscripciones-personaje"></div>
-                <div id="obligaciones-personaje"></div>
+                <details>
+                    <summary>SERVICIOS Y OBLIGACIONES</summary>
+                    <div id="suscripciones-personaje"></div>
+                    <div id="obligaciones-personaje"></div>
+                </details>
             </div>
             <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
@@ -1125,7 +1130,10 @@ cargarTienda().finally(() => {
                 if (error) { mensaje.textContent = "No se pudo cerrar sesión: " + error.message; return; }
                 location.reload();
             });
-            mensaje.replaceChildren(avisoDM, enlaceDM, botonCerrarDM);
+            const avisoArquitecto = document.getElementById("dm-store-notice");
+            avisoArquitecto.hidden = false;
+            avisoArquitecto.replaceChildren(avisoDM, enlaceDM, botonCerrarDM);
+            mensaje.replaceChildren();
             if (selectorPersonaje.value) await cargarEstadoEconomico(selectorPersonaje.value);
             return;
         }

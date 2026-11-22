@@ -16,6 +16,7 @@
     h2{font-size:14px;letter-spacing:2.5px;text-transform:uppercase;margin:0 0 15px}
     h3{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 9px}
     .top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .page-links{display:grid;gap:5px;justify-items:start}
     select{background:#e9efec;color:#111;border:0;padding:9px 11px;min-width:190px;font:inherit}
     .notice{padding:13px 15px;border:1px solid var(--line);margin:18px 0;color:var(--muted)}
     .sheet{display:grid;grid-template-columns:minmax(260px,.86fr) minmax(0,1.6fr);gap:14px;margin-top:18px}
@@ -48,9 +49,10 @@
     .derived{border:1px solid var(--line);padding:9px;text-align:center}
     .derived .manual-box{margin-top:7px}
     .skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .skill-slot{min-height:52px;border:1px solid var(--line);padding:8px;display:flex;align-items:center;gap:8px}
-    .skill-mark{width:20px;height:20px;border:1px solid #64716d;flex:none}
-    .contact-slot{min-height:36px;border-bottom:1px solid var(--line);padding:8px 3px;color:#75817e;font-size:12px}
+    .skill-slot{min-height:52px;border:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr) 65px;align-items:center;gap:8px}
+    .skill-select,.manual-text{width:100%;height:34px;border:1px solid #53615e;background:#080b0c;color:var(--text);padding:5px 8px;font:inherit}
+    .manual-text{max-width:460px}
+    .contact-slot{min-height:36px;border-bottom:1px solid var(--line);padding:8px 3px;color:#75817e;font-size:12px;display:flex;align-items:center;gap:10px}
     .alias-box{min-height:33px;border:1px solid #53615e;padding:7px 9px;color:#71807c;margin:6px 0 13px;font-size:11px;letter-spacing:1px}
     .weapon-table{width:100%;border-collapse:collapse;font-size:12px}
     .weapon-table th,.weapon-table td{text-align:left;vertical-align:top;padding:9px 7px;border-bottom:1px solid var(--line)}
@@ -82,7 +84,7 @@
   <div class="wrap">
     <header>
       <div><div class="kicker">Night Xity // registro ciudadano // 2066</div><h1>Ficha personal</h1></div>
-      <div class="top-actions"><label class="eyebrow" for="character-picker">Consultar personaje</label><select id="character-picker" aria-label="Consultar personaje" disabled><option>CARGANDO...</option></select><a href="citizen.html">Volver a Citizen</a></div>
+      <div class="top-actions"><label class="eyebrow" for="character-picker">Consultar personaje</label><select id="character-picker" aria-label="Consultar personaje" disabled><option>CARGANDO...</option></select><nav class="page-links" aria-label="Navegación"><a href="citizen.html">Volver a Citizen</a><a href="tienda.html">Ir a Tienda DunoXuXa</a></nav></div>
     </header>
     <div id="status" class="notice" role="status" aria-live="polite">Conectando con Citizen Net…</div>
     <main id="sheet" class="sheet" hidden>
@@ -90,7 +92,7 @@
         <div class="eyebrow">Identidad // Night Xity</div>
         <div class="character-mark"><span id="monogram">NX</span></div><div class="manual-caption">Retrato // espacio para integrar después</div>
         <div class="eyebrow">Nombre ciudadano</div><div id="character-name" class="character-name"></div>
-        <div class="label">Alias // captura manual</div><div class="alias-box">PENDIENTE</div>
+        <label class="label" for="manual-alias">Alias // captura manual</label><input id="manual-alias" class="manual-text" type="text" maxlength="80" data-manual-input disabled placeholder="Alias del personaje">
         <div class="facts">
           <div class="fact"><div class="label">Clase</div><div id="character-class" class="value"></div></div>
           <div class="fact" title="Anota un 4 en Alma y redúcelo en 1 por cada implante que te instales. Los puntos de Alma perdidos no se pueden recuperar de ninguna forma. La pérdida de Alma no implica la muerte o sustracción del personaje por parte del Arquitecto para convertirlo en Personaje No Jugador. Cuando un personaje llega a 0 puntos de Alma seguirá siendo humano, muy similar a un sintético, pero humano a fin de cuentas." tabindex="0"><div class="label">Puntos de alma</div><div id="soul-points" class="value"></div></div>
@@ -107,7 +109,7 @@
           <div class="attribute"><span class="attribute-name">DES</span><select id="attribute-des" class="manual-select" data-attribute="des" data-manual-input disabled aria-label="Destreza"></select><span class="manual-caption">MOD</span><output id="modifier-des" class="manual-box">—</output></div>
           <div class="attribute"><span class="attribute-name">CON</span><select id="attribute-con" class="manual-select" data-attribute="con" data-manual-input disabled aria-label="Constitución"></select><span class="manual-caption">MOD</span><output id="modifier-con" class="manual-box">—</output></div>
           <div class="attribute"><span class="attribute-name">INT</span><select id="attribute-int" class="manual-select" data-attribute="int" data-manual-input disabled aria-label="Inteligencia"></select><span class="manual-caption">MOD</span><output id="modifier-int" class="manual-box">—</output></div>
-          <div class="attribute"><span class="attribute-name">SAB</span><select id="attribute-sab" class="manual-select" data-attribute="sab" data-manual-input disabled aria-label="Sabiduría"></select><span class="manual-caption">MOD</span><output id="modifier-sab" class="manual-box">—</output></div>
+          <div class="attribute" title="Es la característica de Sabiduría de un personaje la que mide su salud mental, por lo tanto, su Coeficiente de Criminalidad. Un personaje con un valor de 3 apenas estará lúcido, confundirá realidad con fantasía y estará al borde de la más absoluta locura. Los personajes que caigan por debajo de ese valor enloquecen por completo y pasan a ser personajes no jugadores mientras no cambie su valor de Sabiduría. Cuando un personaje presencia algún horror indescriptible o hace uso de la conexión neuronal y queda frito debido a un encuentro contra un programa Hielo Negro, debe hacer una tirada de SAB. El Arquitecto establece la dificultad dependiendo de la severidad del horror presenciado o del CD del Nodo (la potencia del Hielo Negro). Si el personaje falla la tirada, pierde 1d6 puntos de Sabiduría de forma temporal, y gana una manía o fobia de manera permanente. Si el resultado de la tirada es un 6, uno de los puntos se pierde de forma permanente. Los puntos temporales se recuperan a una tasa de 1 punto por día completo de descanso u 8 horas de acompañamiento psicológico." tabindex="0"><span class="attribute-name help-value">SAB</span><select id="attribute-sab" class="manual-select" data-attribute="sab" data-manual-input disabled aria-label="Sabiduría"></select><span class="manual-caption">MOD</span><output id="modifier-sab" class="manual-box">—</output></div>
           <div class="attribute"><span class="attribute-name">CAR</span><select id="attribute-car" class="manual-select" data-attribute="car" data-manual-input disabled aria-label="Carisma"></select><span class="manual-caption">MOD</span><output id="modifier-car" class="manual-box">—</output></div>
         </div>
         <p class="manual-caption" style="margin:10px 0 0">El jugador elige cada atributo. El modificador se calcula con la tabla.</p>
@@ -128,10 +130,14 @@
       <section class="panel">
         <h2>Habilidades // captura manual</h2>
         <div class="skill-grid">
-          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Corporate</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Punk</span></div>
-          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Cyber</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Hardware</span></div>
-          <div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Urban</span></div><div class="skill-slot"><span class="skill-mark"></span><span class="manual-caption">Savage</span></div>
+          <label class="skill-slot"><span class="manual-caption">Corporate</span><select id="skill-corporate" class="skill-select" data-skill="corporate" data-manual-input disabled aria-label="Puntos de habilidad Corporate"></select></label>
+          <label class="skill-slot"><span class="manual-caption">Punk</span><select id="skill-punk" class="skill-select" data-skill="punk" data-manual-input disabled aria-label="Puntos de habilidad Punk"></select></label>
+          <label class="skill-slot"><span class="manual-caption">Cyber</span><select id="skill-cyber" class="skill-select" data-skill="cyber" data-manual-input disabled aria-label="Puntos de habilidad Cyber"></select></label>
+          <label class="skill-slot"><span class="manual-caption">Hardware</span><select id="skill-hardware" class="skill-select" data-skill="hardware" data-manual-input disabled aria-label="Puntos de habilidad Hardware"></select></label>
+          <label class="skill-slot"><span class="manual-caption">Urban</span><select id="skill-urban" class="skill-select" data-skill="urban" data-manual-input disabled aria-label="Puntos de habilidad Urban"></select></label>
+          <label class="skill-slot"><span class="manual-caption">Savage</span><select id="skill-savage" class="skill-select" data-skill="savage" data-manual-input disabled aria-label="Puntos de habilidad Savage"></select></label>
         </div>
+        <p class="manual-caption" style="margin:10px 0 0">Asigna de 0 a 10 puntos en cada habilidad. El jugador puede editarlos y el Arquitecto corregirlos.</p>
       </section>
       <section class="panel">
         <h2>Economía</h2>
@@ -147,8 +153,8 @@
         <h2>Rasgos registrados</h2><div id="traits"></div>
       </section>
       <section class="panel wide">
-        <h2>Manías y fobias // Citizen</h2>
-        <div class="columns"><div><h3>Manías</h3><div id="manias" class="list"></div></div><div><h3>Fobias</h3><div id="phobias" class="list"></div></div></div>
+        <h2>Coeficiente de Criminalidad // Citizen</h2>
+        <div class="columns"><div><h3>Manías</h3><div id="manias" class="list"></div></div><div><h3>Fobias</h3><div id="phobias" class="list"></div></div><div><h3 class="help-value" title="Cuando se adquiere una adicción el personaje necesita una dosis diaria de la droga (realizando la correspondiente prueba de sobredosis). De no conseguirla, el primer día tendrá un -2 a todas las acciones y a partir del segundo día realizará todas las acciones con desventaja a causa del síndrome de abstinencia. Un personaje adicto a una droga tiene que tomar el doble de dosis para que le haga el efecto normal. Para DESINTOXICARSE, un personaje debe permanecer limpio durante un tiempo determinado por el Arquitecto y una vez por sesión superar una prueba de SAB CD-16. Son necesarias tres pruebas superadas con éxito para desintoxicarse completamente. El fallo en una de ellas indica que el contador se pone a cero y el jugador deberá repetir las pruebas hasta obtener tres éxitos consecutivos." tabindex="0">Adicción</h3><div id="addictions" class="list"></div></div></div>
       </section>
       <section class="panel wide">
         <h2>Armamento // datos de Citizen</h2>
@@ -160,7 +166,7 @@
       </section>
       <section class="panel wide">
         <h2>Contactos // captura manual</h2>
-        <div class="contact-slot">CONTACTO 01 —</div><div class="contact-slot">CONTACTO 02 —</div><div class="contact-slot">CONTACTO 03 —</div><div class="contact-slot">CONTACTO 04 —</div>
+        <label class="contact-slot">CONTACTO 01 — <input id="contact-01" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 02 — <input id="contact-02" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 03 — <input id="contact-03" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 04 — <input id="contact-04" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label>
       </section>
     </main>
     <footer>NIGHT XITY // DATOS DE CITIZEN EN CONSULTA // NIVEL, ATRIBUTOS Y PV EDITABLES</footer>
@@ -176,6 +182,7 @@
     const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
     let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={};
     const ATTRIBUTES=["fue","des","con","int","sab","car"];
+    const SKILLS=["corporate","punk","cyber","hardware","urban","savage"];
     const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
     const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
     const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
@@ -186,6 +193,7 @@
     function initializeManualEditors(){
       $("character-level").replaceChildren(...Array.from({length:10},(_,index)=>new Option(String(index+1),String(index+1))));
       ATTRIBUTES.forEach(attribute=>{$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3))));});
+      SKILLS.forEach(skill=>$(`skill-${skill}`).replaceChildren(...Array.from({length:11},(_,index)=>new Option(String(index),String(index)))));
       document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{if(!manualReadyCharacter)return;refreshDerived();queueManualSave(manualReadyCharacter);}));
       document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
     }
@@ -196,9 +204,9 @@
       const talents=CLASS_RULES[key]?.talents||[];$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
       $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
     }
-    function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value)};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));return payload;}
+    function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
     function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){status.textContent="NO SE PUDO GUARDAR";status.classList.add("error");console.error(error);return;}if(manualReadyCharacter===characterId)status.textContent="GUARDADO";},350));}
-    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const {data,error}=await db.from("ficha_datos_manuales").select("nivel,fue,des,con,int,sab,car,puntos_vida_manual").eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();}
+    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,alias,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();}
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{
@@ -259,9 +267,11 @@
       const mental=identity.salud_mental||{};
       const manias=(mental.manias||[]).map(Number);
       const fobias=(mental.fobias||[]).map(Number);
+      const addictions=(mental.adicciones||[]).map(Number);
       const renderMental=(catalog,selected)=>{const matches=(catalog||[]).filter(row=>selected.includes(Number(row.d100)));return matches.length?matches.map(row=>`<article class="entry"><div class="entry-title">${safe(row.termino)}</div><div class="entry-desc">${safe(row.descripcion||"")}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;};
       $("manias").innerHTML=renderMental(mentalCatalog.manias,manias);
       $("phobias").innerHTML=renderMental(mentalCatalog.fobias,fobias);
+      $("addictions").innerHTML=renderMental(mentalCatalog.adicciones,addictions);
       const {data:subs,error:subError}=await db.from("suscripciones_gastos_vida").select("gasto_id,costo,frecuencia,estado,proximo_cobro").eq("personaje_id",active.id);
       const {data:requests,error:reqError}=await db.from("solicitudes_gastos_vida").select("gasto_id,estado,importe_solicitado,fecha_solicitud,tipo_solicitud").eq("personaje_id",active.id).eq("tipo_solicitud","cambio_vivienda").order("fecha_solicitud",{ascending:false}).limit(5);
       const housing=(subs||[]).filter(row=>row.gasto_id.startsWith("VIV-"));const services=(subs||[]).filter(row=>!row.gasto_id.startsWith("VIV-"));

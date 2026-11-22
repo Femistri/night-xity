@@ -148,6 +148,10 @@
             font-size: 18px;
         }
 
+        .citizen-save-status { min-height: 18px; margin: 10px 0 0; color: #00ff9c; font-size: 12px; }
+        .citizen-save-status.error { color: #ff6b6b; }
+        .details-close { display: block; margin: 18px 0 6px auto; padding: 8px 12px; border: 1px solid #00ff9c; background: transparent; color: #00ff9c; cursor: pointer; font: inherit; font-size: 12px; letter-spacing: 1px; }
+
 
         .money {
             font-size: 28px;
@@ -673,22 +677,8 @@
 
 
             <div class="data-box">
-
-                <div class="label">
-                    TRASFONDO
-                </div>
-                
-<div class="data-box">
-
-    <div class="label">
-        TRASFONDO
-    </div>
-
-    <textarea class="value" id="citizen-background" rows="3"
-        placeholder="TRASFONDO DEL CIUDADANO"></textarea>
-
-</div>
-
+                <div class="label">TRASFONDO</div>
+                <textarea class="value" id="citizen-background" rows="3" placeholder="TRASFONDO DEL CIUDADANO"></textarea>
             </div>
 
 
@@ -708,6 +698,7 @@
 
 
         </div>
+        <p id="citizen-identity-save-status" class="citizen-save-status" role="status" aria-live="polite">CAMBIOS DE IDENTIDAD SE GUARDAN AUTOMÁTICAMENTE.</p>
 
     </section>
 
@@ -982,27 +973,7 @@
 
 <section class="panel">
 
-    <h2>INVENTARIO // FICHAS INDIVIDUALES</h2>
-
-    <div
-        class="item-info"
-        id="citizen-inventory-detailed"
-    >
-        SIN REGISTROS INDIVIDUALES
-    </div>
-
-</section>
-
-        
-    <!-- =========================
-         EQUIPO
-         ========================= -->
-
-    <section class="panel">
-
-    <h2>
-        EQUIPO
-    </h2>
+    <h2>EQUIPO</h2>
 
     <details>
         <summary>ACCESORIOS</summary>
@@ -1067,6 +1038,15 @@
     </div>
 </details>
         
+</section>
+
+<section class="panel">
+    <details>
+        <summary>INVENTARIO // FICHAS INDIVIDUALES</summary>
+        <div class="item-info" id="citizen-inventory-detailed">
+            SIN REGISTROS INDIVIDUALES
+        </div>
+    </details>
 </section>
     
 </div>
@@ -1388,7 +1368,13 @@ personajesAsignados.forEach(personaje => {
 
 selectorCitizen.value = personajeActivo.id;
 
-selectorCitizen.addEventListener("change", () => {
+selectorCitizen.addEventListener("change", async () => {
+    const personajeAnterior = personajeActivo.id;
+    const guardado = await guardarIdentidadCitizen();
+    if (!guardado) {
+        selectorCitizen.value = personajeAnterior;
+        return;
+    }
     localStorage.setItem(clavePersonajeActivo, selectorCitizen.value);
     location.reload();
 });
@@ -1607,6 +1593,86 @@ const ciudadanos = {
 };
 
 const identidad = ciudadano.identidad;
+
+const estadoGuardadoIdentidad = document.getElementById("citizen-identity-save-status");
+let temporizadorGuardadoIdentidad = null;
+let identidadPendienteDeGuardar = false;
+let guardadoIdentidadEnCurso = null;
+
+const datosIdentidadGuardables = () => ({
+    clase: identidad.clase || "",
+    puntos_alma: Number(identidad.puntos_alma ?? 4),
+    trasfondo: identidad.trasfondo || "",
+    tara_sintetica: Array.isArray(identidad.tara_sintetica) ? [...identidad.tara_sintetica] : [],
+    talentos: Array.isArray(identidad.talentos) ? [...identidad.talentos] : [],
+    salud_mental: {
+        manias: Array.isArray(identidad.salud_mental?.manias) ? [...identidad.salud_mental.manias] : [],
+        fobias: Array.isArray(identidad.salud_mental?.fobias) ? [...identidad.salud_mental.fobias] : [],
+        adicciones: Array.isArray(identidad.salud_mental?.adicciones) ? [...identidad.salud_mental.adicciones] : []
+    }
+});
+
+const mostrarEstadoGuardadoIdentidad = (texto, error = false) => {
+    if (!estadoGuardadoIdentidad) return;
+    estadoGuardadoIdentidad.textContent = texto;
+    estadoGuardadoIdentidad.classList.toggle("error", error);
+};
+
+const guardarIdentidadCitizen = async () => {
+    if (temporizadorGuardadoIdentidad) {
+        clearTimeout(temporizadorGuardadoIdentidad);
+        temporizadorGuardadoIdentidad = null;
+    }
+    if (guardadoIdentidadEnCurso) {
+        await guardadoIdentidadEnCurso;
+        if (identidadPendienteDeGuardar) return guardarIdentidadCitizen();
+        return true;
+    }
+    if (!identidadPendienteDeGuardar) return true;
+
+    identidadPendienteDeGuardar = false;
+    mostrarEstadoGuardadoIdentidad("GUARDANDO CAMBIOS…");
+    const payload = datosIdentidadGuardables();
+    const tarea = (async () => {
+        const { data, error } = await supabaseClient.rpc("guardar_identidad_ciudadano", {
+            p_personaje_id: personajeActivo.id,
+            p_identidad: payload
+        });
+        if (error || !data?.exito) {
+            identidadPendienteDeGuardar = true;
+            mostrarEstadoGuardadoIdentidad("NO SE PUDO GUARDAR. REVISA TU CONEXIÓN Y REINTENTA.", true);
+            console.error("No se pudo guardar la identidad del personaje", error || data);
+            return false;
+        }
+        personajeActivo.clase = payload.clase;
+        personajeActivo.ficha = {
+            ...(personajeActivo.ficha || {}),
+            identidad: { ...(personajeActivo.ficha?.identidad || {}), ...payload }
+        };
+        ciudadano.identidad = { ...identidad, ...payload };
+        mostrarEstadoGuardadoIdentidad("CAMBIOS GUARDADOS.");
+        return true;
+    })();
+    guardadoIdentidadEnCurso = tarea;
+    const resultado = await tarea;
+    guardadoIdentidadEnCurso = null;
+    if (identidadPendienteDeGuardar && resultado) return guardarIdentidadCitizen();
+    return resultado;
+};
+
+const programarGuardadoIdentidad = () => {
+    identidadPendienteDeGuardar = true;
+    mostrarEstadoGuardadoIdentidad("CAMBIOS PENDIENTES…");
+    if (temporizadorGuardadoIdentidad) clearTimeout(temporizadorGuardadoIdentidad);
+    temporizadorGuardadoIdentidad = setTimeout(() => guardarIdentidadCitizen(), 500);
+};
+
+window.addEventListener("beforeunload", event => {
+    if (!identidadPendienteDeGuardar && !guardadoIdentidadEnCurso && !temporizadorGuardadoIdentidad) return;
+    event.preventDefault();
+    event.returnValue = "";
+});
+
 const estadoEconomico =
     MotorEconomico.crearEstadoInicial(ciudadano);
 
@@ -2187,10 +2253,20 @@ if (elementoNombre) {
     identidad.clase || "";
 
      document.getElementById("citizen-soul").value =
-    identidad.puntos_alma ?? "";
+    identidad.puntos_alma ?? 4;
 
         document.getElementById("citizen-background").value =
     identidad.trasfondo || "";
+
+document.getElementById("citizen-soul").addEventListener("change", event => {
+    identidad.puntos_alma = Number(event.target.value);
+    programarGuardadoIdentidad();
+});
+
+document.getElementById("citizen-background").addEventListener("input", event => {
+    identidad.trasfondo = event.target.value;
+    programarGuardadoIdentidad();
+});
 
      const taraContainer = document.getElementById("citizen-tara");
 
@@ -2232,6 +2308,19 @@ taraContainer.innerHTML = `
     <strong>TODAS LAS DEMÁS</strong>
     ${tarasDisponibles.map(renderTara).join("")}
 `;
+
+taraContainer.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+        const nombre = checkbox.value;
+        if (checkbox.checked && !tarasCiudadano.includes(nombre)) tarasCiudadano.push(nombre);
+        if (!checkbox.checked) {
+            const index = tarasCiudadano.indexOf(nombre);
+            if (index !== -1) tarasCiudadano.splice(index, 1);
+        }
+        identidad.tara_sintetica = [...tarasCiudadano];
+        programarGuardadoIdentidad();
+    });
+});
         /* =========================
            TALENTOS
            ========================= */
@@ -2243,16 +2332,49 @@ taraContainer.innerHTML = `
 
 const talentosCatalogo = ciudadanos.talentos || {};
 
+const talentosRequeridosPorClase = {
+    backup: ["Sexto sentido", "Lucha con X o Músculos de acero"],
+    data: ["Mente férrea", "Plugin"],
+    link: ["Contactos", "Pico de Oro"],
+    microchip: ["Biomecánica", "Manitas"]
+};
+const keyClaseTalentos = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const talentosObligatoriosClase = clase => talentosRequeridosPorClase[keyClaseTalentos(clase)] || [];
+identidad.talentos = talentosCiudadano;
+let claseAnteriorTalentos = identidad.clase || personajeActivo.clase || "";
+const requiredTalentsInitially = talentosObligatoriosClase(claseAnteriorTalentos);
+const talentosAntesDeClase = [...talentosCiudadano];
+talentosCiudadano.splice(0, talentosCiudadano.length,
+    ...new Set([...requiredTalentsInitially, ...talentosAntesDeClase.filter(name => !requiredTalentsInitially.includes(name))]).values()
+);
+if (talentosCiudadano.length > 5) talentosCiudadano.splice(5);
+if (JSON.stringify(talentosAntesDeClase) !== JSON.stringify(talentosCiudadano)) {
+    identidad.talentos = talentosCiudadano;
+    programarGuardadoIdentidad();
+}
+
+document.getElementById("citizen-class").addEventListener("change", event => {
+    const nuevaClase = event.target.value;
+    const anteriores = talentosObligatoriosClase(claseAnteriorTalentos);
+    const nuevos = talentosObligatoriosClase(nuevaClase);
+    const opcionales = talentosCiudadano.filter(name => !anteriores.includes(name) && !nuevos.includes(name));
+    talentosCiudadano.splice(0, talentosCiudadano.length, ...new Set([...nuevos, ...opcionales]).values());
+    if (talentosCiudadano.length > 5) talentosCiudadano.splice(5);
+    identidad.clase = nuevaClase;
+    identidad.talentos = talentosCiudadano;
+    personajeActivo.clase = nuevaClase;
+    claseAnteriorTalentos = nuevaClase;
+    renderTalentos();
+    programarGuardadoIdentidad();
+});
+
 const talentosContainer =
     document.getElementById("citizen-talents");
 
 const renderTalentos = () => {
 
-    const seleccionados =
-        Object.entries(talentosCatalogo)
-            .filter(([nombre]) =>
-                talentosCiudadano.includes(nombre)
-            );
+    const requeridos = talentosObligatoriosClase(identidad.clase || personajeActivo.clase);
+    const seleccionados = [...new Set(talentosCiudadano)].map(nombre => [nombre, talentosCatalogo[nombre] || "TALENTO DE CLASE"]);
 
     const disponibles =
         Object.entries(talentosCatalogo)
@@ -2277,6 +2399,7 @@ const renderTalentos = () => {
                                     type="checkbox"
                                     value="${nombre}"
                                     checked
+                                    ${requeridos.includes(nombre) ? "disabled title=\"Talento asociado a la clase\"" : ""}
                                 >
                                 <strong>${nombre}</strong>
                                 <br>
@@ -2347,6 +2470,8 @@ const renderTalentos = () => {
                 }
 
                 renderTalentos();
+                identidad.talentos = [...talentosCiudadano];
+                programarGuardadoIdentidad();
             });
         });
 };
@@ -3174,6 +3299,8 @@ const renderManias = () => {
                     }
                 }
 
+                identidad.salud_mental = { ...(identidad.salud_mental || {}), manias: [...maniasCiudadano] };
+                programarGuardadoIdentidad();
                 renderManias();
             });
         });
@@ -3269,6 +3396,8 @@ const renderFobias = () => {
                     }
                 }
 
+                identidad.salud_mental = { ...(identidad.salud_mental || {}), fobias: [...fobiasCiudadano] };
+                programarGuardadoIdentidad();
                 renderFobias();
             });
         });
@@ -3397,6 +3526,8 @@ renderFobias();
                             }
                         }
 
+                        identidad.salud_mental = { ...(identidad.salud_mental || {}), adicciones: [...adiccionesCiudadano] };
+                        programarGuardadoIdentidad();
                         renderAdicciones();
                     });
                 });
@@ -3421,6 +3552,26 @@ renderFobias();
 }
 
 cargarDatosCitizenNet();
+</script>
+
+<script>
+(() => {
+    const refreshCloseControls = () => document.querySelectorAll("details").forEach(details => {
+        const rows = [...details.querySelectorAll(".item, .entry, label, .category-content > *")]
+            .filter(row => row.closest("details") === details).length;
+        const button = [...details.children].find(child => child.matches?.(".details-close"));
+        if (rows > 15 && !button) {
+            const close = document.createElement("button");
+            close.type = "button";
+            close.className = "details-close";
+            close.textContent = "▲ CERRAR MENÚ";
+            close.addEventListener("click", () => { details.open = false; details.querySelector("summary")?.focus({ preventScroll: true }); });
+            details.append(close);
+        } else if (rows <= 15 && button) button.remove();
+    });
+    refreshCloseControls();
+    new MutationObserver(() => requestAnimationFrame(refreshCloseControls)).observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 
 

@@ -17,6 +17,8 @@
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
+        .dm-purchase-target { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; font-size:13px; letter-spacing:1px; line-height:1.5; }
+        .dm-purchase-target[hidden] { display:none; }
         #compra-mensaje { margin-top:12px; min-height:1.3em; color:#aaa; }
         #compra-mensaje.error { color:#ff8585; }
         #compra-mensaje:empty { display:none; }
@@ -440,6 +442,7 @@
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
             </div>
+            <div id="dm-purchase-target" class="dm-purchase-target" hidden aria-live="polite"></div>
             <p class="service-note">
                 Los servicios recurrentes se activan uno por uno. La activación cobra el primer ciclo; los ciclos mensuales duran 42 días y después el cobro es automático.
             </p>
@@ -915,6 +918,17 @@ cargarTienda().finally(() => {
     const formulario = document.getElementById("formulario-acceso");
     const selectorContenedor = document.getElementById("selector-personaje-contenedor");
     const selectorPersonaje = document.getElementById("personaje-asignado");
+    const destinoCompraDM = document.getElementById("dm-purchase-target");
+    let usuarioEsDM = false;
+
+    function actualizarDestinoCompraDM() {
+        if (!destinoCompraDM || !usuarioEsDM) return;
+        const opcion = selectorPersonaje.selectedOptions[0];
+        const nombre = selectorPersonaje.value && opcion ? opcion.textContent.trim() : "";
+        destinoCompraDM.textContent = nombre
+            ? `COMPRAS SE DESCONTARÁN DEL SALDO DE: ${nombre}`
+            : "ARQUITECTO // ELIGE QUIÉN PAGARÁ LA COMPRA.";
+    }
 
     function mostrarAcceso() {
         panel.style.display = "block";
@@ -1065,13 +1079,40 @@ cargarTienda().finally(() => {
         }
 
         if (perfilResult.data.rol === "dm") {
+            usuarioEsDM = true;
+            const { data: personajes, error: personajesError } = await supabaseClient.from("personajes")
+                .select("id,nombre_clave,nombre_jugador,clase").order("nombre_clave");
+            if (personajesError) throw new Error("No se pudieron cargar los personajes: " + personajesError.message);
+            selectorPersonaje.innerHTML = "";
+            selectorPersonaje.add(new Option("ELIGE EL PERSONAJE QUE PAGARÁ LA COMPRA", ""));
+            (personajes || []).forEach(personaje => selectorPersonaje.add(new Option(
+                `${personaje.nombre_jugador ? personaje.nombre_jugador + " // " : ""}${personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}`,
+                personaje.id
+            )));
+            const guardado = localStorage.getItem("nightXity_personaje_dm_activo");
+            if ((personajes || []).some(personaje => personaje.id === guardado)) selectorPersonaje.value = guardado;
+
+            const etiquetaPersonaje = selectorContenedor.querySelector('label[for="personaje-asignado"]');
+            if (etiquetaPersonaje) etiquetaPersonaje.textContent = "PERSONAJE QUE PAGARÁ LA COMPRA:";
+            document.getElementById("personajes-disponibles-contenedor").hidden = true;
+            document.getElementById("crear-personaje-contenedor").hidden = true;
+            selectorContenedor.hidden = false;
             panel.style.display = "block";
             formulario.hidden = true;
-            selectorContenedor.hidden = true;
-            mensaje.replaceChildren();
-
+            destinoCompraDM.hidden = false;
+            actualizarDestinoCompraDM();
+            if (!selectorPersonaje.dataset.dmListenerAttached) {
+                selectorPersonaje.addEventListener("change", async () => {
+                    if (!selectorPersonaje.value) localStorage.removeItem("nightXity_personaje_dm_activo");
+                    else localStorage.setItem("nightXity_personaje_dm_activo", selectorPersonaje.value);
+                    actualizarDestinoCompraDM();
+                    try { await cargarEstadoEconomico(selectorPersonaje.value); }
+                    catch (error) { mensaje.textContent = "No se pudo cargar el saldo del personaje: " + error.message; }
+                });
+                selectorPersonaje.dataset.dmListenerAttached = "true";
+            }
             const avisoDM = document.createElement("p");
-            avisoDM.textContent = "Sesión del Arquitecto detectada. La gestión del DM se realiza en Citizen Net.";
+            avisoDM.textContent = "Elige una ficha antes de comprar. Citizen Net usará la misma selección.";
             const enlaceDM = document.createElement("a");
             enlaceDM.href = "citizen.html";
             enlaceDM.className = "dm-access-link";
@@ -1081,14 +1122,11 @@ cargarTienda().finally(() => {
             botonCerrarDM.textContent = "CERRAR SESIÓN";
             botonCerrarDM.addEventListener("click", async () => {
                 const { error } = await supabaseClient.auth.signOut();
-                if (error) {
-                    mensaje.textContent = "No se pudo cerrar sesión: " + error.message;
-                    return;
-                }
+                if (error) { mensaje.textContent = "No se pudo cerrar sesión: " + error.message; return; }
                 location.reload();
             });
-
-            mensaje.append(avisoDM, enlaceDM, botonCerrarDM);
+            mensaje.replaceChildren(avisoDM, enlaceDM, botonCerrarDM);
+            if (selectorPersonaje.value) await cargarEstadoEconomico(selectorPersonaje.value);
             return;
         }
 
@@ -1130,6 +1168,7 @@ cargarTienda().finally(() => {
             ? "Identidad verificada. Selecciona una ficha o añade otra disponible."
             : "Cuenta lista. Elige uno de los personajes disponibles.";
 
+        destinoCompraDM.hidden = true;
         if (!selectorPersonaje.dataset.listenerAttached) {
             selectorPersonaje.addEventListener("change", () => {
                 if (!selectorPersonaje.value) return;
@@ -1258,6 +1297,9 @@ cargarTienda().finally(() => {
             if (!seleccionados.length) {
                 throw new Error("No hay productos ni viviendas seleccionados.");
             }
+            if (usuarioEsDM && seleccionados.some(item => item.dataset.source)) {
+                throw new Error("Como Arquitecto, desde Tienda solo puedes comprar artículos de catálogo para la ficha seleccionada. Las activaciones de servicios y vivienda se gestionan en Citizen Net.");
+            }
 
             const vivienda = seleccionados.filter(
                 item => item.dataset.source === "vivienda"
@@ -1374,6 +1416,15 @@ cargarTienda().finally(() => {
             );
         }
 
+        if (usuarioEsDM) {
+            const personajeElegido = selectorPersonaje.selectedOptions[0]?.textContent.trim() || "PERSONAJE SIN SELECCIONAR";
+            const totalCompra = seleccionados.reduce((total, item) => total + Number(item.dataset.price || 0), 0);
+            if (!window.confirm(`¿Confirmas la compra por ${totalCompra.toLocaleString("es-MX")} CORPOS para ${personajeElegido}? El importe se descontará del saldo de esa ficha.`)) {
+                boton.disabled = false;
+                boton.textContent = "COMPRAR";
+                return;
+            }
+        }
         const productos = seleccionados.map(item => item.dataset.id);
         const { data, error } = await supabaseClient.rpc(
             "realizar_compra_multiple",
@@ -1570,5 +1621,6 @@ cargarTienda().finally(() => {
 </body>
 
 </html>
+
 
 

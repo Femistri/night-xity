@@ -2751,10 +2751,29 @@ const zonasImplantes = {
 
 const actualizarMapaCorporal = () => {
 
+    const implantesPorZona = new Map();
+    implantesCiudadano.forEach(id => {
+        const implante = implantesCatalogo.find(item => item.id === id);
+        const nombre = implante?.nombre || id;
+        (zonasImplantes[id] || []).forEach(zona => {
+            const nombres = implantesPorZona.get(zona) || [];
+            nombres.push(nombre);
+            implantesPorZona.set(zona, nombres);
+        });
+    });
+
     document
         .querySelectorAll(".implant-hotspot")
         .forEach(hotspot => {
             hotspot.classList.remove("active");
+            const etiquetaZona = hotspot.dataset.zone.replaceAll("-", " ");
+            const nombres = implantesPorZona.get(hotspot.dataset.zone) || [];
+            const descripcion = nombres.length
+                ? `${etiquetaZona.toUpperCase()}: ${nombres.join(", ")}`
+                : `${etiquetaZona.toUpperCase()}: SIN IMPLANTES REGISTRADOS`;
+            hotspot.title = descripcion;
+            hotspot.setAttribute("aria-label", descripcion);
+            hotspot.querySelector("summary")?.setAttribute("title", descripcion);
         });
 
     implantesCiudadano.forEach(id => {

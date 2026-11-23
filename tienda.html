@@ -18,6 +18,9 @@
         #acceso-mensaje { margin-top:10px; color:#aaa; }
         #dm-store-notice { margin-bottom:18px; color:#aaa; }
         #dm-store-notice[hidden] { display:none; }
+        #tienda-personaje-resumen { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; }
+        #tienda-personaje-resumen[hidden] { display:none; }
+        #tienda-saldo { display:block; margin-top:5px; color:#eee; font-size:1.35rem; }
         .details-close { display:block; margin:18px 0 6px auto; padding:8px 12px; border:1px solid #00ff9c; background:transparent; color:#00ff9c; cursor:pointer; font:inherit; font-size:12px; letter-spacing:1px; }
         .dm-purchase-target { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; font-size:13px; letter-spacing:1px; line-height:1.5; }
         .dm-purchase-target[hidden] { display:none; }
@@ -304,6 +307,10 @@
             <select id="personaje-asignado">
                 <option value="">AÚN NO TIENES PERSONAJES</option>
             </select>
+            <div id="tienda-personaje-resumen" hidden aria-live="polite">
+                <span id="tienda-personaje-nombre"></span>
+                <span id="tienda-saldo"></span>
+            </div>
             <div id="personajes-disponibles-contenedor">
                 <p>ELIGE UNA FICHA DISPONIBLE (HASTA TRES POR CUENTA).</p>
                 <select id="personaje-disponible">
@@ -754,7 +761,8 @@ const objetos =
                document
             .querySelectorAll(".select-item")
             .forEach(boton => {
-
+                if (boton.dataset.selectionHandlerAttached === "true") return;
+                boton.dataset.selectionHandlerAttached = "true";
                 boton.addEventListener("click", () => {
                     const seleccionadosActuales = Array.from(
                         document.querySelectorAll(".select-item.selected")
@@ -814,6 +822,8 @@ const objetos =
 
                 const selectedProducts =
             document.getElementById("selected-products");
+if (!selectedProducts.dataset.removeHandlerAttached) {
+selectedProducts.dataset.removeHandlerAttached = "true";
 selectedProducts.addEventListener("click", evento => {
     const botonQuitar = evento.target.closest(".remove-item");
     if (!botonQuitar) return;
@@ -826,12 +836,14 @@ selectedProducts.addEventListener("click", evento => {
         botonProducto.click();
     }
 });
+}
            
         document
             .querySelectorAll(".select-item")
-            .forEach(boton => {
-
-                boton.addEventListener("click", () => {
+             .forEach(boton => {
+                 if (boton.dataset.cartHandlerAttached === "true") return;
+                 boton.dataset.cartHandlerAttached = "true";
+                 boton.addEventListener("click", () => {
 
                     const seleccionados =
                         document.querySelectorAll(
@@ -919,7 +931,7 @@ selectedProducts.innerHTML =
             ? "REACTIVAR SERVICIO"
         : sonServiciosRecurrentes
             ? `ACTIVAR ${seleccionados.length} SERVICIO${seleccionados.length === 1 ? "" : "S"}`
-            : "COMPRAR"}
+            : window.nightXityStoreRole === "dm" ? "CONFIRMAR COMPRA PARA ESTA FICHA" : "COMPRAR"}
 </button>
 
     `;
@@ -961,6 +973,9 @@ cargarTienda().finally(() => {
     const formulario = document.getElementById("formulario-acceso");
     const selectorContenedor = document.getElementById("selector-personaje-contenedor");
     const selectorPersonaje = document.getElementById("personaje-asignado");
+    const resumenPersonaje = document.getElementById("tienda-personaje-resumen");
+    const nombreResumenPersonaje = document.getElementById("tienda-personaje-nombre");
+    const saldoResumenPersonaje = document.getElementById("tienda-saldo");
     const destinoCompraDM = document.getElementById("dm-purchase-target");
     const activacionGrupoDM = document.getElementById("dm-group-activation");
     const opcionesGrupoDM = document.getElementById("dm-group-options");
@@ -970,6 +985,37 @@ cargarTienda().finally(() => {
     const botonGrupoDM = document.getElementById("dm-group-submit");
     const mensajeGrupoDM = document.getElementById("dm-group-activation-message");
     let usuarioEsDM = false;
+
+    function actualizarResumenPersonaje(personajeId, ficha) {
+        if (!personajeId) {
+            resumenPersonaje.hidden = true;
+            nombreResumenPersonaje.textContent = "";
+            saldoResumenPersonaje.textContent = "";
+            return;
+        }
+        const opcion = selectorPersonaje.selectedOptions[0];
+        nombreResumenPersonaje.textContent = opcion?.textContent.trim() || "PERSONAJE SELECCIONADO";
+        const economia = ficha?.economia || {};
+        const movimientos = Array.isArray(economia.movimientos) ? economia.movimientos : [];
+        let saldo = Number(economia.saldo_inicial ?? 0);
+        movimientos.forEach(movimiento => {
+            const monto = Number(movimiento?.monto ?? 0);
+            const tipo = String(movimiento?.tipo || "").toLowerCase();
+            if (tipo === "ingreso") saldo += monto;
+            else if (tipo === "egreso") saldo -= monto;
+        });
+        try {
+            if (typeof MotorEconomico !== "undefined" && typeof MotorEconomico.crearEstadoInicial === "function") {
+                const estado = MotorEconomico.crearEstadoInicial({ ...ficha, economia });
+                if (Number.isFinite(Number(estado?.saldo_actual))) saldo = Number(estado.saldo_actual);
+            }
+        } catch (error) {
+            console.warn("No se pudo calcular el saldo con el motor económico; se usó el historial de la ficha.", error);
+        }
+        saldoResumenPersonaje.textContent = `SALDO DISPONIBLE: ${saldo.toLocaleString("es-MX")} CORPOS`;
+        resumenPersonaje.hidden = false;
+        actualizarDestinoCompraDM();
+    }
 
     function actualizarDestinoCompraDM() {
         if (!destinoCompraDM || !usuarioEsDM) return;
@@ -1005,6 +1051,7 @@ cargarTienda().finally(() => {
     async function cargarActivacionGrupoDM(personajeId, suscripciones) {
         if (!usuarioEsDM || !activacionGrupoDM) return;
         activacionGrupoDM.hidden = false;
+        activacionGrupoDM.open = true;
         const gastos = window.nightXityGastosVida || {};
         const gruposPeriodicos = [
             ["OBLIGATORIOS", gastos.gastos_obligatorios || []],
@@ -1131,6 +1178,7 @@ cargarTienda().finally(() => {
         const listaObligaciones = document.getElementById("obligaciones-personaje");
         if (!personajeId) {
             panelEconomico.hidden = true;
+            actualizarResumenPersonaje("", null);
             return;
         }
 
@@ -1138,7 +1186,11 @@ cargarTienda().finally(() => {
             await new Promise(resolve => window.addEventListener("nightxity:tienda-lista", resolve, { once: true }));
         }
 
-        const [suscripcionesResult, obligacionesResult] = await Promise.all([
+        const [fichaResult, suscripcionesResult, obligacionesResult] = await Promise.all([
+            supabaseClient.from("personajes")
+                .select("ficha")
+                .eq("id", personajeId)
+                .maybeSingle(),
             supabaseClient.from("suscripciones_gastos_vida")
                 .select("id,gasto_id,costo,estado,proximo_cobro")
                 .eq("personaje_id", personajeId),
@@ -1148,6 +1200,9 @@ cargarTienda().finally(() => {
                 .eq("estado", "mora")
                 .order("vence_en")
         ]);
+        if (fichaResult.error) throw new Error("No se pudo consultar el saldo de la ficha: " + fichaResult.error.message);
+        if (!fichaResult.data) throw new Error("No se encontró la ficha seleccionada para consultar su saldo.");
+        actualizarResumenPersonaje(personajeId, fichaResult.data.ficha || {});
         if (suscripcionesResult.error) throw new Error("No se pudieron consultar los servicios: " + suscripcionesResult.error.message);
         if (obligacionesResult.error) throw new Error("No se pudieron consultar las deudas: " + obligacionesResult.error.message);
 
@@ -1188,10 +1243,26 @@ cargarTienda().finally(() => {
                 if (!esServicioPeriodico && boton.dataset.source !== "vivienda") return;
                 if (boton.classList.contains("selected")) boton.click();
                 if (boton.dataset.subscriptionState === "suspendida") return;
-                boton.disabled = true;
+                boton.disabled = boton.dataset.subscriptionState === "activa";
                 boton.classList.remove("selected");
-                boton.textContent = boton.dataset.subscriptionState === "activa" ? "CORRIENDO" : "ACTIVAR EN GRUPO ABAJO";
-                boton.title = "El Arquitecto puede activar varios servicios desde el apartado de activación grupal.";
+                boton.textContent = boton.dataset.subscriptionState === "activa" ? "CORRIENDO" : "ELEGIR PARA ACTIVAR EN GRUPO";
+                boton.title = "Abre la activación grupal de esta Tienda; el servicio se añadirá a la selección del Arquitecto.";
+                if (!boton.dataset.groupJumpHandlerAttached) {
+                    boton.addEventListener("click", event => {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        activacionGrupoDM.open = true;
+                        if (boton.dataset.source === "vivienda") {
+                            selectorViviendaGrupoDM.value = boton.dataset.id;
+                        } else {
+                            const casilla = opcionesGrupoDM.querySelector(`input[name="dm-group-service"][value="${CSS.escape(boton.dataset.id)}"]`);
+                            if (casilla) casilla.checked = true;
+                        }
+                        actualizarTotalGrupoDM();
+                        activacionGrupoDM.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, true);
+                    boton.dataset.groupJumpHandlerAttached = "true";
+                }
             });
             await cargarActivacionGrupoDM(personajeId, suscripciones);
         }
@@ -1291,6 +1362,7 @@ cargarTienda().finally(() => {
 
         if (perfilResult.data.rol === "dm") {
             usuarioEsDM = true;
+            window.nightXityStoreRole = "dm";
             const { data: personajes, error: personajesError } = await supabaseClient.from("personajes")
                 .select("id,nombre_clave,nombre_jugador,clase").is("archivado_en", null).order("nombre_clave");
             if (personajesError) throw new Error("No se pudieron cargar los personajes: " + personajesError.message);
@@ -1347,6 +1419,7 @@ cargarTienda().finally(() => {
         if (perfilResult.data.rol !== "jugador") {
             throw new Error("Esta cuenta no tiene acceso a la tienda de jugadores.");
         }
+        window.nightXityStoreRole = "jugador";
 
         const { data, error } = await supabaseClient
             .from("asignaciones")
@@ -1687,6 +1760,7 @@ cargarTienda().finally(() => {
             ". Total: " + Number(data.total).toLocaleString("es-MX") +
             " CORPOS. Saldo restante: " +
             Number(data.saldo_actual).toLocaleString("es-MX") + " CORPOS.";
+        await cargarEstadoEconomico(personajeId);
         }
     }
 }

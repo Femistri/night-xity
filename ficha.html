@@ -232,7 +232,7 @@
         if(profileError||!profile)throw new Error("No se pudo verificar tu cuenta.");
         const isDM=profile.rol==="dm";
         if(isDM){
-          const {data,error}=await db.from("personajes").select("id,nombre_clave,nombre_jugador,clase,ficha").order("nombre_clave");
+          const {data,error}=await db.from("personajes").select("id,nombre_clave,nombre_jugador,clase,ficha").is("archivado_en",null).order("nombre_clave");
           if(error)throw error; characters=data||[];
         }else{
           const {data,error}=await db.from("asignaciones").select("personaje_id,personajes(id,nombre_clave,nombre_jugador,clase,ficha)").eq("perfil_id",user.id);

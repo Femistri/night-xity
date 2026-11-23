@@ -247,6 +247,16 @@
             border-color: #00ff9c;
             color: #00ff9c;
         }
+
+        .select-item.running,
+        .select-item.running:disabled {
+            border-color: #00ff9c;
+            background: rgba(0, 255, 156, .14);
+            color: #72ffc3;
+            cursor: default;
+            font-weight: 700;
+            opacity: 1;
+        }
         
         footer {
             border-top: 1px solid #333;
@@ -754,14 +764,25 @@ const objetos =
                         ["obligatorio", "opcional"].includes(elemento.dataset.grupo) &&
                         ["mensual", "diaria"].includes(elemento.dataset.frequency);
                     const estaSeleccionando = !boton.classList.contains("selected");
-                    const yaHayServicioRecurrente = seleccionadosActuales.some(esServicioRecurrente);
                     const esRecurrente = esServicioRecurrente(boton);
+                    const yaHayServicioRecurrente = seleccionadosActuales.some(esServicioRecurrente);
+                    const hayNoRecurrenteSeleccionado = seleccionadosActuales.some(item => !esServicioRecurrente(item));
+                    const esServicioSuspendido = boton.dataset.subscriptionState === "suspendida";
+                    const yaHayServicioSuspendido = seleccionadosActuales.some(item => item.dataset.subscriptionState === "suspendida");
 
                     if (estaSeleccionando &&
-                        ((esRecurrente && seleccionadosActuales.length > 0) ||
-                         yaHayServicioRecurrente)) {
+                        ((esServicioSuspendido && seleccionadosActuales.length > 0) || yaHayServicioSuspendido)) {
                         const aviso = document.getElementById("compra-mensaje");
-                        aviso.textContent = "Activa un servicio recurrente por separado. Retira los demás artículos y deja solo un servicio en la selección.";
+                        aviso.textContent = "Los servicios suspendidos se liquidan y reactivan uno por uno.";
+                        aviso.classList.add("error");
+                        return;
+                    }
+
+                    if (estaSeleccionando &&
+                        ((esRecurrente && hayNoRecurrenteSeleccionado) ||
+                         (!esRecurrente && yaHayServicioRecurrente))) {
+                        const aviso = document.getElementById("compra-mensaje");
+                        aviso.textContent = "Puedes activar varios servicios periódicos juntos. Retira primero los productos o solicitudes que no sean servicios periódicos.";
                         aviso.classList.add("error");
                         return;
                     }
@@ -769,12 +790,13 @@ const objetos =
                     boton.classList.toggle("selected");
 
                     if (boton.classList.contains("selected")) {
+                        boton.classList.remove("running");
                         const aviso = document.getElementById("compra-mensaje");
                         aviso.textContent = "";
                         aviso.classList.remove("error");
                         boton.textContent = "SELECCIONADO";
                     } else {
-                        if (boton.dataset.subscriptionState === "activa") boton.textContent = "SERVICIO ACTIVO";
+                        if (boton.dataset.subscriptionState === "activa") boton.textContent = "CORRIENDO";
                         else if (boton.dataset.subscriptionState === "suspendida") boton.textContent = boton.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                         else if (boton.dataset.grupo === "variable") boton.textContent = "SOLICITAR AL DM";
                         else if (boton.dataset.source === "vivienda") boton.textContent = "SOLICITAR AL ARQUITECTO";
@@ -840,12 +862,13 @@ const esSolicitudVariable =
 const esSolicitudVivienda =
     seleccionados.length === 1 &&
     seleccionados[0].dataset.source === "vivienda";
-const esServicioRecurrente =
-    seleccionados.length === 1 &&
-    seleccionados[0].dataset.source === "gasto-vida" &&
-    ((["obligatorio", "opcional"].includes(seleccionados[0].dataset.grupo) &&
-      ["mensual", "diaria"].includes(seleccionados[0].dataset.frequency)) ||
-     seleccionados[0].dataset.subscriptionState === "suspendida");
+const sonServiciosRecurrentes = seleccionados.length > 0 && seleccionados.every(item =>
+    item.dataset.source === "gasto-vida" &&
+    ["obligatorio", "opcional"].includes(item.dataset.grupo) &&
+    ["mensual", "diaria"].includes(item.dataset.frequency) &&
+    item.dataset.subscriptionState !== "suspendida"
+);
+const esReactivacionUnica = seleccionados.length === 1 && seleccionados[0].dataset.subscriptionState === "suspendida";
 const frecuenciaSeleccionada = seleccionados[0]?.dataset.frequency === "mensual"
     ? "CADA 42 DÍAS"
     : seleccionados[0]?.dataset.frequency === "diaria"
@@ -880,8 +903,10 @@ selectedProducts.innerHTML =
         ? (esSolicitudVivienda
             ? "NO SE COBRARÁ HASTA QUE EL ARQUITECTO APRUEBE LA SOLICITUD."
             : "NO SE COBRARÁ HASTA QUE EL DM APRUEBE LA SOLICITUD.")
-        : esServicioRecurrente
-            ? `SE COBRA EL PRIMER CICLO AL ACTIVAR; RECURRENCIA ${frecuenciaSeleccionada}.`
+        : esReactivacionUnica
+            ? "SE LIQUIDARÁ Y REACTIVARÁ EL SERVICIO."
+        : sonServiciosRecurrentes
+            ? `SE COBRA EL PRIMER CICLO DE CADA SERVICIO; DESPUÉS CONTINÚA SU PERIODICIDAD.`
             : "EL SALDO SE VALIDARÁ EN DUNOXUSA AL CONFIRMAR."}
 </div>
 
@@ -890,8 +915,10 @@ selectedProducts.innerHTML =
         ? "SOLICITAR AL ARQUITECTO"
         : esSolicitudEvento || esSolicitudVariable
             ? "SOLICITAR AL DM"
-        : esServicioRecurrente
-            ? (seleccionados[0].dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO" : "ACTIVAR SERVICIO")
+        : esReactivacionUnica
+            ? "REACTIVAR SERVICIO"
+        : sonServiciosRecurrentes
+            ? `ACTIVAR ${seleccionados.length} SERVICIO${seleccionados.length === 1 ? "" : "S"}`
             : "COMPRAR"}
 </button>
 
@@ -1134,17 +1161,24 @@ cargarTienda().finally(() => {
             boton.dataset.subscriptionState = suscripcion?.estado || "";
             if (suscripcion?.estado === "activa") {
                 boton.disabled = true;
-                boton.textContent = "SERVICIO ACTIVO";
+                boton.textContent = "CORRIENDO";
+                boton.classList.add("running");
                 boton.title = suscripcion.proximo_cobro
                     ? "Próximo cobro: " + new Date(suscripcion.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })
                     : "Servicio activo";
             } else if (suscripcion?.estado === "suspendida") {
                 boton.disabled = false;
+                boton.classList.remove("running");
                 boton.textContent = grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                 boton.title = "Liquidación: deuda + multa + reconexión + nueva cuota";
             } else if (["obligatorio", "opcional"].includes(grupo)) {
                 boton.disabled = false;
+                boton.classList.remove("running");
                 boton.textContent = "ACTIVAR SERVICIO";
+            } else {
+                boton.disabled = false;
+                boton.classList.remove("running");
+                if (grupo === "vivienda") boton.textContent = "SOLICITAR AL ARQUITECTO";
             }
         });
 
@@ -1156,7 +1190,7 @@ cargarTienda().finally(() => {
                 if (boton.dataset.subscriptionState === "suspendida") return;
                 boton.disabled = true;
                 boton.classList.remove("selected");
-                boton.textContent = boton.dataset.subscriptionState === "activa" ? "SERVICIO ACTIVO" : "ACTIVAR EN GRUPO ABAJO";
+                boton.textContent = boton.dataset.subscriptionState === "activa" ? "CORRIENDO" : "ACTIVAR EN GRUPO ABAJO";
                 boton.title = "El Arquitecto puede activar varios servicios desde el apartado de activación grupal.";
             });
             await cargarActivacionGrupoDM(personajeId, suscripciones);
@@ -1258,7 +1292,7 @@ cargarTienda().finally(() => {
         if (perfilResult.data.rol === "dm") {
             usuarioEsDM = true;
             const { data: personajes, error: personajesError } = await supabaseClient.from("personajes")
-                .select("id,nombre_clave,nombre_jugador,clase").order("nombre_clave");
+                .select("id,nombre_clave,nombre_jugador,clase").is("archivado_en", null).order("nombre_clave");
             if (personajesError) throw new Error("No se pudieron cargar los personajes: " + personajesError.message);
             selectorPersonaje.innerHTML = "";
             selectorPersonaje.add(new Option("ELIGE EL PERSONAJE QUE PAGARÁ LA COMPRA", ""));
@@ -1510,12 +1544,16 @@ cargarTienda().finally(() => {
                 mensajeCompra.textContent = `Servicio reactivado. Total liquidado: ${Number(data.total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
                 await cargarEstadoEconomico(personajeId);
             } else if (serviciosRecurrentes.length) {
-                if (seleccionados.length !== 1) {
-                    throw new Error("Activa un servicio recurrente por separado. Retira los demás artículos y deja solo un servicio en la selección.");
+                if (seleccionados.length !== serviciosRecurrentes.length) {
+                    throw new Error("Activa los servicios periódicos en una operación separada de productos y solicitudes.");
                 }
                 const { data, error } = await supabaseClient.rpc(
-                    "activar_servicio_gasto",
-                    { p_personaje_id: personajeId, p_gasto_id: serviciosRecurrentes[0].dataset.id }
+                    "activar_costos_vida_grupo",
+                    {
+                        p_personaje_id: personajeId,
+                        p_gasto_ids: serviciosRecurrentes.map(item => item.dataset.id),
+                        p_vivienda_id: null
+                    }
                 );
                 if (error) throw error;
                 if (!data?.exito) {
@@ -1523,7 +1561,7 @@ cargarTienda().finally(() => {
                     await cargarEstadoEconomico(personajeId);
                     return;
                 }
-                mensajeCompra.textContent = `Servicio activado. Primer ciclo: ${Number(data.cargo_inicial).toLocaleString("es-MX")} CORPOS; siguiente cobro: ${new Date(data.proximo_cobro).toLocaleString("es-MX", { timeZone: "America/Cancun" })}.`;
+                mensajeCompra.textContent = `${Number(data.cantidad || serviciosRecurrentes.length)} servicios activados. Cargo inicial: ${Number(data.cargo_total).toLocaleString("es-MX")} CORPOS. Saldo restante: ${Number(data.saldo_actual).toLocaleString("es-MX")} CORPOS.`;
                 await cargarEstadoEconomico(personajeId);
             } else if (vivienda.length) {
                 if (seleccionados.length !== 1) {
@@ -1660,7 +1698,7 @@ cargarTienda().finally(() => {
                     item.textContent = "AGOTADO";
                     return;
                 }
-                if (item.dataset.subscriptionState === "activa") item.textContent = "SERVICIO ACTIVO";
+                if (item.dataset.subscriptionState === "activa") { item.textContent = "CORRIENDO"; item.classList.add("running"); item.disabled = true; }
                 else if (item.dataset.subscriptionState === "suspendida") item.textContent = item.dataset.grupo === "vivienda" ? "REACTIVAR VIVIENDA" : "REACTIVAR SERVICIO";
                 else if (item.dataset.grupo === "variable") item.textContent = "SOLICITAR AL DM";
                 else if (item.dataset.source === "vivienda") item.textContent = "SOLICITAR AL ARQUITECTO";
@@ -1675,11 +1713,17 @@ cargarTienda().finally(() => {
             mensajeCompra.classList.add("error");
         } finally {
             boton.disabled = false;
-            const seleccion = document.querySelector(".select-item.selected");
+            const selecciones = [...document.querySelectorAll(".select-item.selected")];
+            const sonPeriodicos = selecciones.length > 0 && selecciones.every(item =>
+                item.dataset.source === "gasto-vida" &&
+                ["obligatorio", "opcional"].includes(item.dataset.grupo) &&
+                ["mensual", "diaria"].includes(item.dataset.frequency)
+            );
+            const seleccion = selecciones[0];
             boton.textContent = !seleccion ? "COMPRAR"
+                : sonPeriodicos ? `ACTIVAR ${selecciones.length} SERVICIO${selecciones.length === 1 ? "" : "S"}`
                 : ["evento", "variable"].includes(seleccion.dataset.grupo) ? "SOLICITAR AL DM"
                 : seleccion.dataset.subscriptionState === "suspendida" ? "REACTIVAR SERVICIO"
-                : ["obligatorio", "opcional"].includes(seleccion.dataset.grupo) ? "ACTIVAR SERVICIO"
                 : seleccion.dataset.source === "vivienda" ? "SOLICITAR AL ARQUITECTO"
                 : "COMPRAR";
         }
@@ -1785,8 +1829,7 @@ cargarTienda().finally(() => {
 <script>
 (() => {
     const refreshCloseControls = () => document.querySelectorAll("details").forEach(details => {
-        const rows = [...details.querySelectorAll(".item, .entry, label, .catalog-item")]
-            .filter(row => row.closest("details") === details).length;
+        const rows = details.querySelectorAll(".item, .entry, label, .catalog-item").length;
         const category = details.querySelector(":scope > summary")?.textContent.trim().toLocaleUpperCase("es-MX");
         const alwaysClosable = ["VEHÍCULOS", "VARIOS"].includes(category);
         const button = [...details.children].find(child => child.matches?.(".details-close"));

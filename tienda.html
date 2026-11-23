@@ -15,12 +15,14 @@
         #acceso-jugador { margin: 0 0 22px; }
         #acceso-jugador input, #acceso-jugador select { display:block; width:100%; max-width:420px; margin:10px 0; padding:10px; background:#111; color:#eee; border:1px solid #555; }
         #acceso-jugador button { margin:8px 8px 8px 0; padding:9px 14px; background:transparent; border:1px solid #00ff9c; color:#00ff9c; cursor:pointer; }
+        #acceso-jugador button:disabled { opacity:.45; cursor:not-allowed; }
         #acceso-mensaje { margin-top:10px; color:#aaa; }
         #dm-store-notice { margin-bottom:18px; color:#aaa; }
         #dm-store-notice[hidden] { display:none; }
         #tienda-personaje-resumen { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; }
         #tienda-personaje-resumen[hidden] { display:none; }
         #tienda-saldo { display:block; margin-top:5px; color:#eee; font-size:1.35rem; }
+        #tienda-economia-titulo { margin-bottom:6px; color:#999; font-size:11px; letter-spacing:2px; }
         .details-close { display:block; margin:18px 0 6px auto; padding:8px 12px; border:1px solid #00ff9c; background:transparent; color:#00ff9c; cursor:pointer; font:inherit; font-size:12px; letter-spacing:1px; }
         .dm-purchase-target { margin:14px 0; padding:12px 14px; border-left:3px solid #00ff9c; color:#00ff9c; font-size:13px; letter-spacing:1px; line-height:1.5; }
         .dm-purchase-target[hidden] { display:none; }
@@ -300,6 +302,7 @@
 <main>
 
     <section class="panel" id="acceso-jugador" aria-live="polite">
+        <h2 id="acceso-titulo">ACCESO CIUDADANO</h2>
         <div id="dm-store-notice" hidden></div>
         <div id="selector-personaje-contenedor" hidden>
             <p id="jugador-identificado"></p>
@@ -308,8 +311,10 @@
                 <option value="">AÚN NO TIENES PERSONAJES</option>
             </select>
             <div id="tienda-personaje-resumen" hidden aria-live="polite">
+                <div id="tienda-economia-titulo">ECONOMÍA DEL PERSONAJE ACTIVO</div>
                 <span id="tienda-personaje-nombre"></span>
                 <span id="tienda-saldo"></span>
+                <div id="dm-purchase-target" class="dm-purchase-target" hidden aria-live="polite"></div>
             </div>
             <div id="personajes-disponibles-contenedor">
                 <p>ELIGE UNA FICHA DISPONIBLE (HASTA TRES POR CUENTA).</p>
@@ -343,7 +348,6 @@
             </div>
             <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
-        <h2>ACCESO CIUDADANO</h2>
         <div id="formulario-acceso">
             <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
             <input id="acceso-correo" type="email" autocomplete="username" placeholder="CORREO" required>
@@ -477,7 +481,6 @@
             <div id="selected-products">
                 NINGÚN PRODUCTO SELECCIONADO.
             </div>
-            <div id="dm-purchase-target" class="dm-purchase-target" hidden aria-live="polite"></div>
             <div id="compra-mensaje" role="status" aria-live="polite"></div>
 
         </section>
@@ -994,6 +997,9 @@ cargarTienda().finally(() => {
             return;
         }
         const opcion = selectorPersonaje.selectedOptions[0];
+        document.getElementById("tienda-economia-titulo").textContent = usuarioEsDM
+            ? "ECONOMÍA // FICHA QUE PAGARÁ LA COMPRA"
+            : "ECONOMÍA // PERSONAJE ACTIVO";
         nombreResumenPersonaje.textContent = opcion?.textContent.trim() || "PERSONAJE SELECCIONADO";
         const economia = ficha?.economia || {};
         const movimientos = Array.isArray(economia.movimientos) ? economia.movimientos : [];
@@ -1051,7 +1057,6 @@ cargarTienda().finally(() => {
     async function cargarActivacionGrupoDM(personajeId, suscripciones) {
         if (!usuarioEsDM || !activacionGrupoDM) return;
         activacionGrupoDM.hidden = false;
-        activacionGrupoDM.open = true;
         const gastos = window.nightXityGastosVida || {};
         const gruposPeriodicos = [
             ["OBLIGATORIOS", gastos.gastos_obligatorios || []],
@@ -1344,7 +1349,7 @@ cargarTienda().finally(() => {
             selector.add(new Option("NO HAY PERSONAJES DISPONIBLES O YA ALCANZASTE EL LÍMITE", ""));
         }
         boton.disabled = sinDisponibles;
-        contenedor.hidden = false;
+        contenedor.hidden = sinDisponibles;
     }
 
     async function cargarPersonajesAsignados() {
@@ -1363,6 +1368,7 @@ cargarTienda().finally(() => {
         if (perfilResult.data.rol === "dm") {
             usuarioEsDM = true;
             window.nightXityStoreRole = "dm";
+            document.getElementById("acceso-titulo").textContent = "ECONOMÍA DE LA FICHA // ARQUITECTO";
             const { data: personajes, error: personajesError } = await supabaseClient.from("personajes")
                 .select("id,nombre_clave,nombre_jugador,clase").is("archivado_en", null).order("nombre_clave");
             if (personajesError) throw new Error("No se pudieron cargar los personajes: " + personajesError.message);
@@ -1420,6 +1426,7 @@ cargarTienda().finally(() => {
             throw new Error("Esta cuenta no tiene acceso a la tienda de jugadores.");
         }
         window.nightXityStoreRole = "jugador";
+        document.getElementById("acceso-titulo").textContent = "ECONOMÍA DEL PERSONAJE";
 
         const { data, error } = await supabaseClient
             .from("asignaciones")
@@ -1451,9 +1458,11 @@ cargarTienda().finally(() => {
         panel.style.display = "block";
         formulario.hidden = true;
         selectorContenedor.hidden = false;
-        mensaje.textContent = personajes.length
-            ? "Identidad verificada. Selecciona una ficha o añade otra disponible."
-            : "Cuenta lista. Elige uno de los personajes disponibles.";
+        mensaje.textContent = selectorPersonaje.value
+            ? ""
+            : personajes.length
+                ? "Selecciona la ficha que realizará la compra."
+                : "Cuenta lista. Elige uno de los personajes disponibles.";
 
         destinoCompraDM.hidden = true;
         if (!selectorPersonaje.dataset.listenerAttached) {

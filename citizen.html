@@ -480,6 +480,28 @@
         <option value="">CARGANDO PERSONAJES...</option>
     </select>
 </section>
+
+<details class="panel" id="dm-character-management" hidden>
+    <summary>GESTIÓN DE PERSONAJES Y PNJ // ARQUITECTO</summary>
+    <p>Crea PNJ, cambia el nombre visible de personajes sin asignación y archiva fichas que ya no usarás. Archivar conserva su historial.</p>
+    <form id="dm-create-npc-form" class="item">
+        <h3>CREAR PNJ</h3>
+        <label for="dm-create-npc-name">NOMBRE DEL PNJ</label>
+        <input id="dm-create-npc-name" required maxlength="40" autocomplete="off" placeholder="Nombre visible">
+        <label for="dm-create-npc-class">CLASE</label>
+        <select id="dm-create-npc-class" class="value" required>
+            <option value="">ELIGE UNA CLASE</option>
+            <option value="Backup">BACKUP</option>
+            <option value="Data">DATA</option>
+            <option value="Link">LINK</option>
+            <option value="Microchip">MICROCHIP</option>
+        </select>
+        <button type="submit">CREAR PNJ</button>
+    </form>
+    <h3>PERSONAJES REGISTRADOS</h3>
+    <div id="dm-character-management-list" class="list">CARGANDO...</div>
+    <div id="dm-character-management-message" role="status" aria-live="polite"></div>
+</details>
     
    <div class="grid" id="citizen-content">
 
@@ -1125,6 +1147,7 @@ if (esDM) {
         await supabaseClient
             .from("personajes")
             .select("id, nombre_clave, nombre_jugador, clase, ficha")
+            .is("archivado_en", null)
             .order("nombre_clave", { ascending: true });
 
     if (errorPersonajes) {
@@ -1154,7 +1177,124 @@ if (esDM) {
         .filter(Boolean);
 }
 
-if (!personajesAsignados.length) {
+if (esDM) {
+    const panelGestion = document.getElementById("dm-character-management");
+    const listaGestion = document.getElementById("dm-character-management-list");
+    const mensajeGestion = document.getElementById("dm-character-management-message");
+    panelGestion.hidden = false;
+
+    const cargarGestionPersonajes = async () => {
+        listaGestion.textContent = "CARGANDO...";
+        const { data, error } = await supabaseClient.rpc("listar_personajes_dm_gestion");
+        if (error) throw error;
+        listaGestion.replaceChildren();
+        if (!data?.length) {
+            listaGestion.textContent = "NO HAY PERSONAJES REGISTRADOS.";
+            return;
+        }
+        data.forEach(personaje => {
+            const fila = document.createElement("article");
+            fila.className = "item";
+            const titulo = document.createElement("h3");
+            titulo.textContent = `${personaje.nombre_jugador || personaje.nombre_clave} // ${personaje.clase || "SIN CLASE"}${personaje.es_pnj ? " // PNJ" : ""}`;
+            fila.append(titulo);
+
+            const estado = document.createElement("p");
+            estado.textContent = personaje.archivado_en
+                ? "ARCHIVADO · SE CONSERVAN SUS DATOS E HISTORIAL"
+                : personaje.asignado
+                    ? "ASIGNADO A UN JUGADOR · EL NOMBRE NO SE PUEDE CAMBIAR DESDE AQUÍ"
+                    : "SIN ASIGNACIÓN";
+            fila.append(estado);
+
+            const campo = document.createElement("input");
+            campo.type = "text";
+            campo.maxLength = 40;
+            campo.value = personaje.nombre_jugador || "";
+            campo.placeholder = personaje.nombre_clave;
+            campo.setAttribute("aria-label", `Nombre visible de ${personaje.nombre_clave}`);
+            campo.disabled = Boolean(personaje.asignado);
+            fila.append(campo);
+
+            const guardar = document.createElement("button");
+            guardar.type = "button";
+            guardar.textContent = "GUARDAR NOMBRE";
+            guardar.disabled = Boolean(personaje.asignado);
+            guardar.addEventListener("click", async () => {
+                guardar.disabled = true;
+                try {
+                    const { error: cambioError } = await supabaseClient.rpc("renombrar_personaje_no_asignado_dm", {
+                        p_personaje_id: personaje.id,
+                        p_nombre: campo.value
+                    });
+                    if (cambioError) throw cambioError;
+                    mensajeGestion.textContent = "NOMBRE GUARDADO.";
+                    await cargarGestionPersonajes();
+                } catch (error) {
+                    mensajeGestion.textContent = "NO SE PUDO GUARDAR: " + error.message;
+                    guardar.disabled = false;
+                }
+            });
+            fila.append(guardar);
+
+            const archivar = document.createElement("button");
+            archivar.type = "button";
+            archivar.textContent = personaje.archivado_en ? "REACTIVAR" : "ARCHIVAR";
+            archivar.disabled = Boolean(personaje.asignado);
+            archivar.addEventListener("click", async () => {
+                archivar.disabled = true;
+                try {
+                    const { error: archivoError } = await supabaseClient.rpc("archivar_personaje_dm", {
+                        p_personaje_id: personaje.id,
+                        p_archivar: !personaje.archivado_en
+                    });
+                    if (archivoError) throw archivoError;
+                    if (!personaje.archivado_en && localStorage.getItem("nightXity_personaje_dm_activo") === personaje.id) {
+                        localStorage.removeItem("nightXity_personaje_dm_activo");
+                        location.reload();
+                        return;
+                    }
+                    mensajeGestion.textContent = personaje.archivado_en ? "PERSONAJE REACTIVADO." : "PERSONAJE ARCHIVADO.";
+                    await cargarGestionPersonajes();
+                } catch (error) {
+                    mensajeGestion.textContent = "NO SE PUDO CAMBIAR EL ESTADO: " + error.message;
+                    archivar.disabled = false;
+                }
+            });
+            fila.append(archivar);
+            listaGestion.append(fila);
+        });
+    };
+
+    document.getElementById("dm-create-npc-form").addEventListener("submit", async event => {
+        event.preventDefault();
+        const nombre = document.getElementById("dm-create-npc-name");
+        const clase = document.getElementById("dm-create-npc-class");
+        const boton = event.currentTarget.querySelector('button[type="submit"]');
+        boton.disabled = true;
+        try {
+            const { data, error } = await supabaseClient.rpc("crear_pnj_dm", {
+                p_nombre: nombre.value,
+                p_clase: clase.value
+            });
+            if (error) throw error;
+            localStorage.setItem("nightXity_personaje_dm_activo", data);
+            mensajeGestion.textContent = "PNJ CREADO. ABRIENDO SU PERFIL...";
+            location.reload();
+        } catch (error) {
+            mensajeGestion.textContent = "NO SE PUDO CREAR EL PNJ: " + error.message;
+            boton.disabled = false;
+        }
+    });
+
+    try {
+        await cargarGestionPersonajes();
+    } catch (error) {
+        listaGestion.textContent = "NO SE PUDO CARGAR LA GESTIÓN: " + error.message;
+    }
+}
+
+if (!personajesAsignados.length && !esDM) {
     const mensaje = esDM
         ? "No hay personajes registrados."
         : "Tu cuenta todavía no tiene personajes asignados.";
@@ -1163,6 +1303,14 @@ if (!personajesAsignados.length) {
     if (nombre) nombre.textContent = mensaje;
 
     throw new Error(mensaje);
+}
+
+if (!personajesAsignados.length && esDM) {
+    const panelSeleccionDM = document.getElementById("dm-character-gate");
+    const contenidoCitizen = document.getElementById("citizen-content");
+    if (panelSeleccionDM) panelSeleccionDM.hidden = true;
+    if (contenidoCitizen) contenidoCitizen.hidden = true;
+    return;
 }
 
         const clavePersonajeActivo = esDM

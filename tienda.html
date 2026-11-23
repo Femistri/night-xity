@@ -844,10 +844,9 @@ selectedProducts.addEventListener("click", evento => {
         document.addEventListener("click", evento => {
             if (!evento.target.closest(".select-item")) return;
 
-                    const seleccionados =
-                        document.querySelectorAll(
-                            ".select-item.selected"
-                        );
+                    const seleccionados = Array.from(
+                        document.querySelectorAll(".select-item.selected")
+                    );
 
                     if (!seleccionados.length) {
 

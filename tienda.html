@@ -333,7 +333,6 @@
             <input id="acceso-contrasena" type="password" autocomplete="current-password" placeholder="CONTRASEÑA" minlength="8" required>
             <button id="boton-iniciar-sesion" type="button">INICIAR SESIÓN</button>
             <button id="boton-crear-cuenta" type="button">CREAR CUENTA DE JUGADOR</button>
-            <button id="boton-reenviar-confirmacion" type="button">REENVIAR CORREO DE CONFIRMACIÓN</button>
             <button id="boton-recuperar-contrasena" type="button">OLVIDÉ MI CONTRASEÑA</button>
         </div>
         <div id="acceso-mensaje" aria-live="polite"></div>
@@ -1706,11 +1705,14 @@ cargarTienda().finally(() => {
             }
         });
         if (error) {
-            mensaje.textContent = "No se pudo crear la cuenta: " + error.message;
+            const detalle = /rate.*(?:limit|exceed)|too many requests/i.test(error.message)
+                ? "Supabase limitó temporalmente los intentos de alta por correo. Espera un poco antes de volver a intentarlo. No necesitas confirmar ni reenviar un correo."
+                : error.message;
+            mensaje.textContent = "No se pudo crear la cuenta: " + detalle;
             return;
         }
         if (!data.session) {
-            mensaje.textContent = "Cuenta creada. Revisa tu correo, confirma la dirección y luego inicia sesión para elegir personaje.";
+            mensaje.textContent = "No se inició una sesión automáticamente. Prueba iniciar sesión con este correo y contraseña; si no puedes, usa «Olvidé mi contraseña».";
             return;
         }
         try {
@@ -1718,25 +1720,6 @@ cargarTienda().finally(() => {
         } catch (error) {
             mensaje.textContent = error.message;
         }
-    });
-
-    document.getElementById("boton-reenviar-confirmacion").addEventListener("click", async () => {
-        const email = document.getElementById("acceso-correo").value.trim();
-        if (!email) {
-            mensaje.textContent = "Escribe el correo de la cuenta pendiente de confirmar.";
-            return;
-        }
-        mensaje.textContent = "Solicitando un nuevo correo de confirmación...";
-        const { error } = await supabaseClient.auth.resend({
-            type: "signup",
-            email,
-            options: {
-                emailRedirectTo: "https://femistri.github.io/night-xity/tienda.html"
-            }
-        });
-        mensaje.textContent = error
-            ? "No se pudo reenviar la confirmación: " + error.message
-            : "Si la cuenta sigue pendiente, enviaremos un nuevo enlace. Revisa tu correo y abre el mensaje más reciente.";
     });
 
     document.getElementById("boton-iniciar-sesion").addEventListener("click", async () => {

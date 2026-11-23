@@ -310,6 +310,7 @@
             <select id="personaje-asignado">
                 <option value="">AÚN NO TIENES PERSONAJES</option>
             </select>
+            <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
             <div id="tienda-personaje-resumen" hidden aria-live="polite">
                 <div id="tienda-economia-titulo">ECONOMÍA DEL PERSONAJE ACTIVO</div>
                 <span id="tienda-personaje-nombre"></span>
@@ -346,7 +347,6 @@
                     <div id="obligaciones-personaje"></div>
                 </details>
             </div>
-            <button id="boton-cerrar-sesion" type="button">CERRAR SESIÓN</button>
         </div>
         <div id="formulario-acceso">
             <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
@@ -841,12 +841,8 @@ selectedProducts.addEventListener("click", evento => {
 });
 }
            
-        document
-            .querySelectorAll(".select-item")
-             .forEach(boton => {
-                 if (boton.dataset.cartHandlerAttached === "true") return;
-                 boton.dataset.cartHandlerAttached = "true";
-                 boton.addEventListener("click", () => {
+        document.addEventListener("click", evento => {
+            if (!evento.target.closest(".select-item")) return;
 
                     const seleccionados =
                         document.querySelectorAll(
@@ -939,9 +935,7 @@ selectedProducts.innerHTML =
 
     `;
                     
-                });
-
-            });
+        });
         
         console.log(
             "Categorías:",

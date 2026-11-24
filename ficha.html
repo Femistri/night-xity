@@ -59,6 +59,10 @@
     .skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
     .skill-slot{min-height:52px;min-width:0;border:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr) 58px;align-items:center;gap:8px;overflow:hidden}
     .skill-slot>*{min-width:0}
+    .skill-guidance{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .skill-guidance strong{color:var(--acid)}
+    .skill-guidance.invalid{border-color:#8d3834;color:#ffd2cf}
+    .skill-guidance.invalid strong{color:#ffd2cf}
     .skill-select,.manual-text{display:block;min-width:0;width:100%;height:34px;border:1px solid #53615e;background:#080b0c;color:var(--text);padding:5px 6px;font:inherit}
     .manual-text{max-width:460px}
     .contact-slot{min-height:36px;border-bottom:1px solid var(--line);padding:8px 3px;color:#75817e;font-size:12px;display:flex;align-items:center;gap:10px}
@@ -163,7 +167,8 @@
           <label class="skill-slot help-value" title="Urban: Aquellas habilidades que permiten manejarse en entornos urbanos, dotando a los personajes de conocimiento sobre cómo sobrevivir en las grandes ciudades y sus suburbios. Permite saber quién es quién en la jungla de asfalto." tabindex="0"><span class="manual-caption">Urban</span><select id="skill-urban" class="skill-select" data-skill="urban" data-manual-input disabled aria-label="Puntos de habilidad Urban"></select></label>
           <label class="skill-slot help-value" title="Savage: Son aquellos conocimientos que permiten sobrevivir en entornos no urbanos, tales como caza, rastreo, escalada, supervivencia, conocimiento de la flora y fauna, etcétera." tabindex="0"><span class="manual-caption">Savage</span><select id="skill-savage" class="skill-select" data-skill="savage" data-manual-input disabled aria-label="Puntos de habilidad Savage"></select></label>
         </div>
-        <p class="manual-caption" style="margin:10px 0 0">Asigna de 0 a 10 puntos en cada habilidad. El jugador puede editarlos y el Arquitecto corregirlos.</p>
+        <div id="skill-guidance" class="skill-guidance" aria-live="polite"><span>Puntos asignados: <strong id="skill-points-used">0</strong></span><span>Puntos disponibles: <strong id="skill-points-left">6</strong></span><span>Máximo por habilidad: <strong id="skill-points-cap">2</strong></span></div>
+        <p id="skill-guidance-message" class="manual-caption" role="status" aria-live="polite" style="margin:8px 0 0">Nivel 1: distribuye 6 puntos entre las seis habilidades.</p>
       </section>
       <section class="panel">
         <h2>Economía</h2>
@@ -213,6 +218,7 @@
     const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
     const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
     let manualSaveTimers=new Map(),manualSavePending=new Set(),manualSaveTasks=new Map(),manualReadyCharacter=null,manualPortraitPath=null,portraitUploadInProgress=false;
+    let savedSkillBaseline={level:1,values:Object.fromEntries(SKILLS.map(skill=>[skill,0]))};
     function classKey(value){const key=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return CLASS_RULES[key]?key:"";}
     function modifier(value){if(value===""||value==null)return "—";const score=Number(value);return MODIFIERS.find(([max])=>score<=max)?.[1]??"—";}
     function signed(value){const number=Number(value);return number>0?`+${number}`:String(number);}
@@ -220,7 +226,7 @@
       $("character-level").replaceChildren(...Array.from({length:10},(_,index)=>new Option(String(index+1),String(index+1))));
       ATTRIBUTES.forEach(attribute=>{$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3))));});
       SKILLS.forEach(skill=>$(`skill-${skill}`).replaceChildren(...Array.from({length:11},(_,index)=>new Option(String(index),String(index)))));
-      document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{if(!manualReadyCharacter)return;refreshDerived();queueManualSave(manualReadyCharacter);}));
+      document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{if(!manualReadyCharacter)return;refreshDerived();if(input.matches("[data-skill],#character-level")&&!validateSkillChanges())return;queueManualSave(manualReadyCharacter);}));
       document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
     }
     function refreshSessionPV(preferredValue){
@@ -235,6 +241,53 @@
       const selected=previous===""||previous===null||previous===undefined?max:Math.min(max,Math.max(-8,Number(previous)));
       select.value=String(selected);select.disabled=false;
     }
+    function currentSkillValues(){return Object.fromEntries(SKILLS.map(skill=>[skill,Number($(`skill-${skill}`).value||0)]));}
+    function skillBudget(level){return 6+2*(Math.max(1,Number(level)||1)-1);}
+    function skillMaximum(level){return Math.min(10,(Math.max(1,Number(level)||1))+1);}
+    function skillValidation(){
+      const level=Math.max(1,Number($("character-level").value)||1);
+      const values=currentSkillValues();
+      const baseline=savedSkillBaseline;
+      const used=Object.values(values).reduce((sum,value)=>sum+value,0);
+      const budget=skillBudget(level);
+      const cap=skillMaximum(level);
+      const changed=level!==baseline.level||SKILLS.some(skill=>values[skill]!==baseline.values[skill]);
+      if(!changed)return {valid:true,message:"Se conservan los valores guardados."};
+      if(level<baseline.level)return {valid:false,message:"No puedes reducir el nivel guardado."};
+      const levelsGained=level-baseline.level;
+      for(const skill of SKILLS){
+        if(values[skill]<baseline.values[skill])return {valid:false,message:"No puedes retirar puntos ya asignados a una habilidad."};
+        if(values[skill]>cap)return {valid:false,message:`${skill.toUpperCase()}: el máximo permitido en nivel ${level} es ${cap}.`};
+        if(values[skill]>baseline.values[skill]+levelsGained)return {valid:false,message:`${skill.toUpperCase()}: solo puedes sumar 1 punto por nivel a cada habilidad.`};
+      }
+      const previousTotal=Object.values(baseline.values).reduce((sum,value)=>sum+value,0);
+      if(used>budget)return {valid:false,message:`Has asignado ${used} puntos; el presupuesto del nivel ${level} es ${budget}.`};
+      if(levelsGained>0&&used!==previousTotal+2*levelsGained)return {valid:false,message:`Al subir ${levelsGained} nivel(es), debes asignar exactamente ${2*levelsGained} puntos nuevos.`};
+      if(level===1&&baseline.level===1&&baseline.values&&previousTotal===0&&used!==6)return {valid:false,message:"En nivel 1 debes distribuir los 6 puntos iniciales antes de guardar."};
+      return {valid:true,message:`Distribución válida: ${used} de ${budget} puntos asignados. Máximo por habilidad: ${cap}.`};
+    }
+    function refreshSkillGuidance(){
+      const level=Math.max(1,Number($("character-level").value)||1);
+      const values=currentSkillValues();
+      const used=Object.values(values).reduce((sum,value)=>sum+value,0);
+      const budget=skillBudget(level);
+      const result=skillValidation();
+      $("skill-points-used").textContent=String(used);
+      $("skill-points-left").textContent=String(budget-used);
+      $("skill-points-cap").textContent=String(skillMaximum(level));
+      $("skill-guidance").classList.toggle("invalid",!result.valid);
+      $("skill-guidance-message").textContent=result.message;
+      return result;
+    }
+    function validateSkillChanges(){
+      const result=refreshSkillGuidance();
+      if(!result.valid){
+        $("stats-save-status").textContent="HABILIDADES SIN GUARDAR";
+        $("stats-save-status").classList.add("error");
+        return false;
+      }
+      return true;
+    }
     function refreshDerived(){
       refreshSessionPV();
       ATTRIBUTES.forEach(attribute=>$(`modifier-${attribute}`).textContent=modifier($(`attribute-${attribute}`).value));
@@ -246,7 +299,7 @@
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),puntos_vida_sesion:$("manual-pv-session").value===""?null:Number($("manual-pv-session").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
     async function writeManualData(characterId,payload){
       if(manualSaveTasks.has(characterId))await manualSaveTasks.get(characterId);
-      const task=(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){manualSavePending.add(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent="NO SE PUDO GUARDAR";$("stats-save-status").classList.add("error");}console.error(error);return false;}if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent=manualSavePending.has(characterId)?"GUARDANDO…":"GUARDADO";$("stats-save-status").classList.remove("error");}return true;})();
+      const task=(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){manualSavePending.add(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent="NO SE PUDO GUARDAR";$("stats-save-status").classList.add("error");}console.error(error);return false;}savedSkillBaseline={level:Number(payload.nivel||1),values:Object.fromEntries(SKILLS.map(skill=>[skill,Number(payload[`habilidad_${skill}`]||0)]))};if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent=manualSavePending.has(characterId)?"GUARDANDO…":"GUARDADO";$("stats-save-status").classList.remove("error");refreshSkillGuidance();}return true;})();
       manualSaveTasks.set(characterId,task);const result=await task;if(manualSaveTasks.get(characterId)===task)manualSaveTasks.delete(characterId);return result;
     }
     function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");manualSavePending.add(characterId);status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(()=>{manualSaveTimers.delete(characterId);writeManualData(characterId,payload);},350));}
@@ -254,7 +307,7 @@
     window.addEventListener("beforeunload",event=>{if(!manualSavePending.size&&!manualSaveTasks.size&&!manualSaveTimers.size&&!portraitUploadInProgress)return;event.preventDefault();event.returnValue="";});
     async function showPortrait(path,characterId){manualPortraitPath=path||null;const image=$("portrait-image"),caption=$("monogram");image.hidden=true;image.removeAttribute("src");caption.hidden=false;$("portrait-file").disabled=manualReadyCharacter!==characterId;$("portrait-status").textContent=path?"CARGANDO RETRATO…":"SIN RETRATO GUARDADO";if(!path)return;const {data,error}=await db.storage.from("retratos-personajes").createSignedUrl(path,3600);if(active?.id!==characterId)return;if(error){$("portrait-status").textContent="NO SE PUDO CARGAR EL RETRATO";console.error(error);return;}image.onload=()=>{image.hidden=false;caption.hidden=true;$("portrait-status").textContent="RETRATO PRIVADO CARGADO";};image.onerror=()=>{$("portrait-status").textContent="NO SE PUDO MOSTRAR EL RETRATO";};image.src=data.signedUrl;}
     async function uploadPortrait(file){const characterId=active?.id;if(!characterId||manualReadyCharacter!==characterId||!file)return;const status=$("portrait-status");if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}const path=`${characterId}/portrait`;portraitUploadInProgress=true;status.textContent="SUBIENDO RETRATO…";$("portrait-file").disabled=true;const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});if(uploadError){status.textContent="NO SE PUDO SUBIR EL RETRATO";console.error(uploadError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});if(saveError){status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";console.error(saveError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}await showPortrait(path,characterId);$("portrait-file").disabled=false;portraitUploadInProgress=false;}
-    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");$("portrait-file").disabled=true;$("portrait-status").textContent="CARGANDO…";document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,puntos_vida_sesion,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");$("portrait-status").textContent="ERROR DE CARGA";return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";refreshSessionPV(row.puntos_vida_sesion??(row.puntos_vida_manual!=null?Number(row.puntos_vida_manual):""));$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;if(row.puntos_vida_sesion==null&&row.puntos_vida_manual!=null)queueManualSave(characterId);$("portrait-file").disabled=false;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();await showPortrait(row.retrato_path,characterId);}
+    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");$("portrait-file").disabled=true;$("portrait-status").textContent="CARGANDO…";document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,puntos_vida_sesion,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");$("portrait-status").textContent="ERROR DE CARGA";return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";refreshSessionPV(row.puntos_vida_sesion??(row.puntos_vida_manual!=null?Number(row.puntos_vida_manual):""));$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));savedSkillBaseline={level:Number(row.nivel||1),values:Object.fromEntries(SKILLS.map(skill=>[skill,Number(row[`habilidad_${skill}`]??0)]))};refreshSkillGuidance();for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;if(row.puntos_vida_sesion==null&&row.puntos_vida_manual!=null)queueManualSave(characterId);$("portrait-file").disabled=false;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();refreshSkillGuidance();await showPortrait(row.retrato_path,characterId);}
     async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{

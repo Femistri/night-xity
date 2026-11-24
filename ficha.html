@@ -114,7 +114,13 @@
         <p id="class-talents" class="class-talents"></p>
       </section>
       <section class="panel">
-        <h2>Atributos // captura manual</h2>
+
+        <h2 class="help-value"
+    title="Los Atributos se determinan mediante siete tiradas con 3d6. Descarta la tirada más baja y asigna las otras seis a tu elección. Según el valor que asignes obtendrás un modificador para ese Atributo:"
+    tabindex="0">
+  Atributos // captura manual
+</h2>
+        
         <div class="level-row"><span class="label help-value" title="Al final de cada sesión de juego el Arquitecto otorga entre 0 y 3 puntos de experiencia (PE) a cada jugador. 2 PE es el valor &quot;normal&quot;, pero el Arquitecto debería otorgarlos dependiendo de la dificultad de los retos superados. Por cada 10 PE acumulados se sube un nivel. De tener la Tara Sintética Inexperiencia se necesitarán el doble de PE para alcanzar un nuevo nivel. En caso de subir de nivel se lanza el Dado de Aguante indicado en la Clase de personaje y se suma el resultado a los puntos de vida. También hay que asignar 2 nuevos puntos a Habilidades (1 como máximo por Habilidad sin que ninguna sobrepase los 10 en total) y se ajustan otra vez el resto de rasgos según lo indicado en la tabla de avance por Clase. Los personajes pueden adquirir un nuevo Talento, eligiendo cualquiera de la lista general al llegar a los niveles 4 y 8. Cuando el personaje llegue a los niveles 6 y 10 podrá seleccionar un nuevo Trasfondo. En este punto se considera que son gente de gran relevancia en el mundo que les rodea y tienen tanta fama como enemigos que los odian. Aparte de los beneficios normales que otorga cualquier trasfondo, éstos pueden proporcionar beneficios y compromisos adicionales en forma de favores y obligaciones con las corporaciones, archienemigos, deudas empresariales, etcétera. Todo ello bajo la supervisión del Arquitecto." tabindex="0">NIVEL</span><select id="character-level" class="manual-select level-select" data-manual-input disabled aria-label="Nivel"></select><span id="stats-save-status" class="save-status" role="status" aria-live="polite">CARGANDO...</span></div>
         <div class="attribute-grid" aria-label="Atributos elegibles de 3 a 18; modificador calculado automáticamente">
           <div class="attribute" title="Fuerza: La capacidad del personaje para levantar objetos y causar daño físico tanto sin armas como con armas cuerpo a cuerpo. Es el Atributo de referencia para definir aquellas acciones que requieren fuerza bruta." tabindex="0"><span class="attribute-name help-value">FUE</span><select id="attribute-fue" class="manual-select" data-attribute="fue" data-manual-input disabled aria-label="Fuerza"></select><span class="manual-caption">MOD</span><output id="modifier-fue" class="manual-box">—</output></div>
@@ -142,7 +148,13 @@
         </div>
       </section>
       <section class="panel">
-        <h2>Habilidades // captura manual</h2>
+        
+        <h2 class="help-value"
+    title="Todos los personajes empiezan a nivel 1 con 6 puntos para asignar entre las 6 Habilidades disponibles. Cada Habilidad puede recibir un máximo de 2 puntos. Al Subir de Nivel hay que asignar 2 nuevos puntos a Habilidades (1 como máximo por Habilidad sin que ninguna sobrepase los 10 en total)."
+    tabindex="0">
+  Habilidades // captura manual
+</h2>
+        
         <div class="skill-grid">
           <label class="skill-slot help-value" title="Corporate: Engloba varios aspectos como, por ejemplo, la reputación corporativa y la capacidad del personaje para interactuar con los miembros de las corporaciones, acceder a contactos y encontrar equipo o información de manera legal." tabindex="0"><span class="manual-caption">Corporate</span><select id="skill-corporate" class="skill-select" data-skill="corporate" data-manual-input disabled aria-label="Puntos de habilidad Corporate"></select></label>
           <label class="skill-slot help-value" title="Punk: Con esta habilidad se accede al mercado negro y a las zonas seguras de pandilleros. Incluye los contactos, la reputación y la facilidad de conseguir cualquier cosa en los bajos fondos, de manera ilegal." tabindex="0"><span class="manual-caption">Punk</span><select id="skill-punk" class="skill-select" data-skill="punk" data-manual-input disabled aria-label="Puntos de habilidad Punk"></select></label>

@@ -241,20 +241,39 @@
       $("character-level").replaceChildren(...Array.from({length:10},(_,index)=>new Option(String(index+1),String(index+1))));
       ATTRIBUTES.forEach(attribute=>{$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3))));});
       SKILLS.forEach(skill=>$(`skill-${skill}`).replaceChildren(...Array.from({length:11},(_,index)=>new Option(String(index),String(index)))));
-      document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{
-        if(!manualReadyCharacter)return;
-        refreshDerived();
-        if(input.matches("[data-skill],#character-level")){
-          if(validateSkillChanges())queueManualSave(manualReadyCharacter);
-          return;
-        }
-        queueManualSave(manualReadyCharacter);
-      }));
-      $("save-skills-button").addEventListener("click",()=>{
+      document.querySelectorAll("[data-manual-input]").forEach(input=>{
+        const onEdit=()=>{
+          if(!manualReadyCharacter)return;
+          refreshDerived();
+          if(input.matches("[data-skill],#character-level")){
+            const result=refreshSkillGuidance();
+            if(result.changed&&!result.valid)setManualSaveStatus(result.state==="pending"?"DISTRIBUCIÓN PENDIENTE":"DISTRIBUCIÓN POR CORREGIR",result.state==="invalid"?"error":"pending");
+            else if(result.changed)setManualSaveStatus("LISTA PARA CONFIRMAR","pending");
+            else setManualSaveStatus("HABILIDADES GUARDADAS","saved");
+            return;
+          }
+          queueManualSave(manualReadyCharacter);
+        };
+        input.addEventListener("input",onEdit);
+        input.addEventListener("change",onEdit);
+      });
+      $("save-skills-button").addEventListener("click",async()=>{
         if(!manualReadyCharacter)return;
         const result=refreshSkillGuidance();
         if(!result.valid||!result.changed)return;
-        queueManualSave(manualReadyCharacter,true);
+        const characterId=manualReadyCharacter;
+        const payload=manualPayload(characterId);
+        setManualSaveStatus("CONFIRMANDO HABILIDADES…","pending");
+        $("save-skills-button").disabled=true;
+        const ok=await writeManualData(characterId,payload);
+        if(ok&&manualReadyCharacter===characterId){
+          const values=Object.fromEntries(SKILLS.map(skill=>[skill,Number(payload[`habilidad_${skill}`]||0)]));
+          savedSkillBaseline={level:Number(payload.nivel||1),values,initialized:Object.values(values).some(value=>value>0),exists:true};
+          refreshSkillGuidance();
+          setManualSaveStatus("HABILIDADES CONFIRMADAS EN SUPABASE","saved");
+        }else if(manualReadyCharacter===characterId){
+          refreshSkillGuidance();
+        }
       });
       document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
     }
@@ -359,7 +378,7 @@
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),puntos_vida_sesion:$("manual-pv-session").value===""?null:Number($("manual-pv-session").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
     function manualPayloadForSave(characterId){
       const payload=manualPayload(characterId);
-      if(manualReadyCharacter===characterId&&!skillValidation().valid){
+      if(manualReadyCharacter===characterId){
         payload.nivel=savedSkillBaseline.level;
         SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=savedSkillBaseline.values[skill]);
       }
@@ -381,8 +400,6 @@
           return false;
         }
 
-        const values=Object.fromEntries(SKILLS.map(skill=>[skill,Number(payload[`habilidad_${skill}`]||0)]));
-        savedSkillBaseline={level:Number(payload.nivel||1),values,initialized:Object.values(values).some(value=>value>0)||Object.values(values).reduce((a,b)=>a+b,0)>0,exists:true};
         if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);
 
         if(manualReadyCharacter===characterId){

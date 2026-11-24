@@ -182,7 +182,7 @@
         <p id="skill-guidance-message" class="manual-caption" role="status" aria-live="polite" style="margin:8px 0 0">Nivel 1: distribuye 6 puntos entre las seis habilidades.</p>
         <div class="skill-save-row">
           <button id="save-skills-button" class="skill-save-button" type="button" disabled>Guardar habilidades</button>
-          <span class="skill-save-note">Guardado automático activo; usa este botón para confirmar la asignación cuando esté validada.</span>
+          <span class="skill-save-note">Las habilidades no se guardan automáticamente. Puedes corregir y redistribuir antes de confirmar con este botón.</span>
         </div>
       </section>
       <section class="panel">
@@ -226,7 +226,7 @@
     const fmt = value => Number(value || 0).toLocaleString("es-MX");
     const label = person => { const key=person?.nombre_clave||"PERSONAJE"; const player=(person?.nombre_jugador||"").trim(); return player&&player!==key ? `${player} // ${key}` : key; };
     const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
-    let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={};
+    let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={}, currentUserIsDM=false;
     const ATTRIBUTES=["fue","des","con","int","sab","car"];
     const SKILLS=["corporate","punk","cyber","hardware","urban","savage"];
     const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
@@ -307,8 +307,8 @@
         return {valid:true,changed:false,state:"valid",message:"Habilidades guardadas y sincronizadas con Supabase."};
       }
 
-      // Asignación inicial en el nivel de registro del personaje.
-      // Puede comenzar directamente en cualquier nivel entre 1 y 10.
+      // Primera asignación: el personaje puede registrarse directamente
+      // en cualquier nivel, respetando el presupuesto y el máximo individual.
       if(!baseline.initialized){
         if(baseline.exists&&level!==baseline.level){
           return {valid:false,changed:true,state:"invalid",message:`Este personaje está registrado en nivel ${baseline.level}. Completa primero su asignación inicial de ${skillBudget(baseline.level)} puntos en ese nivel.`};
@@ -322,11 +322,34 @@
         return {valid:true,changed:true,state:"pending",message:`Asignación inicial válida: ${used} de ${budget} puntos. Lista para guardar.`};
       }
 
-      if(level!==baseline.level+1)return {valid:false,changed:true,state:"invalid",message:`Para modificar habilidades debes subir exactamente un nivel: de ${baseline.level} a ${baseline.level+1}.`};
+      // JUGADOR Y ARQUITECTO: en el mismo nivel pueden añadir, retirar y
+      // redistribuir puntos libremente. Solo se exige respetar presupuesto y tope.
+      if(level===baseline.level){
+        for(const skill of SKILLS){
+          if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
+          if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
+        }
+        if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto máximo para nivel ${level} es ${budget}.`};
+        return {valid:true,changed:true,state:"pending",message:`Distribución válida: ${used} de ${budget} puntos utilizados. Puedes guardar la corrección.`};
+      }
+
+      // El Arquitecto puede corregir el nivel libremente, incluso bajarlo,
+      // pero nunca exceder el presupuesto ni el máximo individual del nivel destino.
+      if(currentUserIsDM){
+        for(const skill of SKILLS){
+          if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
+          if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
+        }
+        if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto máximo para nivel ${level} es ${budget}.`};
+        return {valid:true,changed:true,state:"pending",message:`Corrección de Arquitecto válida: nivel ${level}, ${used} de ${budget} puntos. Lista para guardar.`};
+      }
+
+      // Los jugadores solo pueden subir un nivel por operación.
+      if(level!==baseline.level+1)return {valid:false,changed:true,state:"invalid",message:`Como jugador solo puedes subir un nivel por vez. Nivel actual: ${baseline.level}.`};
 
       for(const skill of SKILLS){
         const increment=values[skill]-baseline.values[skill];
-        if(increment<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no puedes retirar puntos ya asignados.`};
+        if(increment<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: al subir de nivel no puedes retirar puntos en la misma operación. Guarda primero tu redistribución en el nivel actual.`};
         if(increment>1)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: solo puedes sumar 1 punto por habilidad en cada subida.`};
         if(values[skill]>10)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: ninguna habilidad puede superar 10 puntos.`};
         if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
@@ -452,7 +475,7 @@
         if(authError||!user){fail("Inicia sesión desde Tienda para consultar tu ficha.");return;}
         const {data:profile,error:profileError}=await db.from("perfiles").select("rol").eq("id",user.id).maybeSingle();
         if(profileError||!profile)throw new Error("No se pudo verificar tu cuenta.");
-        const isDM=profile.rol==="dm";
+        const isDM=profile.rol==="dm";currentUserIsDM=isDM;
         if(isDM){
           const {data,error}=await db.from("personajes").select("id,nombre_clave,nombre_jugador,clase,ficha").is("archivado_en",null).order("nombre_clave");
           if(error)throw error; characters=data||[];

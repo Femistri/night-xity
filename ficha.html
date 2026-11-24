@@ -83,6 +83,21 @@
     .weapon-table th{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
     .weapon-table td:first-child{font-weight:700}
     .balance{font-size:34px;letter-spacing:1px;color:var(--acid);margin:4px 0 16px}
+    .income-panel{grid-column:1/-1;border-color:var(--acid)}
+    .body-map-container{position:relative;width:100%;max-width:700px;margin:0 auto;overflow:visible}
+    .body-map-image{width:100%;height:auto;display:block}
+    .implant-hotspot{position:absolute;z-index:10;display:none}
+    .implant-hotspot.active{display:block}
+    .eye-hotspot{top:7%;left:43.5%}.head-hotspot{top:5%;left:48%}.neck-hotspot{top:14%;left:46.5%}
+    .right-arm-hotspot{top:37%;left:27%}.left-arm-hotspot{top:37%;left:66.5%}
+    .torso-hotspot{top:27%;left:46.5%}.abdomen-hotspot{top:35%;left:46.5%}
+    .right-leg-hotspot{top:68%;left:36%}.left-leg-hotspot{top:68%;left:56%}
+    .implant-hotspot summary{list-style:none;cursor:pointer;width:28px;height:28px;border:2px solid #fff;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .implant-hotspot.active summary{border-color:var(--acid);box-shadow:0 0 12px var(--acid);color:var(--acid)}
+    .implant-hotspot summary::-webkit-details-marker{display:none}
+    .implant-card{position:absolute;top:38px;left:0;width:min(260px,70vw);padding:14px;background:#111;border:1px solid #778;color:#eee;text-align:left;z-index:20;box-shadow:0 8px 25px #000b}
+    .implant-card h3{margin:0 0 8px}.implant-card p{font-size:12px;line-height:1.5;margin:5px 0}
+
     .columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .list{display:grid;gap:8px}
     .entry{border-top:1px solid var(--line);padding:10px 0 3px}
@@ -108,7 +123,7 @@
 <body>
   <div class="wrap">
     <header>
-      <div><div class="kicker">Night Xity // registro ciudadano // 2066</div><h1>Ficha personal</h1></div>
+      <div><div class="kicker">Night Xity // registro ciudadano // 2066</div><h1>HABILIDADES CONFIRMADAS EN Xcatec XomoX</h1></div>
       <div class="top-actions"><label class="eyebrow" for="character-picker">Consultar personaje</label><select id="character-picker" aria-label="Consultar personaje" disabled><option>CARGANDO...</option></select><nav class="page-links" aria-label="Navegación"><a href="citizen.html">Volver a Citizen</a><a href="tienda.html">Ir a Tienda DunoXuXa</a></nav></div>
     </header>
     <div id="status" class="notice" role="status" aria-live="polite">Conectando con Citizen Net…</div>
@@ -209,6 +224,28 @@
       <section class="panel wide">
         <h2>Inventario // fichas individuales</h2>
         <div id="inventory" class="columns"></div>
+      </section>
+      <section class="panel wide income-panel" id="sheet-income-panel">
+        <h2>Ingresos // registro de pagos</h2>
+        <p class="empty">Consulta de pagos por trabajo, pagos puntuales y salarios periódicos. Esta sección es exclusivamente informativa.</p>
+        <h3>Salarios activos</h3><div id="sheet-active-salaries" class="list"></div>
+        <h3 style="margin-top:16px">Pagos recibidos</h3><div id="sheet-income-history" class="list"></div>
+      </section>
+      <section class="panel wide" id="sheet-body-panel">
+        <h2>Cuerpo // modificaciones</h2>
+        <div class="body-map-container">
+          <img src="fdaca2c4-e64d-46b3-8f5d-a6a6941648a8.png" alt="Mapa corporal de modificaciones de Night Xity" class="body-map-image">
+          <details class="implant-hotspot eye-hotspot" data-zone="ojos"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot head-hotspot" data-zone="cabeza"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot neck-hotspot" data-zone="cuello"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot right-arm-hotspot" data-zone="brazo-derecho"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot left-arm-hotspot" data-zone="brazo-izquierdo"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot torso-hotspot" data-zone="torso"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot abdomen-hotspot" data-zone="abdomen"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot right-leg-hotspot" data-zone="pierna-derecha"><summary>●</summary><div class="implant-card"></div></details>
+          <details class="implant-hotspot left-leg-hotspot" data-zone="pierna-izquierda"><summary>●</summary><div class="implant-card"></div></details>
+        </div>
+        <p class="manual-caption">Los puntos activos identifican las zonas modificadas. Selecciona un punto para consultar los implantes instalados y sus definiciones.</p>
       </section>
       <section class="panel wide">
         <h2>Contactos // captura manual</h2>
@@ -509,6 +546,33 @@
       if(!categories.length)return `<div class="empty">SIN OBJETOS REGISTRADOS</div>`;
       return categories.map(category=>`<div><details open><summary>${safe(category.toUpperCase())} (${buckets.get(category).length})</summary><div class="list" style="margin-top:10px">${buckets.get(category).map(item=>{const product=itemCatalog(item);return `<article class="entry"><div class="entry-title">${safe(item.nombre||product.nombre||"Objeto")}</div><div class="entry-meta">${safe(item.estado||"REGISTRADO")}</div>${product.descripcion?`<div class="entry-desc">${safe(product.descripcion)}</div>`:""}</article>`;}).join("")}</div></details></div>`).join("");
     }
+    async function renderIncomeReadOnly(characterId){
+      const salaries=$("sheet-active-salaries"),history=$("sheet-income-history");
+      const date=value=>value?new Date(value).toLocaleString("es-MX",{timeZone:"America/Cancun",dateStyle:"medium",timeStyle:"short"}):"SIN FECHA";
+      const [{data:payroll,error:payrollError},{data:payments,error:paymentsError}]=await Promise.all([
+        db.from("nominas_jugadores").select("id,puesto,monto,ciclo_dias,proximo_pago,estado").eq("personaje_id",characterId).eq("estado","activa").order("proximo_pago",{ascending:true}),
+        db.from("pagos_dm").select("id,tipo,monto,concepto,pagado_en").eq("personaje_id",characterId).order("pagado_en",{ascending:false}).limit(50)
+      ]);
+      salaries.replaceChildren();history.replaceChildren();
+      if(payrollError||paymentsError){salaries.textContent=history.textContent="NO SE PUDO CONSULTAR EL REGISTRO DE INGRESOS. "+(payrollError?.message||paymentsError?.message||"");return;}
+      if(!payroll?.length)salaries.innerHTML='<div class="empty">SIN SALARIOS PERIÓDICOS ACTIVOS.</div>';
+      (payroll||[]).forEach(row=>{const node=document.createElement("article");node.className="entry";node.innerHTML=`<div class="entry-title">${safe(row.puesto||"PUESTO SIN NOMBRE")}</div><div class="entry-meta">${fmt(row.monto)} CORPOS CADA ${Number(row.ciclo_dias||42)} DÍAS · PRÓXIMO PAGO: ${safe(date(row.proximo_pago))}</div>`;salaries.append(node);});
+      if(!payments?.length)history.innerHTML='<div class="empty">SIN PAGOS RECIBIDOS REGISTRADOS.</div>';
+      (payments||[]).forEach(row=>{const node=document.createElement("article");node.className="entry";node.innerHTML=`<div class="entry-title">${safe(row.concepto||"SIN CONCEPTO")}</div><div class="entry-meta">${safe(date(row.pagado_en))} · ${safe((row.tipo||"PAGO").replaceAll("_"," ").toUpperCase())} · ${fmt(row.monto)} CORPOS</div>`;history.append(node);});
+    }
+    const implantZones={"IMP-0001":["ojos","cuello","torso"],"IMP-0002":["torso"],"IMP-0003":["brazo-derecho"],"IMP-0004":["brazo-derecho","brazo-izquierdo"],"IMP-0005":["torso","abdomen","cabeza"],"IMP-0006":["abdomen"],"IMP-0007":["cuello"],"IMP-0008":["cuello"],"IMP-0009":["cuello"],"IMP-0010":["torso","abdomen","cabeza","cuello"],"IMP-0011":["torso","abdomen","cabeza","cuello","brazo-derecho","brazo-izquierdo","pierna-derecha","pierna-izquierda"],"IMP-0012":["cuello"],"IMP-0013":["cabeza","cuello"],"IMP-0014":["torso","abdomen","cabeza","cuello","brazo-derecho","brazo-izquierdo","pierna-derecha","pierna-izquierda"],"IMP-0015":["cuello"],"IMP-0016":["torso"],"IMP-0017":["cuello"],"IMP-0018":["cuello"],"IMP-0019":["ojos"],"IMP-0020":["pierna-derecha","pierna-izquierda"],"IMP-0021":["pierna-derecha","pierna-izquierda","brazo-derecho","brazo-izquierdo","ojos"],"IMP-0022":["cabeza"],"IMP-0023":["ojos"],"IMP-0024":["brazo-izquierdo"],"IMP-0025":["ojos"],"IMP-0026":["cuello"],"IMP-0027":["torso"],"IMP-0028":["abdomen"],"IMP-0029":["abdomen"],"IMP-0030":["cabeza"]};
+    function renderBodyMap(items){
+      const implants=(items||[]).filter(item=>item.categoria==="Implantes");
+      const zones=new Map();
+      implants.forEach(item=>{const product=itemCatalog(item),id=item.catalogo_id||product.id;for(const zone of (implantZones[id]||[])){if(!zones.has(zone))zones.set(zone,[]);zones.get(zone).push({name:item.nombre||product.nombre||id,description:product.descripcion||"SIN DEFINICIÓN DISPONIBLE",status:item.estado||"INSTALADO"});}});
+      document.querySelectorAll("#sheet-body-panel .implant-hotspot").forEach(hotspot=>{
+        const zone=hotspot.dataset.zone,entries=zones.get(zone)||[],card=hotspot.querySelector(".implant-card"),summary=hotspot.querySelector("summary");
+        hotspot.classList.toggle("active",entries.length>0);hotspot.open=false;
+        const tooltip=entries.length?entries.map(item=>item.name).join(", "):zone.replaceAll("-"," ").toUpperCase()+": SIN IMPLANTES REGISTRADOS";
+        hotspot.title=tooltip;summary.title=tooltip;summary.setAttribute("aria-label",tooltip);
+        card.innerHTML=entries.length?`<h3>${safe(zone.replaceAll("-"," ").toUpperCase())}</h3>${entries.map(item=>`<p><strong>${safe(item.name)}</strong><br>${safe(item.status)}<br>${safe(item.description)}</p>`).join("")}`:`<h3>${safe(zone.replaceAll("-"," ").toUpperCase())}</h3><p>SIN IMPLANTES REGISTRADOS.</p>`;
+      });
+    }
     async function render(isDM){
       if(!active)return;
       const ficha=active.ficha||{}, identity={...(ficha.identidad||{}),nombre_clave:active.nombre_clave||ficha.identidad?.nombre_clave||"SIN NOMBRE",nombre_jugador:active.nombre_jugador||ficha.identidad?.nombre_jugador||"",clase:active.clase||ficha.identidad?.clase||""};
@@ -523,6 +587,8 @@
       const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
       $("weapons").innerHTML=weaponMarkup(items);
       $("inventory").innerHTML=inventoryMarkup(items);
+      renderBodyMap(items);
+      await renderIncomeReadOnly(active.id);
       const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
       const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
       const mental=identity.salud_mental||{};

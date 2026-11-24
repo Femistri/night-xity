@@ -44,10 +44,6 @@
     .save-status{margin-left:auto;color:var(--muted);font-size:10px;letter-spacing:1px}
     .help-value{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
     .pv-input{width:100%;height:33px;background:#080b0c;border:1px solid #53615e;color:var(--text);text-align:center;font:inherit}
-    .pv-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0}
-    .pv-pair .derived{min-width:0;padding:7px 5px}
-    .pv-pair .attribute-name{font-size:10px;letter-spacing:1px}
-    .pv-pair .pv-input{min-width:0;padding:3px 1px;font-size:12px}
     .class-talents{font-size:12px;color:#c1ceca;margin:0 0 12px}
     .manual-caption{font-size:9px;letter-spacing:1px;color:#74817e;text-transform:uppercase}
     .portrait-controls{display:grid;gap:6px;margin:-10px 0 16px}
@@ -129,10 +125,7 @@
       <section class="panel">
         <h2>Indicadores // datos y cálculos</h2>
         <div class="derived-grid">
-          <div class="pv-pair">
-            <div class="derived" title="PV totales del personaje. Se capturan manualmente y representan el máximo de puntos de vida." tabindex="0"><span class="attribute-name help-value">PV TOTAL</span><input id="manual-pv" class="pv-input" type="number" min="0" step="1" data-manual-input disabled aria-label="Puntos de vida totales"></div>
-            <div class="derived" title="Puntos de vida actuales durante la sesión. Se modifican por daño y curación, sin alterar los PV totales." tabindex="0"><span class="attribute-name help-value">PV SESIÓN</span><select id="manual-pv-session" class="pv-input" data-manual-input disabled aria-label="Puntos de vida de la sesión"><option value="">—</option></select></div>
-          </div>
+          <div class="derived" title="En nivel 1: tira un DA y suma CON para obtener los PV iniciales. En cada nivel posterior, tira un DA y súmalo al total de PV. El jugador anota el total." tabindex="0"><span class="attribute-name help-value">PV</span><input id="manual-pv" class="pv-input" type="number" min="0" step="1" data-manual-input disabled aria-label="Puntos de vida actuales"></div>
           <div class="derived" title="Pueden gastarse para realizar cualquier prueba con Ventaja, anular una Desventaja propia, causar una Desventaja a un oponente o activar aquellos Talentos que lo requieran. Los PowerUps gastados se recuperan —hasta el total de Alma actual del personaje— al iniciar una nueva sesión de juego o después de un descanso de 8 horas." tabindex="0"><span class="attribute-name help-value">POW</span><output id="indicator-pow" class="manual-box">—</output></div>
           <div class="derived" title="Suma el modificador por DES y los bonos por Protecciones eImplantes para el total de DF" tabindex="0"><span class="attribute-name help-value">DF</span><output id="indicator-df" class="manual-box">10</output></div>
           <div class="derived" title="Para los ataques cuerpo a cuerpo añade tu modificador de FUE (también al daño que hagas). Para proyectiles suma el de DES" tabindex="0"><span class="attribute-name help-value">ATQ</span><output id="indicator-atq" class="manual-box">—</output></div>
@@ -168,240 +161,69 @@
       </section>
       <section class="panel wide">
         <h2>Coeficiente de Criminalidad // Citizen</h2>
-        <div class="columns"><div><h3>Manías</h3><div id="manias" class="list"></div></div><div><h3>Fobias</h3><div id="phobias" class="list"></div></div><div><h3>Adicciones</h3><div id="addictions" class="list"></div></div></div>
+        <div class="columns"><div><h3>Manías</h3><div id="manias" class="list"></div></div><div><h3>Fobias</h3><div id="phobias" class="list"></div></div><div><h3 class="help-value" title="Cuando se adquiere una adicción el personaje necesita una dosis diaria de la droga (realizando la correspondiente prueba de sobredosis). De no conseguirla, el primer día tendrá un -2 a todas las acciones y a partir del segundo día realizará todas las acciones con desventaja a causa del síndrome de abstinencia. Un personaje adicto a una droga tiene que tomar el doble de dosis para que le haga el efecto normal. Para DESINTOXICARSE, un personaje debe permanecer limpio durante un tiempo determinado por el Arquitecto y una vez por sesión superar una prueba de SAB CD-16. Son necesarias tres pruebas superadas con éxito para desintoxicarse completamente. El fallo en una de ellas indica que el contador se pone a cero y el jugador deberá repetir las pruebas hasta obtener tres éxitos consecutivos." tabindex="0">Adicción</h3><div id="addictions" class="list"></div></div></div>
       </section>
       <section class="panel wide">
-        <h2>Inventario // Citizen</h2><div id="weapons"></div><div id="inventory" class="list"></div>
+        <h2>Armamento // datos de Citizen</h2>
+        <div id="weapons"></div>
+      </section>
+      <section class="panel wide">
+        <h2>Inventario // fichas individuales</h2>
+        <div id="inventory" class="columns"></div>
+      </section>
+      <section class="panel wide">
+        <h2>Contactos // captura manual</h2>
+        <label class="contact-slot">CONTACTO 01 — <input id="contact-01" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 02 — <input id="contact-02" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 03 — <input id="contact-03" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label><label class="contact-slot">CONTACTO 04 — <input id="contact-04" class="manual-text" type="text" maxlength="160" data-manual-input disabled></label>
       </section>
     </main>
-    <footer>NIGHT XITY // DUNOXUXA // REGISTRO CIUDADANO 2066</footer>
+    <footer>NIGHT XITY // DATOS DE CITIZEN EN CONSULTA // NIVEL, ATRIBUTOS Y PV EDITABLES</footer>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="motor_economico_night_xity_v1.js"></script>
   <script>
-    const SUPABASE_URL="https://xgydjryqjofqzjysrjjs.supabase.co";
-    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhneWRqcnlxam9mcXpqeXNyanpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4NjY0MDAsImV4cCI6MjA3NDQ0MjQwMH0.9fG4e8x6sY1J4rZpY0m3tN5bQ2kL7vH8cD1aF6gS3pQ";
-    const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-    const $=id=>document.getElementById(id);
-    const fmt=value=>Number(value||0).toLocaleString("es-MX",{maximumFractionDigits:2});
-    const safe=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-    const modifier=value=>value===""?"—":String(Math.floor((Number(value)-10)/2));
-    const signed=value=>value>0?`+${value}`:String(value);
-    const classKey=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"");
-    const label=identity=>identity.nombre_jugador?`${identity.nombre_clave} // ${identity.nombre_jugador}`:identity.nombre_clave;
-    const CLASS_RULES={
-      link:{da:"1d6",talents:["Interfaz neuronal","Control remoto","Hackeo"]},
-      data:{da:"1d8",talents:["Análisis de datos","Intrusión","Criptografía"]},
-      microchip:{da:"1d10",talents:["Cuerpo aumentado","Sobrecarga","Arsenal"]},
-      backup:{da:"1d4",talents:["Supervivencia","Improvisación","Resistencia"]}
-    };
-    const ADVANCEMENT={
-      link:[[1,0],[1,0],[2,0],[2,1],[3,1],[3,1],[4,1],[4,2],[5,2],[5,2]],
-      data:[[0,1],[0,1],[1,1],[1,2],[2,2],[2,2],[3,2],[3,3],[4,3],[4,3]],
-      microchip:[[1,0],[2,0],[2,1],[3,1],[3,2],[4,2],[4,3],[5,3],[5,4],[6,4]],
-      backup:[[0,1],[1,1],[1,1],[2,1],[2,2],[3,2],[3,2],[4,2],[4,3],[5,3]]
-    };
+    const db = window.supabase.createClient("https://mxolzgerwrzeqcfmsxaa.supabase.co", "sb_publishable_ym1P2o0CCXd9E7H89nTaNA_CCldoI6a");
+    const $ = id => document.getElementById(id);
+    const safe = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    const fmt = value => Number(value || 0).toLocaleString("es-MX");
+    const label = person => { const key=person?.nombre_clave||"PERSONAJE"; const player=(person?.nombre_jugador||"").trim(); return player&&player!==key ? `${player} // ${key}` : key; };
+    const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
+    let characters=[], active=null, livingCatalog={}, core={}, productCatalog={}, mentalCatalog={};
     const ATTRIBUTES=["fue","des","con","int","sab","car"];
     const SKILLS=["corporate","punk","cyber","hardware","urban","savage"];
-    let characters=[],active=null,livingCatalog={},core={},productCatalog={},mentalCatalog={};
-    let manualReadyCharacter=null,manualPortraitPath=null,portraitUploadInProgress=false;
-    const manualSaveTimers=new Map(),manualSaveTasks=new Map(),manualSavePending=new Set();
-    function fail(message){$("status").textContent=message;$("status").classList.add("error");}
+    const CLASS_RULES={backup:{da:"1d8",talents:["Sexto sentido","Lucha con X o Músculos de acero"]},data:{da:"1d4",talents:["Mente férrea","Plugin"]},link:{da:"1d6",talents:["Contactos","Pico de Oro"]},microchip:{da:"1d6",talents:["Biomecánica","Manitas"]}};
+    const ADVANCEMENT={backup:[[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[5,8],[6,9],[7,10]],data:[[0,0],[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[3,7],[3,8],[3,9]],link:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]],microchip:[[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[4,7],[4,8],[5,9]]};
+    const MODIFIERS=[[3,-3],[5,-2],[8,-1],[12,0],[15,1],[17,2],[18,3]];
+    let manualSaveTimers=new Map(),manualSavePending=new Set(),manualSaveTasks=new Map(),manualReadyCharacter=null,manualPortraitPath=null,portraitUploadInProgress=false;
+    function classKey(value){const key=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return CLASS_RULES[key]?key:"";}
+    function modifier(value){if(value===""||value==null)return "—";const score=Number(value);return MODIFIERS.find(([max])=>score<=max)?.[1]??"—";}
+    function signed(value){const number=Number(value);return number>0?`+${number}`:String(number);}
     function initializeManualEditors(){
       $("character-level").replaceChildren(...Array.from({length:10},(_,index)=>new Option(String(index+1),String(index+1))));
-      ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3)))));
+      ATTRIBUTES.forEach(attribute=>{$(`attribute-${attribute}`).replaceChildren(new Option("—",""),...Array.from({length:16},(_,index)=>new Option(String(index+3),String(index+3))));});
       SKILLS.forEach(skill=>$(`skill-${skill}`).replaceChildren(...Array.from({length:11},(_,index)=>new Option(String(index),String(index)))));
       document.querySelectorAll("[data-manual-input]").forEach(input=>input.addEventListener("change",()=>{if(!manualReadyCharacter)return;refreshDerived();queueManualSave(manualReadyCharacter);}));
       document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
     }
-    function refreshSessionPV(preferredValue){
-      const totalInput=$("manual-pv").value;
-      const select=$("manual-pv-session");
-      if(totalInput===""||!Number.isFinite(Number(totalInput))){
-        select.replaceChildren(new Option("—",""));
-        select.value="";
-        select.disabled=true;
-        return;
-      }
-      const max=Math.max(0,Math.floor(Number(totalInput)));
-      const previous=preferredValue!==undefined?preferredValue:select.value;
-      const options=[];
-      for(let value=-8;value<=max;value++)options.push(new Option(String(value),String(value)));
-      select.replaceChildren(...options);
-      let selected;
-      if(previous===""||previous===null||previous===undefined)selected=max;
-      else selected=Math.min(max,Math.max(-8,Number(previous)));
-      select.value=String(selected);
-      select.disabled=false;
-    }
     function refreshDerived(){
-      refreshSessionPV();
       ATTRIBUTES.forEach(attribute=>$(`modifier-${attribute}`).textContent=modifier($(`attribute-${attribute}`).value));
-      const identity=active?.ficha?.identidad||{};
-      const key=classKey(active?.clase||identity.clase);
-      const level=Number($("character-level").value||1);
-      const [attack,institute]=(ADVANCEMENT[key]||[])[level-1]||[null,null];
-      $("indicator-atq").textContent=attack==null?"—":signed(attack);
-      $("indicator-ins").textContent=institute==null?"—":signed(institute);
-      $("indicator-da").textContent=CLASS_RULES[key]?.da||"—";
-      $("indicator-pow").textContent=$("soul-points").textContent||"—";
-      const talents=CLASS_RULES[key]?.talents||[];
-      $("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
+      const identity=active?.ficha?.identidad||{};const key=classKey(active?.clase||identity.clase);const level=Number($("character-level").value||1);const [attack,institute]=(ADVANCEMENT[key]||[])[level-1]||[null,null];
+      $("indicator-atq").textContent=attack==null?"—":signed(attack);$("indicator-ins").textContent=institute==null?"—":signed(institute);$("indicator-da").textContent=CLASS_RULES[key]?.da||"—";$("indicator-pow").textContent=$("soul-points").textContent||"—";
+      const talents=CLASS_RULES[key]?.talents||[];$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
       $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
     }
-    function manualPayload(characterId){
-      const payload={
-        personaje_id:characterId,
-        nivel:Number($("character-level").value||1),
-        puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),
-        puntos_vida_sesion:$("manual-pv-session").value===""?null:Number($("manual-pv-session").value),
-        alias:$("manual-alias").value.trim()||null
-      };
-      ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));
-      SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));
-      for(let index=1;index<=4;index++){
-        const key=String(index).padStart(2,"0");
-        payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;
-      }
-      return payload;
-    }
+    function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
     async function writeManualData(characterId,payload){
       if(manualSaveTasks.has(characterId))await manualSaveTasks.get(characterId);
-      const task=(async()=>{
-        const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});
-        if(error){
-          manualSavePending.add(characterId);
-          if(manualReadyCharacter===characterId){
-            $("stats-save-status").textContent="NO SE PUDO GUARDAR";
-            $("stats-save-status").classList.add("error");
-          }
-          console.error(error);
-          return false;
-        }
-        if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);
-        if(manualReadyCharacter===characterId){
-          $("stats-save-status").textContent=manualSavePending.has(characterId)?"GUARDANDO…":"GUARDADO";
-          $("stats-save-status").classList.remove("error");
-        }
-        return true;
-      })();
-      manualSaveTasks.set(characterId,task);
-      const result=await task;
-      if(manualSaveTasks.get(characterId)===task)manualSaveTasks.delete(characterId);
-      return result;
+      const task=(async()=>{const {error}=await db.from("ficha_datos_manuales").upsert(payload,{onConflict:"personaje_id"});if(error){manualSavePending.add(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent="NO SE PUDO GUARDAR";$("stats-save-status").classList.add("error");}console.error(error);return false;}if(!manualSaveTimers.has(characterId))manualSavePending.delete(characterId);if(manualReadyCharacter===characterId){$("stats-save-status").textContent=manualSavePending.has(characterId)?"GUARDANDO…":"GUARDADO";$("stats-save-status").classList.remove("error");}return true;})();
+      manualSaveTasks.set(characterId,task);const result=await task;if(manualSaveTasks.get(characterId)===task)manualSaveTasks.delete(characterId);return result;
     }
-    function queueManualSave(characterId){
-      const payload=manualPayload(characterId),status=$("stats-save-status");
-      manualSavePending.add(characterId);
-      status.textContent="GUARDANDO…";
-      status.classList.remove("error");
-      clearTimeout(manualSaveTimers.get(characterId));
-      manualSaveTimers.set(characterId,setTimeout(()=>{
-        manualSaveTimers.delete(characterId);
-        writeManualData(characterId,payload);
-      },350));
-    }
-    async function flushManualSave(characterId){
-      const timer=manualSaveTimers.get(characterId);
-      if(timer){clearTimeout(timer);manualSaveTimers.delete(characterId);}
-      if(!manualSavePending.has(characterId))return true;
-      return writeManualData(characterId,manualPayload(characterId));
-    }
-    window.addEventListener("beforeunload",event=>{
-      if(!manualSavePending.size&&!manualSaveTasks.size&&!manualSaveTimers.size&&!portraitUploadInProgress)return;
-      event.preventDefault();
-      event.returnValue="";
-    });
-    async function showPortrait(path,characterId){
-      manualPortraitPath=path||null;
-      const image=$("portrait-image"),caption=$("monogram");
-      image.hidden=true;
-      image.removeAttribute("src");
-      caption.hidden=false;
-      $("portrait-file").disabled=manualReadyCharacter!==characterId;
-      $("portrait-status").textContent=path?"CARGANDO RETRATO…":"SIN RETRATO GUARDADO";
-      if(!path)return;
-      const {data,error}=await db.storage.from("retratos-personajes").createSignedUrl(path,3600);
-      if(active?.id!==characterId)return;
-      if(error){$("portrait-status").textContent="NO SE PUDO CARGAR EL RETRATO";console.error(error);return;}
-      image.onload=()=>{
-        image.hidden=false;
-        caption.hidden=true;
-        $("portrait-status").textContent="RETRATO PRIVADO CARGADO";
-      };
-      image.onerror=()=>$("portrait-status").textContent="NO SE PUDO MOSTRAR EL RETRATO";
-      image.src=data.signedUrl;
-    }
-    async function uploadPortrait(file){
-      const characterId=active?.id;
-      if(!characterId||manualReadyCharacter!==characterId||!file)return;
-      const status=$("portrait-status");
-      if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}
-      if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}
-      const path=`${characterId}/portrait`;
-      portraitUploadInProgress=true;
-      status.textContent="SUBIENDO RETRATO…";
-      $("portrait-file").disabled=true;
-      const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});
-      if(uploadError){
-        status.textContent="NO SE PUDO SUBIR EL RETRATO";
-        console.error(uploadError);
-        $("portrait-file").disabled=false;
-        portraitUploadInProgress=false;
-        return;
-      }
-      const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});
-      if(saveError){
-        status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";
-        console.error(saveError);
-        $("portrait-file").disabled=false;
-        portraitUploadInProgress=false;
-        return;
-      }
-      await showPortrait(path,characterId);
-      $("portrait-file").disabled=false;
-      portraitUploadInProgress=false;
-    }
-    async function loadManualData(characterId){
-      manualReadyCharacter=null;
-      $("stats-save-status").textContent="CARGANDO…";
-      $("stats-save-status").classList.remove("error");
-      $("portrait-file").disabled=true;
-      $("portrait-status").textContent="CARGANDO…";
-      document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);
-      const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,puntos_vida_sesion,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";
-      const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();
-      if(active?.id!==characterId)return;
-      if(error){
-        $("stats-save-status").textContent="ERROR DE CARGA";
-        $("stats-save-status").classList.add("error");
-        $("portrait-status").textContent="ERROR DE CARGA";
-        return;
-      }
-      const row=data||{nivel:1};
-      $("character-level").value=String(row.nivel||1);
-      $("manual-pv").value=row.puntos_vida_manual??"";
-      $("manual-alias").value=row.alias||"";
-      ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");
-      SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));
-      for(let index=1;index<=4;index++){
-        const key=String(index).padStart(2,"0");
-        $(`contact-${key}`).value=row[`contacto_${key}`]||"";
-      }
-      refreshSessionPV(row.puntos_vida_sesion??(row.puntos_vida_manual!=null?Number(row.puntos_vida_manual):""));
-      document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);
-      manualReadyCharacter=characterId;
-      $("portrait-file").disabled=false;
-      $("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";
-      if(row.puntos_vida_sesion==null&&row.puntos_vida_manual!=null)queueManualSave(characterId);
-      refreshDerived();
-      await showPortrait(row.retrato_path,characterId);
-    }
-    async function json(path){
-      const response=await fetch(path);
-      if(!response.ok)throw new Error(`No se pudo cargar ${path}`);
-      return response.json();
-    }
+    function queueManualSave(characterId){const payload=manualPayload(characterId),status=$("stats-save-status");manualSavePending.add(characterId);status.textContent="GUARDANDO…";status.classList.remove("error");clearTimeout(manualSaveTimers.get(characterId));manualSaveTimers.set(characterId,setTimeout(()=>{manualSaveTimers.delete(characterId);writeManualData(characterId,payload);},350));}
+    async function flushManualSave(characterId){const timer=manualSaveTimers.get(characterId);if(timer){clearTimeout(timer);manualSaveTimers.delete(characterId);}if(!manualSavePending.has(characterId))return true;return writeManualData(characterId,manualPayload(characterId));}
+    window.addEventListener("beforeunload",event=>{if(!manualSavePending.size&&!manualSaveTasks.size&&!manualSaveTimers.size&&!portraitUploadInProgress)return;event.preventDefault();event.returnValue="";});
+    async function showPortrait(path,characterId){manualPortraitPath=path||null;const image=$("portrait-image"),caption=$("monogram");image.hidden=true;image.removeAttribute("src");caption.hidden=false;$("portrait-file").disabled=manualReadyCharacter!==characterId;$("portrait-status").textContent=path?"CARGANDO RETRATO…":"SIN RETRATO GUARDADO";if(!path)return;const {data,error}=await db.storage.from("retratos-personajes").createSignedUrl(path,3600);if(active?.id!==characterId)return;if(error){$("portrait-status").textContent="NO SE PUDO CARGAR EL RETRATO";console.error(error);return;}image.onload=()=>{image.hidden=false;caption.hidden=true;$("portrait-status").textContent="RETRATO PRIVADO CARGADO";};image.onerror=()=>{$("portrait-status").textContent="NO SE PUDO MOSTRAR EL RETRATO";};image.src=data.signedUrl;}
+    async function uploadPortrait(file){const characterId=active?.id;if(!characterId||manualReadyCharacter!==characterId||!file)return;const status=$("portrait-status");if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="FORMATO NO ADMITIDO · USA JPG, PNG O WEBP";return;}if(file.size>5*1024*1024){status.textContent="EL ARCHIVO SUPERA 5 MB";return;}const path=`${characterId}/portrait`;portraitUploadInProgress=true;status.textContent="SUBIENDO RETRATO…";$("portrait-file").disabled=true;const {error:uploadError}=await db.storage.from("retratos-personajes").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});if(uploadError){status.textContent="NO SE PUDO SUBIR EL RETRATO";console.error(uploadError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}const {error:saveError}=await db.from("ficha_datos_manuales").upsert({personaje_id:characterId,retrato_path:path},{onConflict:"personaje_id"});if(saveError){status.textContent="SE SUBIÓ, PERO NO SE PUDO GUARDAR EN LA FICHA";console.error(saveError);$("portrait-file").disabled=false;portraitUploadInProgress=false;return;}await showPortrait(path,characterId);$("portrait-file").disabled=false;portraitUploadInProgress=false;}
+    async function loadManualData(characterId){manualReadyCharacter=null;$("stats-save-status").textContent="CARGANDO…";$("stats-save-status").classList.remove("error");$("portrait-file").disabled=true;$("portrait-status").textContent="CARGANDO…";document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=true);const columns="nivel,fue,des,con,int,sab,car,puntos_vida_manual,alias,retrato_path,contacto_01,contacto_02,contacto_03,contacto_04,habilidad_corporate,habilidad_punk,habilidad_cyber,habilidad_hardware,habilidad_urban,habilidad_savage";const {data,error}=await db.from("ficha_datos_manuales").select(columns).eq("personaje_id",characterId).maybeSingle();if(active?.id!==characterId)return;if(error){$("stats-save-status").textContent="ERROR DE CARGA";$("stats-save-status").classList.add("error");$("portrait-status").textContent="ERROR DE CARGA";return;}const row=data||{nivel:1};$("character-level").value=String(row.nivel||1);$("manual-pv").value=row.puntos_vida_manual??"";$("manual-alias").value=row.alias||"";ATTRIBUTES.forEach(attribute=>$(`attribute-${attribute}`).value=row[attribute]??"");SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(row[`habilidad_${skill}`]??0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");$(`contact-${key}`).value=row[`contacto_${key}`]||"";}document.querySelectorAll("[data-manual-input]").forEach(input=>input.disabled=false);manualReadyCharacter=characterId;$("portrait-file").disabled=false;$("stats-save-status").textContent=data?"GUARDADO":"SIN DATOS · EDITA PARA GUARDAR";refreshDerived();await showPortrait(row.retrato_path,characterId);}
+    async function json(path){const response=await fetch(path);if(!response.ok)throw new Error(`No se pudo cargar ${path}`);return response.json();}
     async function start(){
       try{
         const {data:{user},error:authError}=await db.auth.getUser();
@@ -411,122 +233,66 @@
         const isDM=profile.rol==="dm";
         if(isDM){
           const {data,error}=await db.from("personajes").select("id,nombre_clave,nombre_jugador,clase,ficha").is("archivado_en",null).order("nombre_clave");
-          if(error)throw error;
-          characters=data||[];
+          if(error)throw error; characters=data||[];
         }else{
           const {data,error}=await db.from("asignaciones").select("personaje_id,personajes(id,nombre_clave,nombre_jugador,clase,ficha)").eq("perfil_id",user.id);
-          if(error)throw error;
-          characters=(data||[]).map(row=>row.personajes).filter(Boolean);
+          if(error)throw error; characters=(data||[]).map(row=>row.personajes).filter(Boolean);
         }
         if(!characters.length){fail(isDM?"No hay personajes registrados.":"Tu cuenta todavía no tiene personajes asignados.");return;}
-        [livingCatalog,core,productCatalog,mentalCatalog]=await Promise.all([
-          json("Gastos_de_vida_CBPunk_v1.json"),
-          json("Night_Xity_Citizen_Nucleo_v1.json?v=14"),
-          json("catalogo_night_xity_web_v1.json?v=8"),
-          json("salud_mental_night_xity_v1.json?v=3")
-        ]);
+        [livingCatalog,core,productCatalog,mentalCatalog]=await Promise.all([json("Gastos_de_vida_CBPunk_v1.json"),json("Night_Xity_Citizen_Nucleo_v1.json?v=14"),json("catalogo_night_xity_web_v1.json?v=8"),json("salud_mental_night_xity_v1.json?v=3")]);
         const key=isDM?"nightXity_personaje_dm_activo":"nightXity_personaje_activo";
         const stored=localStorage.getItem(key);
         const valid=characters.some(item=>item.id===stored);
         active=characters.find(item=>item.id===(valid?stored:characters[0].id))||characters[0];
-        if(!valid&&isDM)$("status").textContent="Selecciona el personaje que quieres consultar.";
-        const picker=$("character-picker");
-        picker.replaceChildren(...characters.map(person=>new Option(label(person),person.id)));
-        picker.value=active.id;
-        picker.disabled=characters.length<2;
-        picker.addEventListener("change",async()=>{
-          const previous=active?.id;
-          const next=picker.value;
-          if(previous&&!(await flushManualSave(previous))){picker.value=previous;return;}
-          if(portraitUploadInProgress){
-            picker.value=previous;
-            $("portrait-status").textContent="ESPERA A QUE TERMINE LA SUBIDA DEL RETRATO.";
-            return;
-          }
-          active=characters.find(person=>person.id===next);
-          localStorage.setItem(key,next);
-          await render(isDM);
-        });
+        if(!valid&&isDM){$("status").textContent="Selecciona el personaje que quieres consultar.";}
+        const picker=$("character-picker");picker.replaceChildren(...characters.map(person=>new Option(label(person),person.id)));picker.value=active.id;picker.disabled=characters.length<2;
+          picker.addEventListener("change",async()=>{const previous=active?.id;const next=picker.value;if(previous&&!(await flushManualSave(previous))){picker.value=previous;return;}if(portraitUploadInProgress){picker.value=previous;$("portrait-status").textContent="ESPERA A QUE TERMINE LA SUBIDA DEL RETRATO.";return;}active=characters.find(person=>person.id===next);localStorage.setItem(key,next);await render(isDM);});
         await render(isDM);
       }catch(error){fail(error.message||"No se pudo cargar la ficha.");}
     }
     function itemCatalog(item){return (productCatalog.items||[]).find(row=>row.id===item.catalogo_id)||{};}
-    function namedExpense(id){
-      for(const [key,value] of Object.entries(livingCatalog)){
-        if(Array.isArray(value)){
-          const hit=value.find(row=>row.id===id);
-          if(hit)return hit.descripcion||hit.nombre||id;
-        }
-      }
-      return id;
-    }
+    function namedExpense(id){for(const [key,value] of Object.entries(livingCatalog)){if(Array.isArray(value)){const hit=value.find(row=>row.id===id);if(hit)return hit.descripcion||hit.nombre||id;}}return id;}
     function weaponMarkup(items){
       const weapons=(items||[]).filter(item=>item.categoria==="Armas");
       if(!weapons.length)return `<div class="empty">SIN ARMAS REGISTRADAS EN CITIZEN</div>`;
-      return `<div style="overflow-x:auto"><table class="weapon-table"><thead><tr><th>Arma</th><th>Tipo</th><th>Alcance</th><th>TT</th><th>RF</th><th>FA</th><th>Estado</th></tr></thead><tbody>${weapons.map(item=>{
-        const product=itemCatalog(item),combat=product.combate||{};
-        return `<tr><td>${safe(item.nombre||product.nombre||"Arma")}</td><td>${safe(product.tipo||"—")}</td><td>${safe(product.alcance??"—")}</td><td>${safe(combat.TT?.tirada||"—")}</td><td>${safe(combat.RF?.tirada||"—")}</td><td>${safe(combat.FA?.tirada||"—")}</td><td>${safe(item.estado||"REGISTRADA")}</td></tr>`;
-      }).join("")}</tbody></table></div>`;
+      return `<div style="overflow-x:auto"><table class="weapon-table"><thead><tr><th>Arma</th><th>Tipo</th><th>Alcance</th><th>TT</th><th>RF</th><th>FA</th><th>Estado</th></tr></thead><tbody>${weapons.map(item=>{const product=itemCatalog(item),combat=product.combate||{};return `<tr><td>${safe(item.nombre||product.nombre||"Arma")}</td><td>${safe(product.tipo||"—")}</td><td>${safe(product.alcance??"—")}</td><td>${safe(combat.TT?.tirada||"—")}</td><td>${safe(combat.RF?.tirada||"—")}</td><td>${safe(combat.FA?.tirada||"—")}</td><td>${safe(item.estado||"REGISTRADA")}</td></tr>`;}).join("")}</tbody></table></div>`;
     }
     function inventoryMarkup(items){
-      const buckets=new Map();
-      (items||[]).filter(item=>item.categoria!=="Armas").forEach(item=>{
-        const category=item.categoria||"Varios";
-        if(!buckets.has(category))buckets.set(category,[]);
-        buckets.get(category).push(item);
-      });
+      const buckets=new Map();(items||[]).filter(item=>item.categoria!=="Armas").forEach(item=>{const category=item.categoria||"Varios";if(!buckets.has(category))buckets.set(category,[]);buckets.get(category).push(item);});
       const preferred=["Armas","Implantes","Programas","Accesorios","Blindajes","Terminales","MediCare","Drogas","Vehiculos","Varios","Cotidiano"];
       const categories=[...preferred.filter(name=>buckets.has(name)),...Array.from(buckets.keys()).filter(name=>!preferred.includes(name))];
       if(!categories.length)return `<div class="empty">SIN OBJETOS REGISTRADOS</div>`;
-      return categories.map(category=>`<div><details open><summary>${safe(category.toUpperCase())} (${buckets.get(category).length})</summary><div class="list" style="margin-top:10px">${buckets.get(category).map(item=>{
-        const product=itemCatalog(item);
-        return `<article class="entry"><div class="entry-title">${safe(item.nombre||product.nombre||"Objeto")}</div><div class="entry-meta">${safe(item.estado||"REGISTRADO")}</div>${product.descripcion?`<div class="entry-desc">${safe(product.descripcion)}</div>`:""}</article>`;
-      }).join("")}</div></details></div>`).join("");
+      return categories.map(category=>`<div><details open><summary>${safe(category.toUpperCase())} (${buckets.get(category).length})</summary><div class="list" style="margin-top:10px">${buckets.get(category).map(item=>{const product=itemCatalog(item);return `<article class="entry"><div class="entry-title">${safe(item.nombre||product.nombre||"Objeto")}</div><div class="entry-meta">${safe(item.estado||"REGISTRADO")}</div>${product.descripcion?`<div class="entry-desc">${safe(product.descripcion)}</div>`:""}</article>`;}).join("")}</div></details></div>`).join("");
     }
     async function render(isDM){
       if(!active)return;
-      const ficha=active.ficha||{},identity={...(ficha.identidad||{}),nombre_clave:active.nombre_clave||ficha.identidad?.nombre_clave||"SIN NOMBRE",nombre_jugador:active.nombre_jugador||ficha.identidad?.nombre_jugador||"",clase:active.clase||ficha.identidad?.clase||""};
+      const ficha=active.ficha||{}, identity={...(ficha.identidad||{}),nombre_clave:active.nombre_clave||ficha.identidad?.nombre_clave||"SIN NOMBRE",nombre_jugador:active.nombre_jugador||ficha.identidad?.nombre_jugador||"",clase:active.clase||ficha.identidad?.clase||""};
       const person={...ficha,identidad:identity,economia:{...(ficha.economia||{}),saldo_inicial:Number(ficha.economia?.saldo_inicial||0),movimientos:Array.isArray(ficha.economia?.movimientos)?ficha.economia.movimientos:[]},inventario:ficha.inventario||{}};
-      const state=MotorEconomico.crearEstadoInicial(person),items=Array.isArray(ficha.inventario_detallado)?ficha.inventario_detallado:[];
+      const state=MotorEconomico.crearEstadoInicial(person), items=Array.isArray(ficha.inventario_detallado)?ficha.inventario_detallado:[];
       $("status").textContent=isDM?"Modo Arquitecto // puedes corregir nivel, atributos y PV":"Ficha sincronizada desde Citizen Net // puedes editar nivel, atributos y PV";
       $("sheet").hidden=false;
-      const displayName=label(identity);
-      $("character-name").textContent=displayName;
-      $("character-class").textContent=identity.clase||"SIN REGISTRO";
-      $("soul-points").textContent=identity.puntos_alma??"SIN REGISTRO";
-      $("backstory").textContent=identity.trasfondo||"SIN TRASFONDO REGISTRADO";
+      const displayName=label(identity);$("character-name").textContent=displayName;$("character-class").textContent=identity.clase||"SIN REGISTRO";$("soul-points").textContent=identity.puntos_alma??"SIN REGISTRO";$("backstory").textContent=identity.trasfondo||"SIN TRASFONDO REGISTRADO";
       await loadManualData(active.id);
-      const initials=(displayName.match(/[\p{L}\p{N}]+/gu)||["NX"]).slice(0,2).map(word=>word[0]).join("").toUpperCase();
-      $("monogram").textContent=initials;
+      const initials=(displayName.match(/[\p{L}\p{N}]+/gu)||["NX"]).slice(0,2).map(word=>word[0]).join("").toUpperCase();$("monogram").textContent=initials;
       $("balance").textContent=`${fmt(state.saldo_actual)} CORPOS`;
-      const movements=[...state.movimientos].reverse();
-      $("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
+      const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
       $("weapons").innerHTML=weaponMarkup(items);
       $("inventory").innerHTML=inventoryMarkup(items);
-      const talents=Array.isArray(identity.talentos)?identity.talentos:[];
-      const talentCatalog=core.talentos||{};
-      $("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
-      const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];
-      const taraCatalog=core.tara_sintetica||{};
-      $("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
+      const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
+      const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
       const mental=identity.salud_mental||{};
       const manias=(mental.manias||[]).map(Number);
       const fobias=(mental.fobias||[]).map(Number);
       const addictions=(mental.adicciones||[]).map(Number);
-      const renderMental=(catalog,selected)=>{
-        const matches=(catalog||[]).filter(row=>selected.includes(Number(row.d100)));
-        return matches.length?matches.map(row=>`<article class="entry"><div class="entry-title">${safe(row.termino)}</div><div class="entry-desc">${safe(row.descripcion||"")}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;
-      };
+      const renderMental=(catalog,selected)=>{const matches=(catalog||[]).filter(row=>selected.includes(Number(row.d100)));return matches.length?matches.map(row=>`<article class="entry"><div class="entry-title">${safe(row.termino)}</div><div class="entry-desc">${safe(row.descripcion||"")}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;};
       $("manias").innerHTML=renderMental(mentalCatalog.manias,manias);
       $("phobias").innerHTML=renderMental(mentalCatalog.fobias,fobias);
       $("addictions").innerHTML=renderMental(mentalCatalog.adicciones,addictions);
       const {data:subs,error:subError}=await db.from("suscripciones_gastos_vida").select("gasto_id,costo,frecuencia,estado,proximo_cobro").eq("personaje_id",active.id);
       const {data:requests,error:reqError}=await db.from("solicitudes_gastos_vida").select("gasto_id,estado,importe_solicitado,fecha_solicitud,tipo_solicitud").eq("personaje_id",active.id).eq("tipo_solicitud","cambio_vivienda").order("fecha_solicitud",{ascending:false}).limit(5);
-      const housing=(subs||[]).filter(row=>row.gasto_id.startsWith("VIV-"));
-      const services=(subs||[]).filter(row=>!row.gasto_id.startsWith("VIV-"));
-      const subscriptionMarkup=rows=>rows.length?rows.map(row=>`<article class="entry"><div class="entry-title">${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${fmt(row.costo)} CORPOS · ${safe(row.frecuencia||"").toUpperCase()} · ${safe(row.estado||"").toUpperCase()}${row.proximo_cobro?` · SIGUIENTE: ${new Date(row.proximo_cobro).toLocaleDateString("es-MX")}`:""}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;
-      let housingHtml=subscriptionMarkup(housing);
-      if(requests?.length)housingHtml+=requests.map(row=>`<article class="entry"><div class="entry-title">Solicitud: ${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${safe(row.estado).toUpperCase()} · ${row.fecha_solicitud?new Date(row.fecha_solicitud).toLocaleDateString("es-MX"):""}</div></article>`).join("");
+      const housing=(subs||[]).filter(row=>row.gasto_id.startsWith("VIV-"));const services=(subs||[]).filter(row=>!row.gasto_id.startsWith("VIV-"));
+      const subscriptionMarkup=(rows)=>rows.length?rows.map(row=>`<article class="entry"><div class="entry-title">${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${fmt(row.costo)} CORPOS · ${safe(row.frecuencia||"").toUpperCase()} · ${safe(row.estado||"").toUpperCase()}${row.proximo_cobro?` · SIGUIENTE: ${new Date(row.proximo_cobro).toLocaleDateString("es-MX")}`:""}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;
+      let housingHtml=subscriptionMarkup(housing);if(requests?.length)housingHtml+=requests.map(row=>`<article class="entry"><div class="entry-title">Solicitud: ${safe(namedExpense(row.gasto_id))}</div><div class="entry-meta">${safe(row.estado).toUpperCase()} · ${row.fecha_solicitud?new Date(row.fecha_solicitud).toLocaleDateString("es-MX"):""}</div></article>`).join("");
       $("housing").innerHTML=subError||reqError?`<div class="empty">No se pudieron cargar los datos de vivienda.</div>`:housingHtml;
       $("services").innerHTML=subError?`<div class="empty">No se pudieron cargar los servicios.</div>`:subscriptionMarkup(services);
     }
@@ -535,21 +301,12 @@
     start();
   </script>
   <script>
-    (()=>{
+    (() => {
       const refreshCloseControls=()=>document.querySelectorAll("details").forEach(details=>{
         const rows=[...details.querySelectorAll(".item,.entry,label")].filter(row=>row.closest("details")===details).length;
         const button=[...details.children].find(child=>child.matches?.(".details-close"));
-        if(rows>15&&!button){
-          const close=document.createElement("button");
-          close.type="button";
-          close.className="details-close";
-          close.textContent="▲ CERRAR MENÚ";
-          close.addEventListener("click",()=>{
-            details.open=false;
-            details.querySelector("summary")?.focus({preventScroll:true});
-          });
-          details.append(close);
-        }else if(rows<=15&&button)button.remove();
+        if(rows>15&&!button){const close=document.createElement("button");close.type="button";close.className="details-close";close.textContent="▲ CERRAR MENÚ";close.addEventListener("click",()=>{details.open=false;details.querySelector("summary")?.focus({preventScroll:true});});details.append(close);}
+        else if(rows<=15&&button)button.remove();
       });
       refreshCloseControls();
       new MutationObserver(()=>requestAnimationFrame(refreshCloseControls)).observe(document.body,{childList:true,subtree:true});

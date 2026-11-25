@@ -203,9 +203,18 @@
       <section class="panel">
         <h2>Economía</h2>
         <div class="label">Saldo disponible</div><div id="balance" class="balance">— CORPOS</div>
-        <details><summary>Historial económico</summary><div id="history" class="list" style="margin-top:12px"></div></details>
-        <details><summary>Vivienda</summary><div id="housing" class="list" style="margin-top:12px"></div></details>
-        <details><summary>Servicios</summary><div id="services" class="list" style="margin-top:12px"></div></details>
+        <details id="sheet-expenses-panel">
+          <summary>EGRESOS</summary>
+          <details><summary>Historial económico</summary><div id="history" class="list" style="margin-top:12px"></div></details>
+          <details><summary>Vivienda</summary><div id="housing" class="list" style="margin-top:12px"></div></details>
+          <details><summary>Servicios</summary><div id="services" class="list" style="margin-top:12px"></div></details>
+        </details>
+        <details class="income-panel" id="sheet-income-panel">
+          <summary>INGRESOS // REGISTRO DE PAGOS</summary>
+          <p class="empty">Consulta de pagos por trabajo, pagos puntuales y salarios periódicos. Esta sección es exclusivamente informativa.</p>
+          <h3>Salarios activos</h3><div id="sheet-active-salaries" class="list"></div>
+          <h3 style="margin-top:16px">Pagos recibidos</h3><div id="sheet-income-history" class="list"></div>
+        </details>
       </section>
       <section class="panel">
         <h2>Talentos</h2><div id="class-talents-list" class="class-talents"></div><div id="talents" class="list"></div>
@@ -224,12 +233,6 @@
       <section class="panel wide">
         <h2>Inventario // fichas individuales</h2>
         <div id="inventory" class="columns"></div>
-      </section>
-      <section class="panel wide income-panel" id="sheet-income-panel">
-        <h2>Ingresos // registro de pagos</h2>
-        <p class="empty">Consulta de pagos por trabajo, pagos puntuales y salarios periódicos. Esta sección es exclusivamente informativa.</p>
-        <h3>Salarios activos</h3><div id="sheet-active-salaries" class="list"></div>
-        <h3 style="margin-top:16px">Pagos recibidos</h3><div id="sheet-income-history" class="list"></div>
       </section>
       <section class="panel wide" id="sheet-body-panel">
         <h2>Cuerpo // modificaciones</h2>

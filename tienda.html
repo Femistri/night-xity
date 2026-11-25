@@ -294,7 +294,6 @@
 
     <nav class="page-nav" aria-label="Navegación principal">
         <a href="citizen.html">IR A CITIZEN</a>
-        <a href="ficha.html">IR A FICHA</a>
     </nav>
 
 </header>
@@ -303,9 +302,11 @@
 <main>
 
     <section class="panel" id="acceso-jugador" aria-live="polite">
-        <h2 id="acceso-titulo">ACCESO CIUDADANO</h2>
+        <h2 id="acceso-titulo">ACCESO CIUDADANO // SESIÓN Y ROL</h2>
+        <h3>IDENTIFICACIÓN DE SESIÓN</h3>
         <div id="dm-store-notice" hidden></div>
         <div id="selector-personaje-contenedor" hidden>
+            <h3>PERSONAJES // CUENTA CIUDADANA</h3>
             <p id="jugador-identificado"></p>
             <label for="personaje-asignado">PERSONAJES DE TU CUENTA:</label>
             <select id="personaje-asignado">
@@ -341,13 +342,6 @@
                 <button id="boton-crear-personaje" type="button" disabled>CREAR PERSONAJE</button>
                 <div id="crear-personaje-mensaje" role="status" aria-live="polite"></div>
             </div>
-            <div id="estado-economico" hidden>
-                <details>
-                    <summary>SERVICIOS Y OBLIGACIONES</summary>
-                    <div id="suscripciones-personaje"></div>
-                    <div id="obligaciones-personaje"></div>
-                </details>
-            </div>
         </div>
         <div id="formulario-acceso">
             <p>Inicia sesión o crea una cuenta para continuar como jugador.</p>
@@ -364,8 +358,16 @@
 
         <h2>VIDA COTIDIANA</h2>
 
+        <div id="estado-economico" hidden>
+            <details>
+                <summary>CÓDIGO DE SERVICIOS Y OBLIGACIONES CORRIENTES</summary>
+                <div id="suscripciones-personaje"></div>
+                <div id="obligaciones-personaje"></div>
+            </details>
+        </div>
+
         <details>
-            <summary>SERVICIOS / GASTOS</summary>
+            <summary>SERVICIOS Y GASTOS DISPONIBLES</summary>
             <div class="category-content">
                 CATÁLOGO EN CARGA...
             </div>
@@ -392,7 +394,7 @@
 
     <section class="panel">
 
-        <h2>CATÁLOGO</h2>
+        <h2>CATÁLOGO // CATEGORÍAS DESPLEGABLES</h2>
   
         <details>
             <summary>IMPLANTES</summary>
@@ -573,7 +575,7 @@ const cargarTienda = async () => {
             "VEHÍCULOS": "Vehiculos",
             "VARIOS": "Varios",
             "COTIDIANO": "Cotidiano",
-"SERVICIOS / GASTOS": "Cotidiano"
+"SERVICIOS Y GASTOS DISPONIBLES": "Cotidiano"
         };
 
 
@@ -594,7 +596,7 @@ const cargarTienda = async () => {
                     return;
                 }
 
-              if (nombreVisible === "SERVICIOS / GASTOS") {
+              if (nombreVisible === "SERVICIOS Y GASTOS DISPONIBLES") {
 
     const gastosObligatorios =
         gastosVida.gastos_obligatorios || [];

@@ -17,6 +17,7 @@
     h3{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 9px}
     .top-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
     .page-links{display:grid;gap:5px;justify-items:start}
+    .link-button{padding:0;border:0;border-bottom:1px solid currentColor;background:none;color:var(--acid);font:inherit;font-size:13px;cursor:pointer;text-align:left}
     select{background:#e9efec;color:#111;border:0;padding:9px 11px;min-width:190px;font:inherit}
     .notice{padding:13px 15px;border:1px solid var(--line);margin:18px 0;color:var(--muted)}
     .sheet{display:grid;grid-template-columns:minmax(260px,.86fr) minmax(0,1.6fr);gap:14px;margin-top:18px}
@@ -42,7 +43,9 @@
     .level-row{display:flex;align-items:center;gap:10px;margin:0 0 12px}
     .level-select{min-width:75px;padding:5px 8px}
     .save-status{margin-left:auto;color:var(--muted);font-size:10px;letter-spacing:1px}
-    .help-value{cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+    .help-value{cursor:help;text-decoration:underline dotted;text-underline-offset:3px;position:relative}
+    .help-value:focus{z-index:5;outline:1px solid var(--acid);outline-offset:2px}
+    .help-value:focus::after{content:attr(title);position:absolute;left:0;top:calc(100% + 6px);z-index:20;width:min( min(78vw,340px), 340px);padding:10px 12px;background:#172321;border:1px solid var(--acid);color:var(--text);font-size:12px;line-height:1.4;letter-spacing:0;text-transform:none;text-decoration:none;box-shadow:0 8px 24px #000b;white-space:normal}
     .pv-input{width:100%;min-width:0;height:33px;background:#080b0c;border:1px solid #53615e;color:var(--text);text-align:center;font:inherit}
     .pv-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0}
     .pv-pair .derived{min-width:0;padding:7px 5px}
@@ -124,7 +127,7 @@
   <div class="wrap">
     <header>
       <div><div class="kicker">Night Xity // registro ciudadano // 2066</div><h1>HABILIDADES CONFIRMADAS EN Xcatec XomoX</h1></div>
-      <div class="top-actions"><label class="eyebrow" for="character-picker">Consultar personaje</label><select id="character-picker" aria-label="Consultar personaje" disabled><option>CARGANDO...</option></select><nav class="page-links" aria-label="Navegación"><a href="citizen.html">Volver a Citizen</a><a href="tienda.html">Ir a Tienda DunoXuXa</a></nav></div>
+      <div class="top-actions"><label class="eyebrow" for="character-picker">Consultar personaje</label><select id="character-picker" aria-label="Consultar personaje" disabled><option>CARGANDO...</option></select><nav class="page-links" aria-label="Navegación"><a href="index.html">Volver a portada</a><a href="citizen.html">Volver a Citizen</a><a href="tienda.html">Ir a Tienda DunoXuXa</a><button id="sign-out-button" type="button" class="link-button">Cerrar sesión</button></nav></div>
     </header>
     <div id="status" class="notice" role="status" aria-live="polite">Conectando con Citizen Net…</div>
     <main id="sheet" class="sheet" hidden>
@@ -196,8 +199,9 @@
         <div id="skill-guidance" class="skill-guidance" aria-live="polite"><span>Puntos asignados: <strong id="skill-points-used">0</strong></span><span>Puntos disponibles: <strong id="skill-points-left">6</strong></span><span>Máximo por habilidad: <strong id="skill-points-cap">2</strong></span></div>
         <p id="skill-guidance-message" class="manual-caption" role="status" aria-live="polite" style="margin:8px 0 0">Nivel 1: distribuye 6 puntos entre las seis habilidades.</p>
         <div class="skill-save-row">
-          <button id="save-skills-button" class="skill-save-button" type="button" disabled>Guardar habilidades</button>
-          <span class="skill-save-note">Las habilidades no se guardan automáticamente. Puedes corregir y redistribuir antes de confirmar con este botón.</span>
+          <button id="save-skills-button" class="skill-save-button" type="button" disabled>CONFIRMAR HABILIDADES</button>
+          <button id="discard-skills-button" class="skill-save-button" type="button" disabled>DESCARTAR CAMBIOS</button>
+          <span class="skill-save-note">Los cambios se conservan como borrador hasta confirmarlos. Si la distribución no cumple las reglas, puedes corregirla o descartarla.</span>
         </div>
       </section>
       <section class="panel">
@@ -305,6 +309,7 @@
         const payload=manualPayload(characterId);
         setManualSaveStatus("CONFIRMANDO HABILIDADES…","pending");
         $("save-skills-button").disabled=true;
+        $("discard-skills-button").disabled=true;
         const ok=await writeManualData(characterId,payload);
         if(ok&&manualReadyCharacter===characterId){
           const values=Object.fromEntries(SKILLS.map(skill=>[skill,Number(payload[`habilidad_${skill}`]||0)]));
@@ -313,7 +318,21 @@
           setManualSaveStatus("HABILIDADES CONFIRMADAS EN SUPABASE","saved");
         }else if(manualReadyCharacter===characterId){
           refreshSkillGuidance();
+          $("discard-skills-button").disabled=false;
         }
+      });
+      $("discard-skills-button").addEventListener("click",()=>{
+        if(!manualReadyCharacter)return;
+        $("character-level").value=String(savedSkillBaseline.level);
+        SKILLS.forEach(skill=>$(`skill-${skill}`).value=String(savedSkillBaseline.values[skill]??0));
+        refreshDerived();
+        refreshSkillGuidance();
+        setManualSaveStatus("CAMBIOS DE HABILIDADES DESCARTADOS","saved");
+      });
+      $("sign-out-button").addEventListener("click",async()=>{
+        const {error}=await db.auth.signOut();
+        if(error){setManualSaveStatus("NO SE PUDO CERRAR LA SESIÓN","error");console.error(error);return;}
+        window.location.href="index.html";
       });
       document.querySelectorAll("[data-attribute]").forEach(input=>input.addEventListener("change",refreshDerived));
     }
@@ -337,7 +356,6 @@
       const values=currentSkillValues();
       const baseline=savedSkillBaseline;
       const used=Object.values(values).reduce((sum,value)=>sum+value,0);
-      const previousTotal=Object.values(baseline.values).reduce((sum,value)=>sum+value,0);
       const budget=skillBudget(level);
       const cap=skillMaximum(level);
       const changed=level!==baseline.level||SKILLS.some(skill=>values[skill]!==baseline.values[skill]);
@@ -347,56 +365,39 @@
         return {valid:true,changed:false,state:"valid",message:"Habilidades guardadas y sincronizadas con Supabase."};
       }
 
-      // Primera asignación: el personaje puede registrarse directamente
-      // en cualquier nivel, respetando el presupuesto y el máximo individual.
-      if(!baseline.initialized){
-        if(baseline.exists&&level!==baseline.level){
-          return {valid:false,changed:true,state:"invalid",message:`Este personaje está registrado en nivel ${baseline.level}. Completa primero su asignación inicial de ${skillBudget(baseline.level)} puntos en ese nivel.`};
-        }
-        for(const skill of SKILLS){
-          if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
-          if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
-        }
-        if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto inicial para nivel ${level} es ${budget}.`};
-        if(used!==budget)return {valid:false,changed:true,state:"pending",message:`Asignación inicial incompleta para nivel ${level}: necesitas ${budget} puntos; llevas ${used}.`};
-        return {valid:true,changed:true,state:"pending",message:`Asignación inicial válida: ${used} de ${budget} puntos. Lista para guardar.`};
-      }
-
-      // JUGADOR Y ARQUITECTO: en el mismo nivel pueden añadir, retirar y
-      // redistribuir puntos libremente. Solo se exige respetar presupuesto y tope.
-      if(level===baseline.level){
-        for(const skill of SKILLS){
-          if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
-          if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
-        }
-        if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto máximo para nivel ${level} es ${budget}.`};
-        return {valid:true,changed:true,state:"pending",message:`Distribución válida: ${used} de ${budget} puntos utilizados. Puedes guardar la corrección.`};
-      }
-
-      // El Arquitecto puede corregir el nivel libremente, incluso bajarlo,
-      // pero nunca exceder el presupuesto ni el máximo individual del nivel destino.
-      if(currentUserIsDM){
-        for(const skill of SKILLS){
-          if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
-          if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
-        }
-        if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto máximo para nivel ${level} es ${budget}.`};
-        return {valid:true,changed:true,state:"pending",message:`Corrección de Arquitecto válida: nivel ${level}, ${used} de ${budget} puntos. Lista para guardar.`};
-      }
-
-      // Los jugadores solo pueden subir un nivel por operación.
-      if(level!==baseline.level+1)return {valid:false,changed:true,state:"invalid",message:`Como jugador solo puedes subir un nivel por vez. Nivel actual: ${baseline.level}.`};
-
       for(const skill of SKILLS){
-        const increment=values[skill]-baseline.values[skill];
-        if(increment<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: al subir de nivel no puedes retirar puntos en la misma operación. Guarda primero tu redistribución en el nivel actual.`};
-        if(increment>1)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: solo puedes sumar 1 punto por habilidad en cada subida.`};
-        if(values[skill]>10)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: ninguna habilidad puede superar 10 puntos.`};
+        if(values[skill]<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: no se permiten valores negativos.`};
         if(values[skill]>cap)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: el máximo permitido para nivel ${level} es ${cap}.`};
       }
+      if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto para nivel ${level} es ${budget}. Retira ${used-budget} punto(s).`};
+      if(used<budget)return {valid:false,changed:true,state:"pending",message:`Distribución incompleta para nivel ${level}: necesitas ${budget} puntos y llevas ${used}. Asigna ${budget-used} punto(s) más.`};
+
+      if(!baseline.initialized){
+        if(baseline.exists&&level!==baseline.level){
+          return {valid:false,changed:true,state:"invalid",message:`Completa primero la asignación inicial de ${skillBudget(baseline.level)} puntos en el nivel registrado (${baseline.level}).`};
+        }
+        return {valid:true,changed:true,state:"valid",message:`Asignación inicial completa: ${used} de ${budget} puntos. Lista para confirmar.`};
+      }
+
+      if(level<baseline.level){
+        return {valid:true,changed:true,state:"valid",message:`Redistribución válida: nivel reducido a ${level}, con ${used} de ${budget} puntos. Lista para confirmar.`};
+      }
+
+      if(level===baseline.level){
+        return {valid:true,changed:true,state:"valid",message:`Redistribución válida: ${used} de ${budget} puntos. Lista para confirmar.`};
+      }
+
+      if(level!==baseline.level+1){
+        return {valid:false,changed:true,state:"invalid",message:`Solo puedes subir un nivel por operación. Nivel guardado: ${baseline.level}.`};
+      }
+      for(const skill of SKILLS){
+        const increment=values[skill]-baseline.values[skill];
+        if(increment<0)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: al subir de nivel no puedes retirar puntos en la misma operación. Redistribuye primero en tu nivel actual o baja de nivel.`};
+        if(increment>1)return {valid:false,changed:true,state:"invalid",message:`${skill.toUpperCase()}: solo puedes sumar 1 punto por habilidad en cada subida.`};
+      }
+      const previousTotal=Object.values(baseline.values).reduce((sum,value)=>sum+value,0);
       if(used!==previousTotal+2)return {valid:false,changed:true,state:"pending",message:`Al subir de nivel debes asignar exactamente 2 puntos nuevos: pasa de ${previousTotal} a ${previousTotal+2}; llevas ${used}.`};
-      if(used>budget)return {valid:false,changed:true,state:"invalid",message:`Has asignado ${used} puntos; el presupuesto acumulado del nivel ${level} es ${budget}.`};
-      return {valid:true,changed:true,state:"pending",message:`Subida válida: 2 puntos nuevos. ${used} de ${budget} puntos asignados. Lista para guardar.`};
+      return {valid:true,changed:true,state:"valid",message:`Subida válida: 2 puntos nuevos. ${used} de ${budget} puntos asignados. Lista para confirmar.`};
     }
     function refreshSkillGuidance(){
       const level=Math.max(1,Number($("character-level").value)||1);
@@ -411,8 +412,11 @@
       $("skill-points-left").textContent=String(budget-used);
       $("skill-points-cap").textContent=String(skillMaximum(level));
       $("skill-guidance-message").textContent=result.message;
+      const busy=manualReadyCharacter===null||manualSaveTimers.has(manualReadyCharacter)||manualSaveTasks.has(manualReadyCharacter);
       const saveButton=$("save-skills-button");
-      if(saveButton)saveButton.disabled=!result.valid||!result.changed||manualReadyCharacter===null||manualSaveTimers.has(manualReadyCharacter)||manualSaveTasks.has(manualReadyCharacter);
+      const discardButton=$("discard-skills-button");
+      if(saveButton)saveButton.disabled=!result.valid||!result.changed||busy;
+      if(discardButton)discardButton.disabled=!result.changed||busy;
       return result;
     }
     function setManualSaveStatus(message,state=""){

@@ -1082,9 +1082,31 @@
 <section class="panel">
     <details>
         <summary>INVENTARIO // FICHAS INDIVIDUALES</summary>
-        <div class="item-info" id="citizen-inventory-detailed">
-            SIN REGISTROS INDIVIDUALES
+        <div class="item" id="manual-object-entry-panel">
+            <h3>REGISTRO MANUAL DE OBJETOS</h3>
+            <p>Registra objetos que no provienen de compras de catálogo. El valor es informativo y no modifica tu saldo CORPOS.</p>
+            <form id="manual-object-form">
+                <label for="manual-object-name">OBJETO</label>
+                <input id="manual-object-name" class="value" type="text" maxlength="75" required placeholder="Nombre del objeto">
+                <label for="manual-object-origin">PROCEDENCIA</label>
+                <select id="manual-object-origin" class="value" required>
+                    <option value="">ELIGE PROCEDENCIA</option>
+                    <option value="Extraído">EXTRAÍDO</option>
+                    <option value="Comprado">COMPRADO</option>
+                    <option value="Encontrado">ENCONTRADO</option>
+                    <option value="Robado">ROBADO</option>
+                    <option value="Truequeado">TRUEQUEADO</option>
+                    <option value="Hecho">HECHO</option>
+                    <option value="Recibido">RECIBIDO</option>
+                </select>
+                <label for="manual-object-value">VALOR ESTIMADO (CORPOS)</label>
+                <input id="manual-object-value" class="value" type="number" min="0" step="0.01" required value="0" placeholder="0">
+                <button id="manual-object-add" type="submit">+ AGREGAR OBJETO</button>
+            </form>
+            <div id="manual-object-form-message" class="citizen-save-status" role="status" aria-live="polite"></div>
         </div>
+        <div id="manual-object-list" class="item-info">CARGANDO OBJETOS...</div>
+        <div class="item-info" id="citizen-inventory-detailed">SIN REGISTROS INDIVIDUALES</div>
     </details>
 </section>
     
@@ -2943,32 +2965,197 @@ const inventarioDetallado =
 const inventarioDetalladoContainer =
     document.getElementById("citizen-inventory-detailed");
 
-const renderInventarioDetallado = () => {
+const listaObjetosManuales = document.getElementById("manual-object-list");
+const formularioObjetoManual = document.getElementById("manual-object-form");
+const mensajeObjetoManual = document.getElementById("manual-object-form-message");
+const categoriasObjetosManuales = [
+    "Extraído", "Comprado", "Encontrado", "Robado", "Truequeado", "Hecho", "Recibido"
+];
+const estadosObjetosManuales = [
+    "Activo", "Incompleto", "Obsoleto", "Entregado", "Vendido",
+    "Perdido", "Robado", "Truequeado", "Destruído", "Gastado"
+];
 
-    if (inventarioDetallado.length === 0) {
-        inventarioDetalladoContainer.innerHTML =
-            "SIN OBJETOS REGISTRADOS";
+const objetosManuales = () => inventarioDetallado.filter(
+    objeto => objeto?.origen_registro === "manual"
+);
+
+const renderInventarioDetallado = () => {
+    // Conserva la representación existente del inventario comercial y de catálogo.
+    // Los registros manuales se muestran aparte para no mezclarlos ni duplicarlos.
+    const inventarioComercial = inventarioDetallado.filter(
+        objeto => objeto?.origen_registro !== "manual"
+    );
+    if (!inventarioComercial.length) {
+        inventarioDetalladoContainer.textContent = "SIN OBJETOS DE CATÁLOGO REGISTRADOS.";
+    } else {
+        inventarioDetalladoContainer.replaceChildren();
+        inventarioComercial.forEach(objeto => {
+            const articulo = catalogo.items.find(item => item.id === objeto.catalogo_id);
+            const fila = document.createElement("div");
+            fila.className = "item";
+            const nombre = document.createElement("strong");
+            nombre.textContent = objeto.nombre || "OBJETO SIN NOMBRE";
+            const descripcion = document.createElement("small");
+            descripcion.textContent = articulo?.descripcion || "SIN DESCRIPCIÓN";
+            fila.append(nombre, document.createElement("br"), descripcion);
+            inventarioDetalladoContainer.appendChild(fila);
+        });
+    }
+
+    const manuales = objetosManuales();
+    if (!manuales.length) {
+        listaObjetosManuales.textContent = "SIN OBJETOS MANUALES REGISTRADOS.";
         return;
     }
 
-    inventarioDetalladoContainer.innerHTML =
-        inventarioDetallado.map(objeto => {
+    listaObjetosManuales.replaceChildren();
+    manuales.forEach(objeto => {
+        const fila = document.createElement("div");
+        fila.className = "item";
 
-            const articulo = catalogo.items.find(
-                item => item.id === objeto.catalogo_id
-            );
+        const titulo = document.createElement("strong");
+        titulo.textContent = objeto.nombre || "OBJETO SIN NOMBRE";
+        fila.appendChild(titulo);
 
-            return `
-                <div class="item">
-                    <strong>${objeto.nombre || "OBJETO SIN NOMBRE"}</strong>
-                    <br>
-                    <small>
-                        ${articulo?.descripcion || "SIN DESCRIPCIÓN"}
-                    </small>
-                </div>
-            `;
-        }).join("");
+        const info = document.createElement("div");
+        info.className = "item-info";
+        const fecha = objeto.creado_en
+            ? new Date(objeto.creado_en).toLocaleString("es-MX", { timeZone: "America/Cancun" })
+            : "FECHA NO DISPONIBLE";
+        info.textContent = `PROCEDENCIA: ${objeto.procedencia || "SIN REGISTRO"} · VALOR: ${Number(objeto.valor_corpos || 0).toLocaleString("es-MX")} CORPOS · ESTADO: ${objeto.estado || "SIN ESTADO"} · REGISTRO: ${fecha}`;
+        fila.appendChild(info);
+
+        if (esDM) {
+            const editor = document.createElement("div");
+            editor.className = "item";
+            const nombre = document.createElement("input");
+            nombre.className = "value";
+            nombre.maxLength = 75;
+            nombre.value = objeto.nombre || "";
+            nombre.setAttribute("aria-label", "Corregir nombre del objeto");
+
+            const procedencia = document.createElement("select");
+            procedencia.className = "value";
+            categoriasObjetosManuales.forEach(valor => procedencia.add(new Option(valor.toUpperCase(), valor)));
+            procedencia.value = objeto.procedencia || "";
+
+            const valor = document.createElement("input");
+            valor.className = "value";
+            valor.type = "number";
+            valor.min = "0";
+            valor.step = "0.01";
+            valor.value = Number(objeto.valor_corpos || 0);
+            valor.setAttribute("aria-label", "Corregir valor en CORPOS");
+
+            const guardar = document.createElement("button");
+            guardar.type = "button";
+            guardar.textContent = "GUARDAR CORRECCIÓN";
+            guardar.addEventListener("click", async () => {
+                const importe = Number(valor.value);
+                if (!nombre.value.trim() || nombre.value.trim().length > 75 || !procedencia.value || !Number.isFinite(importe) || importe < 0) {
+                    mensajeObjetoManual.textContent = "Revisa nombre, procedencia y valor.";
+                    return;
+                }
+                guardar.disabled = true;
+                mensajeObjetoManual.textContent = "GUARDANDO CORRECCIÓN...";
+                const { data, error } = await supabaseClient.rpc("gestionar_objetos_manuales", {
+                    p_accion: "corregir",
+                    p_personaje_id: personajeActivo.id,
+                    p_id_instancia: objeto.id_instancia,
+                    p_nombre: nombre.value.trim(),
+                    p_procedencia: procedencia.value,
+                    p_valor_corpos: importe,
+                    p_estado: null
+                });
+                if (error || !data?.exito) {
+                    mensajeObjetoManual.textContent = "NO SE PUDO CORREGIR: " + (error?.message || "Supabase no confirmó la operación.");
+                    guardar.disabled = false;
+                    return;
+                }
+                const indice = inventarioDetallado.findIndex(item => item.id_instancia === objeto.id_instancia);
+                if (indice >= 0) inventarioDetallado[indice] = data.objeto;
+                personajeActivo.ficha = { ...(personajeActivo.ficha || {}), inventario_detallado: [...inventarioDetallado] };
+                mensajeObjetoManual.textContent = "CORRECCIÓN GUARDADA.";
+                renderInventarioDetallado();
+            });
+
+            const estado = document.createElement("select");
+            estado.className = "value";
+            estadosObjetosManuales.forEach(valorEstado => estado.add(new Option(valorEstado.toUpperCase(), valorEstado)));
+            estado.value = objeto.estado || "Activo";
+            const cambiarEstado = document.createElement("button");
+            cambiarEstado.type = "button";
+            cambiarEstado.textContent = "ACTUALIZAR ESTADO";
+            cambiarEstado.addEventListener("click", async () => {
+                cambiarEstado.disabled = true;
+                mensajeObjetoManual.textContent = "ACTUALIZANDO ESTADO...";
+                const { data, error } = await supabaseClient.rpc("gestionar_objetos_manuales", {
+                    p_accion: "cambiar_estado",
+                    p_personaje_id: personajeActivo.id,
+                    p_id_instancia: objeto.id_instancia,
+                    p_nombre: null,
+                    p_procedencia: null,
+                    p_valor_corpos: null,
+                    p_estado: estado.value
+                });
+                if (error || !data?.exito) {
+                    mensajeObjetoManual.textContent = "NO SE PUDO CAMBIAR EL ESTADO: " + (error?.message || "Supabase no confirmó la operación.");
+                    cambiarEstado.disabled = false;
+                    return;
+                }
+                const indice = inventarioDetallado.findIndex(item => item.id_instancia === objeto.id_instancia);
+                if (indice >= 0) inventarioDetallado[indice] = data.objeto;
+                personajeActivo.ficha = { ...(personajeActivo.ficha || {}), inventario_detallado: [...inventarioDetallado] };
+                mensajeObjetoManual.textContent = "ESTADO ACTUALIZADO.";
+                renderInventarioDetallado();
+            });
+            editor.append(nombre, procedencia, valor, guardar, estado, cambiarEstado);
+            fila.appendChild(editor);
+        }
+        listaObjetosManuales.appendChild(fila);
+    });
 };
+
+formularioObjetoManual.addEventListener("submit", async event => {
+    event.preventDefault();
+    const nombre = document.getElementById("manual-object-name").value.trim();
+    const procedencia = document.getElementById("manual-object-origin").value;
+    const valor = Number(document.getElementById("manual-object-value").value);
+    const boton = document.getElementById("manual-object-add");
+
+    if (!nombre || nombre.length > 75 || !categoriasObjetosManuales.includes(procedencia) || !Number.isFinite(valor) || valor < 0) {
+        mensajeObjetoManual.textContent = "Revisa nombre, procedencia y valor CORPOS.";
+        return;
+    }
+
+    boton.disabled = true;
+    mensajeObjetoManual.textContent = "REGISTRANDO OBJETO...";
+    const { data, error } = await supabaseClient.rpc("gestionar_objetos_manuales", {
+        p_accion: "agregar",
+        p_personaje_id: personajeActivo.id,
+        p_id_instancia: null,
+        p_nombre: nombre,
+        p_procedencia: procedencia,
+        p_valor_corpos: valor,
+        p_estado: null
+    });
+
+    if (error || !data?.exito) {
+        mensajeObjetoManual.textContent = "NO SE PUDO REGISTRAR: " + (error?.message || "Supabase no confirmó la operación.");
+        boton.disabled = false;
+        return;
+    }
+
+    inventarioDetallado.unshift(data.objeto);
+    estadoEconomico.inventario_detallado = inventarioDetallado;
+    personajeActivo.ficha = { ...(personajeActivo.ficha || {}), inventario_detallado: [...inventarioDetallado] };
+    formularioObjetoManual.reset();
+    document.getElementById("manual-object-value").value = "0";
+    mensajeObjetoManual.textContent = "OBJETO REGISTRADO. NO SE MODIFICÓ TU SALDO CORPOS.";
+    boton.disabled = false;
+    renderInventarioDetallado();
+});
 
 renderInventarioDetallado();
 

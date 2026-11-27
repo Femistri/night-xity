@@ -549,11 +549,25 @@
       return `<div style="overflow-x:auto"><table class="weapon-table"><thead><tr><th>Arma</th><th>Tipo</th><th>Alcance</th><th>TT</th><th>RF</th><th>FA</th><th>Estado</th></tr></thead><tbody>${weapons.map(item=>{const product=itemCatalog(item),combat=product.combate||{};return `<tr><td>${safe(item.nombre||product.nombre||"Arma")}</td><td>${safe(product.tipo||"—")}</td><td>${safe(product.alcance??"—")}</td><td>${safe(combat.TT?.tirada||"—")}</td><td>${safe(combat.RF?.tirada||"—")}</td><td>${safe(combat.FA?.tirada||"—")}</td><td>${safe(item.estado||"REGISTRADA")}</td></tr>`;}).join("")}</tbody></table></div>`;
     }
     function inventoryMarkup(items){
-      const buckets=new Map();(items||[]).filter(item=>item.categoria!=="Armas").forEach(item=>{const category=item.categoria||"Varios";if(!buckets.has(category))buckets.set(category,[]);buckets.get(category).push(item);});
+      const allItems=Array.isArray(items)?items:[];
+      // Los registros manuales tienen un formato propio: no deben caer en VARIOS
+      // ni mezclarse con los artículos provenientes del catálogo.
+      const manualItems=allItems.filter(item=>item?.origen_registro==="manual");
+      const catalogItems=allItems.filter(item=>item?.origen_registro!=="manual"&&item.categoria!=="Armas");
+      const buckets=new Map();
+      catalogItems.forEach(item=>{const category=item.categoria||"Varios";if(!buckets.has(category))buckets.set(category,[]);buckets.get(category).push(item);});
       const preferred=["Armas","Implantes","Programas","Accesorios","Blindajes","Terminales","MediCare","Drogas","Vehiculos","Varios","Cotidiano"];
       const categories=[...preferred.filter(name=>buckets.has(name)),...Array.from(buckets.keys()).filter(name=>!preferred.includes(name))];
-      if(!categories.length)return `<div class="empty">SIN OBJETOS REGISTRADOS</div>`;
-      return categories.map(category=>`<div><details open><summary>${safe(category.toUpperCase())} (${buckets.get(category).length})</summary><div class="list" style="margin-top:10px">${buckets.get(category).map(item=>{const product=itemCatalog(item);return `<article class="entry"><div class="entry-title">${safe(item.nombre||product.nombre||"Objeto")}</div><div class="entry-meta">${safe(item.estado||"REGISTRADO")}</div>${product.descripcion?`<div class="entry-desc">${safe(product.descripcion)}</div>`:""}</article>`;}).join("")}</div></details></div>`).join("");
+      const catalogMarkup=categories.map(category=>`<div><details open><summary>${safe(category.toUpperCase())} (${buckets.get(category).length})</summary><div class="list" style="margin-top:10px">${buckets.get(category).map(item=>{const product=itemCatalog(item);return `<article class="entry"><div class="entry-title">${safe(item.nombre||product.nombre||"Objeto")}</div><div class="entry-meta">${safe(item.estado||"REGISTRADO")}</div>${product.descripcion?`<div class="entry-desc">${safe(product.descripcion)}</div>`:""}</article>`;}).join("")}</div></details></div>`).join("");
+      const manualMarkup=manualItems.length?`<div><details open><summary>OBJETOS MANUALES (${manualItems.length})</summary><div class="list" style="margin-top:10px">${manualItems.map(item=>{
+        const value=Number(item.valor_corpos);
+        const formattedValue=Number.isFinite(value)?value.toLocaleString("es-MX",{maximumFractionDigits:2}):"0";
+        const date=item.creado_en?new Date(item.creado_en):null;
+        const formattedDate=date&&!Number.isNaN(date.getTime())?date.toLocaleString("es-MX",{timeZone:"America/Cancun",dateStyle:"medium",timeStyle:"short"}):"FECHA NO DISPONIBLE";
+        return `<article class="entry"><div class="entry-title">${safe(item.nombre||"OBJETO SIN NOMBRE")}</div><div class="entry-meta">PROCEDENCIA: ${safe(item.procedencia||"SIN REGISTRO")} · VALOR: ${formattedValue} CORPOS · ESTADO: ${safe(item.estado||"SIN ESTADO")} · REGISTRO: ${safe(formattedDate)}</div></article>`;
+      }).join("")}</div></details></div>`:"";
+      if(!catalogMarkup&&!manualMarkup)return `<div class="empty">SIN OBJETOS REGISTRADOS</div>`;
+      return catalogMarkup+manualMarkup;
     }
     async function renderIncomeReadOnly(characterId){
       const salaries=$("sheet-active-salaries"),history=$("sheet-income-history");

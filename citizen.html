@@ -218,60 +218,6 @@
             margin-top: 5px;
         }
 
-        /* Acciones del registro manual: separar visualmente guardar y cambiar estado. */
-        #manual-object-list > .item > .item > button:nth-of-type(1),
-        #manual-object-list > .item > .item > button:nth-of-type(2) {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 36px;
-            margin: 7px 8px 0 0;
-            padding: 8px 12px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            color: #fff;
-            font: inherit;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: .35px;
-            cursor: pointer;
-            transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
-        }
-        #manual-object-list > .item > .item > button:nth-of-type(1) {
-            background: #167a55;
-            border-color: #29a879;
-        }
-        #manual-object-list > .item > .item > button:nth-of-type(1):hover {
-            background: #1b9568;
-            border-color: #55d5a4;
-        }
-        #manual-object-list > .item > .item > button:nth-of-type(2) {
-            background: #176a9a;
-            border-color: #3995c8;
-        }
-        #manual-object-list > .item > .item > button:nth-of-type(2):hover {
-            background: #1d80b8;
-            border-color: #65b9e8;
-        }
-        #manual-object-list > .item > .item > button:focus-visible {
-            outline: 2px solid #fff;
-            outline-offset: 2px;
-            box-shadow: 0 0 0 4px #111;
-        }
-        #manual-object-list > .item > .item > button:disabled {
-            opacity: .65;
-            cursor: wait;
-        }
-        @media (max-width: 700px) {
-            #manual-object-list > .item > .item > button:nth-of-type(1),
-            #manual-object-list > .item > .item > button:nth-of-type(2) {
-                min-height: 40px;
-                margin-top: 9px;
-                padding: 9px 11px;
-                font-size: 12px;
-            }
-        }
-
         #citizen-income-panel { grid-column: 1 / -1; border-color: #00ff9c; }
         #citizen-income-panel .item-info { line-height: 1.6; }
         #citizen-session-nav { grid-column: 1 / -1; margin: 0; }
@@ -281,6 +227,40 @@
         #dm-payroll-panel,
         #dm-living-costs-panel {
             grid-column: 1 / -1;
+        }
+
+        #dm-event-requests-panel {
+            grid-column: 1 / -1;
+            margin-top: 26px;
+            padding-top: 18px;
+            border-top: 2px solid #00ff9c;
+        }
+
+        #dm-event-requests-panel > p {
+            margin: 12px 0 18px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        .dm-global-request {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .dm-global-request button {
+            margin: 10px 8px 0 0;
+            min-height: 40px;
+            padding: 9px 14px;
+            max-width: 100%;
+            white-space: normal;
+        }
+
+        .dm-global-request input {
+            display: block;
+            width: 100%;
+            max-width: 420px;
+            min-width: 0;
+            margin: 7px 0 10px;
         }
 
         #dm-variable-requests-panel {
@@ -528,6 +508,23 @@
                 grid-template-columns: 1fr;
             }
 
+            main, .grid, .panel, details, .item, .dm-global-request {
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: clamp(25px, 7vw, 34px);
+                letter-spacing: 2px;
+                overflow-wrap: anywhere;
+            }
+
+            .dm-global-request button {
+                display: block;
+                width: 100%;
+                margin: 9px 0 0;
+            }
+
         }
 
     </style>
@@ -598,6 +595,12 @@
     <p>Bandeja general: reúne solicitudes pendientes de todos los personajes. Asigna el importe antes de aprobar; la aprobación registra el cargo.</p>
     <div id="dm-variable-requests">CARGANDO...</div>
     <div id="dm-variable-message" role="status" aria-live="polite"></div>
+</details>
+<details id="dm-event-requests-panel" hidden>
+    <summary>BANDEJA GLOBAL DE EVENTOS // ARQUITECTO</summary>
+    <p>Solicitudes pendientes de eventos de todos los personajes. La bandeja individual de cada personaje se conserva como historial.</p>
+    <div id="dm-event-requests">CARGANDO...</div>
+    <div id="dm-event-message" role="status" aria-live="polite"></div>
 </details>
 <details id="dm-living-costs-panel" hidden>
     <summary>ACTIVAR COSTOS DE VIDA // ARQUITECTO</summary>
@@ -1741,6 +1744,15 @@ const { data: solicitudesVariables, error: errorSolicitudesVariables } = esDM
         .order("fecha_solicitud", { ascending: true })
         .limit(50)
     : { data: [], error: null };
+const { data: solicitudesEventosGlobales, error: errorSolicitudesEventosGlobales } = esDM
+    ? await supabaseClient
+        .from("solicitudes_gastos_vida")
+        .select("id, personaje_id, gasto_id, estado, importe_solicitado, fecha_solicitud")
+        .eq("tipo_solicitud", "evento")
+        .eq("estado", "pendiente")
+        .order("fecha_solicitud", { ascending: true })
+        .limit(50)
+    : { data: [], error: null };
 const viviendasCatalogo = gastosVida.vivienda || [];
 const nombreVivienda = id =>
     viviendasCatalogo.find(vivienda => vivienda.id === id)?.descripcion || id;
@@ -2275,20 +2287,6 @@ if (panelEventos) {
                 item => item.id === solicitud.gasto_id
             );
             const nombreEvento = evento?.nombre || solicitud.gasto_id;
-            const botonesRevision =
-                perfilActual?.rol === "dm" &&
-                solicitud.estado === "pendiente"
-                    ? `
-                        <button
-                            data-resolver-evento="${solicitud.id}"
-                            data-aprobar-evento="true"
-                        >APROBAR</button>
-                        <button
-                            data-resolver-evento="${solicitud.id}"
-                            data-aprobar-evento="false"
-                        >RECHAZAR</button>
-                    `
-                    : "";
 
             return `
                 <div class="item">
@@ -2306,7 +2304,6 @@ if (panelEventos) {
                             { timeZone: "America/Cancun" }
                         )}
                     </div>
-                    ${botonesRevision}
                 </div>
             `;
         }).join("");
@@ -2314,34 +2311,6 @@ if (panelEventos) {
 
     panelEventos.appendChild(listaEventos);
 
-    if (perfilActual?.rol === "dm") {
-        listaEventos.addEventListener("click", async event => {
-            const boton = event.target.closest("[data-resolver-evento]");
-            if (!boton) return;
-
-            boton.disabled = true;
-
-            const { error } = await supabaseClient.rpc(
-                "resolver_solicitud_evento",
-                {
-                    p_solicitud_id: boton.dataset.resolverEvento,
-                    p_aprobar: boton.dataset.aprobarEvento === "true",
-                    p_mensaje: null
-                }
-            );
-
-            if (error) {
-                boton.disabled = false;
-                const aviso = document.createElement("div");
-                aviso.className = "item-info";
-                aviso.textContent = `No se pudo resolver: ${error.message}`;
-                listaEventos.prepend(aviso);
-                return;
-            }
-
-            location.reload();
-        });
-    }
 }
         
 if (esDM) {
@@ -2576,6 +2545,84 @@ if (esDM) {
             return;
         }
 
+        location.reload();
+    });
+}
+
+if (esDM) {
+    const panelEventosGlobal = document.getElementById("dm-event-requests-panel");
+    const listaEventosGlobal = document.getElementById("dm-event-requests");
+    const mensajeEventosGlobal = document.getElementById("dm-event-message");
+    panelEventosGlobal.hidden = false;
+
+    if (errorSolicitudesEventosGlobal) {
+        listaEventosGlobal.textContent =
+            "No se pudieron cargar las solicitudes de eventos: " + errorSolicitudesEventosGlobal.message;
+    } else {
+        const pendientes = solicitudesEventosGlobales || [];
+        panelEventosGlobal.open = pendientes.length > 0;
+        listaEventosGlobal.replaceChildren();
+
+        if (!pendientes.length) {
+            listaEventosGlobal.textContent = "NO HAY SOLICITUDES DE EVENTOS PENDIENTES.";
+        } else {
+            pendientes.forEach(solicitud => {
+                const tarjeta = document.createElement("article");
+                tarjeta.className = "item dm-global-request";
+                tarjeta.dataset.eventRequest = solicitud.id;
+
+                const personaje = personajesAsignados.find(item => item.id === solicitud.personaje_id);
+                const evento = gastosEventos.find(item => item.id === solicitud.gasto_id);
+                const jugador = document.createElement("span");
+                jugador.className = "dm-request-player";
+                jugador.textContent = etiquetaPersonaje(personaje) || "PERSONAJE SIN DATOS";
+
+                const nombreEvento = document.createElement("div");
+                nombreEvento.className = "item-name";
+                nombreEvento.textContent = evento?.nombre || solicitud.gasto_id;
+
+                const datos = document.createElement("div");
+                datos.className = "item-info";
+                datos.textContent = "SOLICITUD: " + new Date(solicitud.fecha_solicitud).toLocaleString("es-MX", {
+                    timeZone: "America/Cancun", dateStyle: "medium", timeStyle: "short"
+                }) + " · IMPORTE: " + Number(solicitud.importe_solicitado || 0).toLocaleString("es-MX") + " CORPOS";
+
+                const aprobar = document.createElement("button");
+                aprobar.type = "button";
+                aprobar.textContent = "APROBAR Y PROCESAR CARGO";
+                aprobar.dataset.eventAction = "aprobar";
+                aprobar.dataset.requestId = solicitud.id;
+
+                const rechazar = document.createElement("button");
+                rechazar.type = "button";
+                rechazar.textContent = "RECHAZAR";
+                rechazar.dataset.eventAction = "rechazar";
+                rechazar.dataset.requestId = solicitud.id;
+
+                tarjeta.append(jugador, nombreEvento, datos, aprobar, rechazar);
+                listaEventosGlobal.appendChild(tarjeta);
+            });
+        }
+    }
+
+    listaEventosGlobal.addEventListener("click", async event => {
+        const boton = event.target.closest("[data-event-action]");
+        if (!boton) return;
+        listaEventosGlobal.querySelectorAll("button").forEach(item => { item.disabled = true; });
+        mensajeEventosGlobal.textContent = "Procesando decisión del Arquitecto…";
+
+        const { data, error } = await supabaseClient.rpc("resolver_solicitud_evento", {
+            p_solicitud_id: boton.dataset.requestId,
+            p_aprobar: boton.dataset.eventAction === "aprobar",
+            p_mensaje: null
+        });
+
+        if (error || !data?.exito) {
+            mensajeEventosGlobal.textContent = "No se pudo resolver la solicitud: " +
+                (error?.message || data?.mensaje || "respuesta no confirmada");
+            listaEventosGlobal.querySelectorAll("button").forEach(item => { item.disabled = false; });
+            return;
+        }
         location.reload();
     });
 }
@@ -4000,17 +4047,15 @@ renderFobias();
 
         const adiccionesCiudadano =
             Array.isArray(salud.adicciones)
-                ? salud.adicciones.map(adiccion => String(adiccion?.id ?? adiccion))
+                ? salud.adicciones
                 : [];
 
         const drogasCatalogo =
-            Array.isArray(catalogo.categorias?.Drogas)
-                ? catalogo.categorias.Drogas
-                : Array.isArray(catalogo.items)
-                    ? catalogo.items.filter(
-                        item => item.categoria === "Drogas"
-                    )
-                    : [];
+            Array.isArray(catalogo.items)
+                ? catalogo.items.filter(
+                    item => item.categoria === "Drogas"
+                )
+                : [];
 
         const adiccionesContainer =
             document.getElementById("citizen-addictions");

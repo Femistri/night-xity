@@ -46,6 +46,10 @@
     .help-value{cursor:help;text-decoration:underline dotted;text-underline-offset:3px;position:relative}
     .help-value:focus{z-index:5;outline:1px solid var(--acid);outline-offset:2px}
     .help-value:focus::after{content:attr(title);position:absolute;left:0;top:calc(100% + 6px);z-index:20;width:min( min(78vw,340px), 340px);padding:10px 12px;background:#172321;border:1px solid var(--acid);color:var(--text);font-size:12px;line-height:1.4;letter-spacing:0;text-transform:none;text-decoration:none;box-shadow:0 8px 24px #000b;white-space:normal}
+    .nx-help-tooltip{position:fixed;z-index:99999;width:min( min(88vw,360px), 360px);max-height:min(42vh,260px);overflow:auto;padding:11px 13px;background:#172321;border:1px solid var(--acid);color:var(--text);font-size:12px;line-height:1.5;letter-spacing:0;text-transform:none;text-decoration:none;box-shadow:0 8px 24px #000d;white-space:normal;pointer-events:none}
+    .help-value,.talent-help{touch-action:manipulation}
+    .talent-help{cursor:help}
+    .talent-help:focus{outline:1px solid var(--acid);outline-offset:3px}
     .pv-input{width:100%;min-width:0;height:33px;background:#080b0c;border:1px solid #53615e;color:var(--text);text-align:center;font:inherit}
     .pv-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0}
     .pv-pair .derived{min-width:0;padding:7px 5px}
@@ -448,7 +452,7 @@
       ATTRIBUTES.forEach(attribute=>$(`modifier-${attribute}`).textContent=modifier($(`attribute-${attribute}`).value));
       const identity=active?.ficha?.identidad||{};const key=classKey(active?.clase||identity.clase);const level=Number($("character-level").value||1);const [attack,institute]=(ADVANCEMENT[key]||[])[level-1]||[null,null];
       $("indicator-atq").textContent=attack==null?"—":signed(attack);$("indicator-ins").textContent=institute==null?"—":signed(institute);$("indicator-da").textContent=CLASS_RULES[key]?.da||"—";$("indicator-pow").textContent=$("soul-points").textContent||"—";
-      const talents=CLASS_RULES[key]?.talents||[];$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
+      const talents=CLASS_RULES[key]?.talents||[];const talentCatalog=core.talentos||{};$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active talent-help" data-help="${safe(talentCatalog[talent]||"Sin descripción registrada para este talento.")}" tabindex="0" role="button" aria-label="${safe(talent)}: consultar explicación">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
       $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
     }
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),puntos_vida_sesion:$("manual-pv-session").value===""?null:Number($("manual-pv-session").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
@@ -621,7 +625,7 @@
       $("inventory").innerHTML=inventoryMarkup(items);
       renderBodyMap(items);
       await renderIncomeReadOnly(active.id);
-      const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><details class="talent-detail"><summary class="entry-title">${safe(name)}</summary>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</details></article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
+      const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><details class="talent-detail"><summary class="entry-title talent-help" data-help="${safe(talentCatalog[name]||"Sin descripción registrada para este talento.")}" aria-label="${safe(name)}: consultar explicación">${safe(name)}</summary>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</details></article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
       const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
       const mental=identity.salud_mental||{};
       const manias=(mental.manias||[]).map(Number);
@@ -653,6 +657,101 @@
       });
       refreshCloseControls();
       new MutationObserver(()=>requestAnimationFrame(refreshCloseControls)).observe(document.body,{childList:true,subtree:true});
+    })();
+  </script>
+  <script>
+    (() => {
+      const selector = '.attribute[title],.derived[title],.skill-slot[title],.help-value[title],.fact[title]';
+      let bubble = null;
+      let activeTarget = null;
+      let hideTimer = null;
+      const ensureBubble = () => {
+        if (bubble) return bubble;
+        bubble = document.createElement('div');
+        bubble.className = 'nx-help-tooltip';
+        bubble.id = 'nx-help-tooltip';
+        bubble.setAttribute('role', 'tooltip');
+        bubble.hidden = true;
+        document.body.append(bubble);
+        return bubble;
+      };
+      const descriptionFor = target => target?.dataset?.help || target?.getAttribute('title') || '';
+      const positionBubble = target => {
+        if (!bubble || !target) return;
+        const rect = target.getBoundingClientRect();
+        const margin = 10;
+        const width = Math.min(window.innerWidth - margin * 2, 360);
+        bubble.style.width = width + 'px';
+        bubble.style.left = Math.max(margin, Math.min(rect.left, window.innerWidth - width - margin)) + 'px';
+        bubble.style.top = '0px';
+        const height = bubble.offsetHeight;
+        let top = rect.bottom + 8;
+        if (top + height > window.innerHeight - margin) top = rect.top - height - 8;
+        if (top < margin) top = Math.max(margin, Math.min(window.innerHeight - height - margin, rect.bottom + 8));
+        bubble.style.top = top + 'px';
+      };
+      const show = target => {
+        const description = descriptionFor(target);
+        if (!description) return;
+        clearTimeout(hideTimer);
+        activeTarget = target;
+        const node = ensureBubble();
+        node.textContent = description;
+        node.hidden = false;
+        requestAnimationFrame(() => positionBubble(target));
+        target.setAttribute('aria-describedby', node.id);
+      };
+      const hide = () => {
+        if (bubble) bubble.hidden = true;
+        if (activeTarget) activeTarget.removeAttribute('aria-describedby');
+        activeTarget = null;
+      };
+      const prepare = root => {
+        const nodes = [];
+        if (root?.matches?.(selector)) nodes.push(root);
+        root?.querySelectorAll?.(selector).forEach(node => nodes.push(node));
+        nodes.forEach(node => {
+          if (!node.dataset.help) node.dataset.help = node.getAttribute('title') || '';
+          node.removeAttribute('title');
+          if (!node.hasAttribute('tabindex') && !node.matches('label')) node.setAttribute('tabindex', '0');
+        });
+      };
+      prepare(document);
+      document.addEventListener('pointerover', event => {
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        const target = event.target.closest?.(selector + ',.talent-help');
+        if (target && !target.contains(event.relatedTarget)) show(target);
+      });
+      document.addEventListener('pointerout', event => {
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        const target = event.target.closest?.(selector + ',.talent-help');
+        if (target && !target.contains(event.relatedTarget)) {
+          hideTimer = setTimeout(() => { if (!bubble?.matches(':hover')) hide(); }, 120);
+        }
+      });
+      document.addEventListener('focusin', event => {
+        const target = event.target.closest?.(selector + ',.talent-help');
+        if (target) show(target);
+      });
+      document.addEventListener('focusout', event => {
+        const target = event.target.closest?.(selector + ',.talent-help');
+        if (target && !target.contains(event.relatedTarget)) hideTimer = setTimeout(hide, 120);
+      });
+      document.addEventListener('click', event => {
+        const target = event.target.closest?.(selector + ',.talent-help');
+        if (target) {
+          if (event.target.closest('select,input,button,textarea')) return;
+          if (target.matches('.skill-slot')) event.preventDefault();
+          if (activeTarget === target && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) hide();
+          else show(target);
+          return;
+        }
+        if (!event.target.closest('.nx-help-tooltip')) hide();
+      });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') hide(); });
+      window.addEventListener('resize', () => { if (activeTarget && bubble && !bubble.hidden) positionBubble(activeTarget); });
+      window.addEventListener('scroll', () => { if (activeTarget && bubble && !bubble.hidden) positionBubble(activeTarget); }, true);
+      new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => { if (node.nodeType === 1) prepare(node); }))).observe(document.body, {childList:true,subtree:true});
     })();
   </script>
 </body>

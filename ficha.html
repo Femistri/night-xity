@@ -661,10 +661,15 @@
   </script>
   <script>
     (() => {
-      const selector = '.attribute[title],.derived[title],.skill-slot[title],.help-value[title],.fact[title]';
+      // Los selectores usan data-help porque prepare() retira title para evitar
+      // tooltips nativos del navegador. Así los controles siguen siendo localizables.
+      const selector = '.attribute[data-help],.derived[data-help],.skill-slot[data-help],.help-value[data-help],.fact[data-help]';
+      const targets = selector + ',.talent-help[data-help]';
+      const touchMode = () => window.matchMedia('(hover: none), (pointer: coarse)').matches;
       let bubble = null;
       let activeTarget = null;
       let hideTimer = null;
+
       const ensureBubble = () => {
         if (bubble) return bubble;
         bubble = document.createElement('div');
@@ -702,14 +707,15 @@
         target.setAttribute('aria-describedby', node.id);
       };
       const hide = () => {
+        clearTimeout(hideTimer);
         if (bubble) bubble.hidden = true;
         if (activeTarget) activeTarget.removeAttribute('aria-describedby');
         activeTarget = null;
       };
       const prepare = root => {
         const nodes = [];
-        if (root?.matches?.(selector)) nodes.push(root);
-        root?.querySelectorAll?.(selector).forEach(node => nodes.push(node));
+        if (root?.matches?.('.attribute[title],.derived[title],.skill-slot[title],.help-value[title],.fact[title]')) nodes.push(root);
+        root?.querySelectorAll?.('.attribute[title],.derived[title],.skill-slot[title],.help-value[title],.fact[title]').forEach(node => nodes.push(node));
         nodes.forEach(node => {
           if (!node.dataset.help) node.dataset.help = node.getAttribute('title') || '';
           node.removeAttribute('title');
@@ -717,32 +723,40 @@
         });
       };
       prepare(document);
+
+      // Hover solo en dispositivos con puntero preciso.
       document.addEventListener('pointerover', event => {
-        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-        const target = event.target.closest?.(selector + ',.talent-help');
+        if (touchMode()) return;
+        const target = event.target.closest?.(targets);
         if (target && !target.contains(event.relatedTarget)) show(target);
       });
       document.addEventListener('pointerout', event => {
-        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-        const target = event.target.closest?.(selector + ',.talent-help');
+        if (touchMode()) return;
+        const target = event.target.closest?.(targets);
         if (target && !target.contains(event.relatedTarget)) {
-          hideTimer = setTimeout(() => { if (!bubble?.matches(':hover')) hide(); }, 120);
+          hideTimer = setTimeout(() => hide(), 120);
         }
       });
+
+      // En pantallas táctiles el foco se produce antes del click. Ignorarlo evita
+      // que el focusout cierre el globo durante el mismo primer toque.
       document.addEventListener('focusin', event => {
-        const target = event.target.closest?.(selector + ',.talent-help');
+        if (touchMode()) return;
+        const target = event.target.closest?.(targets);
         if (target) show(target);
       });
       document.addEventListener('focusout', event => {
-        const target = event.target.closest?.(selector + ',.talent-help');
+        if (touchMode()) return;
+        const target = event.target.closest?.(targets);
         if (target && !target.contains(event.relatedTarget)) hideTimer = setTimeout(hide, 120);
       });
+
       document.addEventListener('click', event => {
-        const target = event.target.closest?.(selector + ',.talent-help');
+        const target = event.target.closest?.(targets);
         if (target) {
           if (event.target.closest('select,input,button,textarea')) return;
           if (target.matches('.skill-slot')) event.preventDefault();
-          if (activeTarget === target && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) hide();
+          if (touchMode() && activeTarget === target && bubble && !bubble.hidden) hide();
           else show(target);
           return;
         }

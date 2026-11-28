@@ -307,6 +307,10 @@
             margin: 15px 0;
         }
 
+        .balance.negative {
+            color: #ff4d5a;
+        }
+
 
         .positive {
             color: #aaa;
@@ -2057,8 +2061,10 @@ const saldoActual =
     estadoEconomico?.saldo_actual
         ?? ciudadano.economia?.saldo_inicial
         ?? 0;
-document.getElementById("citizen-balance").textContent =
-    `${saldoActual.toLocaleString("es-MX")} CORPOS`;
+const elementoSaldoCitizen = document.getElementById("citizen-balance");
+elementoSaldoCitizen.textContent =
+    `${Number(saldoActual).toLocaleString("es-MX")} CORPOS`;
+elementoSaldoCitizen.classList.toggle("negative", Number(saldoActual) < 0);
 
 
 const historialEconomicoContainer =
@@ -2087,16 +2093,21 @@ if (movimientosEconomicos.length === 0) {
                     ? "GASTO DE VIDA"
                     : movimiento.subtipo === "COMPRA"
                         ? "COMPRA COMERCIAL"
-                        : movimiento.subtipo || "MOVIMIENTO";
+                        : movimiento.subtipo === "GASTO_VARIABLE"
+                            ? "GASTO VARIABLE"
+                            : movimiento.subtipo === "EVENTO"
+                                ? "GASTO DE EVENTO"
+                                : movimiento.subtipo || "MOVIMIENTO";
 
             const fechaMovimiento =
                 movimiento.fecha
                     ? new Date(movimiento.fecha).toLocaleString("es-MX")
                     : "FECHA NO DISPONIBLE";
 
+            const montoNumerico = Number(movimiento.monto || 0);
+            const esEgreso = String(movimiento.tipo || "").toLowerCase() === "egreso";
             const montoMovimiento =
-                Number(movimiento.monto || 0)
-                    .toLocaleString("es-MX");
+                `${esEgreso ? "−" : "+"}${Math.abs(montoNumerico).toLocaleString("es-MX")}`;
 
             return `
                 <div class="item">

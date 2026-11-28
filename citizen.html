@@ -3946,15 +3946,17 @@ renderFobias();
 
         const adiccionesCiudadano =
             Array.isArray(salud.adicciones)
-                ? salud.adicciones
+                ? salud.adicciones.map(adiccion => String(adiccion?.id ?? adiccion))
                 : [];
 
         const drogasCatalogo =
-            Array.isArray(catalogo.items)
-                ? catalogo.items.filter(
-                    item => item.categoria === "Drogas"
-                )
-                : [];
+            Array.isArray(catalogo.categorias?.Drogas)
+                ? catalogo.categorias.Drogas
+                : Array.isArray(catalogo.items)
+                    ? catalogo.items.filter(
+                        item => item.categoria === "Drogas"
+                    )
+                    : [];
 
         const adiccionesContainer =
             document.getElementById("citizen-addictions");

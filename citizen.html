@@ -3036,6 +3036,43 @@ const objetosManuales = () => inventarioDetallado.filter(
     objeto => objeto?.origen_registro === "manual"
 );
 
+// Devuelve el valor canónico admitido por la RPC, sin depender de
+// mayúsculas, espacios o acentos en registros históricos.
+const normalizarEstadoObjetoManual = estado => {
+    const normalizado = String(estado ?? "")
+        .trim()
+        .normalize("NFD")
+        .replace(/[\\u0300-\\u036f]/g, "")
+        .toLocaleLowerCase("es-MX");
+
+    return estadosObjetosManuales.find(valor =>
+        valor.normalize("NFD")
+            .replace(/[\\u0300-\\u036f]/g, "")
+            .toLocaleLowerCase("es-MX") === normalizado
+    ) || null;
+};
+
+// Mantiene sincronizadas las tres representaciones locales del inventario.
+// La persistencia real sigue siendo responsabilidad de la RPC.
+const sincronizarObjetoManualLocal = objetoActualizado => {
+    if (!objetoActualizado?.id_instancia) return false;
+
+    const indice = inventarioDetallado.findIndex(
+        item => item?.id_instancia === objetoActualizado.id_instancia
+    );
+
+    if (indice < 0) return false;
+
+    inventarioDetallado[indice] = objetoActualizado;
+    estadoEconomico.inventario_detallado = [...inventarioDetallado];
+    personajeActivo.ficha = {
+        ...(personajeActivo.ficha || {}),
+        inventario_detallado: [...inventarioDetallado]
+    };
+
+    return true;
+};
+
 const renderInventarioDetallado = () => {
     // Conserva la representación existente del inventario comercial y de catálogo.
     // Los registros manuales se muestran aparte para no mezclarlos ni duplicarlos.
@@ -3129,21 +3166,46 @@ const renderInventarioDetallado = () => {
                     guardar.disabled = false;
                     return;
                 }
-                const indice = inventarioDetallado.findIndex(item => item.id_instancia === objeto.id_instancia);
-                if (indice >= 0) inventarioDetallado[indice] = data.objeto;
-                personajeActivo.ficha = { ...(personajeActivo.ficha || {}), inventario_detallado: [...inventarioDetallado] };
+                if (!sincronizarObjetoManualLocal(data.objeto)) {
+                    mensajeObjetoManual.textContent = "LA CORRECCIÓN SE GUARDÓ EN SUPABASE, PERO NO SE PUDO ACTUALIZAR LA VISTA LOCAL. RECARGA EL PERFIL.";
+                    guardar.disabled = false;
+                    return;
+                }
                 mensajeObjetoManual.textContent = "CORRECCIÓN GUARDADA.";
                 renderInventarioDetallado();
             });
 
             const estado = document.createElement("select");
             estado.className = "value";
-            estadosObjetosManuales.forEach(valorEstado => estado.add(new Option(valorEstado.toUpperCase(), valorEstado)));
-            estado.value = objeto.estado || "Activo";
+            estadosObjetosManuales.forEach(valorEstado =>
+                estado.add(new Option(valorEstado.toUpperCase(), valorEstado))
+            );
+
+            const estadoGuardado = objeto.estado == null || String(objeto.estado).trim() === ""
+                ? "Activo"
+                : normalizarEstadoObjetoManual(objeto.estado);
+
+            if (estadoGuardado) {
+                estado.value = estadoGuardado;
+            } else {
+                estado.add(new Option(
+                    `ESTADO NO RECONOCIDO: ${String(objeto.estado).toUpperCase()} — ELIGE UNO`,
+                    ""
+                ), 0);
+                estado.value = "";
+            }
+            estado.setAttribute("aria-label", `Estado de ${objeto.nombre || "objeto manual"}`);
+
             const cambiarEstado = document.createElement("button");
             cambiarEstado.type = "button";
             cambiarEstado.textContent = "ACTUALIZAR ESTADO";
             cambiarEstado.addEventListener("click", async () => {
+                if (!estadosObjetosManuales.includes(estado.value)) {
+                    mensajeObjetoManual.textContent = "ELIGE UN ESTADO VÁLIDO ANTES DE ACTUALIZAR.";
+                    estado.focus();
+                    return;
+                }
+
                 cambiarEstado.disabled = true;
                 mensajeObjetoManual.textContent = "ACTUALIZANDO ESTADO...";
                 const { data, error } = await supabaseClient.rpc("gestionar_objetos_manuales", {
@@ -3160,9 +3222,11 @@ const renderInventarioDetallado = () => {
                     cambiarEstado.disabled = false;
                     return;
                 }
-                const indice = inventarioDetallado.findIndex(item => item.id_instancia === objeto.id_instancia);
-                if (indice >= 0) inventarioDetallado[indice] = data.objeto;
-                personajeActivo.ficha = { ...(personajeActivo.ficha || {}), inventario_detallado: [...inventarioDetallado] };
+                if (!sincronizarObjetoManualLocal(data.objeto)) {
+                    mensajeObjetoManual.textContent = "EL ESTADO SE GUARDÓ EN SUPABASE, PERO NO SE PUDO ACTUALIZAR LA VISTA LOCAL. RECARGA EL PERFIL.";
+                    cambiarEstado.disabled = false;
+                    return;
+                }
                 mensajeObjetoManual.textContent = "ESTADO ACTUALIZADO.";
                 renderInventarioDetallado();
             });
@@ -3882,15 +3946,14 @@ renderFobias();
 
         const adiccionesCiudadano =
             Array.isArray(salud.adicciones)
-                ? salud.adicciones.map(adiccion => String(adiccion?.id ?? adiccion))
+                ? salud.adicciones
                 : [];
 
-        // El catálogo vigente organiza las drogas en categorias.Drogas.
-        // Se conserva compatibilidad con la estructura plana anterior.
-        const drogasCatalogo = Array.isArray(catalogo.categorias?.Drogas)
-            ? catalogo.categorias.Drogas
-            : Array.isArray(catalogo.items)
-                ? catalogo.items.filter(item => item.categoria === "Drogas")
+        const drogasCatalogo =
+            Array.isArray(catalogo.items)
+                ? catalogo.items.filter(
+                    item => item.categoria === "Drogas"
+                )
                 : [];
 
         const adiccionesContainer =

@@ -90,6 +90,7 @@
     .weapon-table th{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
     .weapon-table td:first-child{font-weight:700}
     .balance{font-size:34px;letter-spacing:1px;color:var(--acid);margin:4px 0 16px}
+    .balance.negative{color:#ff4d5a}
     .income-panel{grid-column:1/-1;border-color:var(--acid)}
     .body-map-container{position:relative;width:100%;max-width:700px;margin:0 auto;overflow:visible}
     .body-map-image{width:100%;height:auto;display:block}
@@ -654,7 +655,8 @@
       await loadManualData(active.id);
       const initials=(displayName.match(/[\p{L}\p{N}]+/gu)||["NX"]).slice(0,2).map(word=>word[0]).join("").toUpperCase();$("monogram").textContent=initials;
       $("balance").textContent=`${fmt(state.saldo_actual)} CORPOS`;
-      const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>`<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${fmt(move.monto)} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
+      $("balance").classList.toggle("negative",Number(state.saldo_actual)<0);
+      const movements=[...state.movimientos].reverse();$("history").innerHTML=movements.length?movements.map(move=>{const isExpense=String(move.tipo||"").toLowerCase()==="egreso";const signedAmount=`${isExpense?"−":"+"}${fmt(Math.abs(Number(move.monto)||0))}`;return `<article class="entry"><div class="entry-title">${safe(move.concepto||move.subtipo||"Movimiento")}</div><div class="entry-meta">${safe(move.tipo||"").toUpperCase()} · ${signedAmount} CORPOS · ${move.fecha?new Date(move.fecha).toLocaleString("es-MX"):"SIN FECHA"}</div></article>`;}).join(""):`<div class="empty">SIN MOVIMIENTOS REGISTRADOS</div>`;
       $("weapons").innerHTML=weaponMarkup(items);
       $("inventory").innerHTML=inventoryMarkup(items);
       renderBodyMap(items);

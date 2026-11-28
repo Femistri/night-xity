@@ -218,6 +218,60 @@
             margin-top: 5px;
         }
 
+        /* Acciones del registro manual: separar visualmente guardar y cambiar estado. */
+        #manual-object-list > .item > .item > button:nth-of-type(1),
+        #manual-object-list > .item > .item > button:nth-of-type(2) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            margin: 7px 8px 0 0;
+            padding: 8px 12px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            color: #fff;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .35px;
+            cursor: pointer;
+            transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+        }
+        #manual-object-list > .item > .item > button:nth-of-type(1) {
+            background: #167a55;
+            border-color: #29a879;
+        }
+        #manual-object-list > .item > .item > button:nth-of-type(1):hover {
+            background: #1b9568;
+            border-color: #55d5a4;
+        }
+        #manual-object-list > .item > .item > button:nth-of-type(2) {
+            background: #176a9a;
+            border-color: #3995c8;
+        }
+        #manual-object-list > .item > .item > button:nth-of-type(2):hover {
+            background: #1d80b8;
+            border-color: #65b9e8;
+        }
+        #manual-object-list > .item > .item > button:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px #111;
+        }
+        #manual-object-list > .item > .item > button:disabled {
+            opacity: .65;
+            cursor: wait;
+        }
+        @media (max-width: 700px) {
+            #manual-object-list > .item > .item > button:nth-of-type(1),
+            #manual-object-list > .item > .item > button:nth-of-type(2) {
+                min-height: 40px;
+                margin-top: 9px;
+                padding: 9px 11px;
+                font-size: 12px;
+            }
+        }
+
         #citizen-income-panel { grid-column: 1 / -1; border-color: #00ff9c; }
         #citizen-income-panel .item-info { line-height: 1.6; }
         #citizen-session-nav { grid-column: 1 / -1; margin: 0; }

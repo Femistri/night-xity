@@ -148,6 +148,35 @@
             font-size: 18px;
         }
 
+        #citizen-occupation, #citizen-employer {
+            width: 100%; min-width: 0; padding: 9px 10px;
+            border: 1px solid #555; background: #111; color: #eee;
+            font: inherit; font-size: 16px;
+        }
+        #citizen-occupation:focus, #citizen-employer:focus {
+            outline: 1px solid #00ff9c; border-color: #00ff9c;
+        }
+        .talent-choice {
+            display: flex; align-items: flex-start; gap: 9px;
+            margin: 9px 0; padding: 8px 0; border-bottom: 1px solid #292929;
+        }
+        .talent-choice > input { flex: 0 0 auto; margin-top: 4px; }
+        .talent-info { min-width: 0; flex: 1 1 auto; }
+        .talent-info summary {
+            cursor: pointer; color: #eee; font-weight: 700; line-height: 1.4;
+        }
+        .talent-info summary:hover { color: #00ff9c; }
+        .talent-info small {
+            display: block; margin-top: 7px; color: #aaa;
+            font-size: 12px; line-height: 1.55; overflow-wrap: anywhere;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .talent-info:hover > small { display: block; }
+        }
+        @media (max-width: 700px) {
+            #citizen-occupation, #citizen-employer { font-size: 16px; }
+            .talent-choice { padding: 11px 0; }
+        }
         .citizen-save-status { min-height: 18px; margin: 10px 0 0; color: #00ff9c; font-size: 12px; }
         .citizen-save-status.error { color: #ff6b6b; }
         .details-close { display: block; margin: 18px 0 6px auto; padding: 8px 12px; border: 1px solid #00ff9c; background: transparent; color: #00ff9c; cursor: pointer; font: inherit; font-size: 12px; letter-spacing: 1px; }
@@ -637,9 +666,10 @@
                     OCUPACIÓN
                 </div>
 
-                <div class="value">
-                    TRABAJADOR INDEPENDIENTE
-                </div>
+                <input class="value" id="citizen-occupation" type="text"
+                       maxlength="120" autocomplete="off"
+                       placeholder="OCUPACIÓN DEL CIUDADANO"
+                       aria-label="Ocupación del ciudadano">
 
             </div>
 
@@ -679,9 +709,10 @@
                     EMPLEADOR
                 </div>
 
-                <div class="value">
-                    SIN REGISTRO
-                </div>
+                <input class="value" id="citizen-employer" type="text"
+                       maxlength="120" autocomplete="off"
+                       placeholder="SIN REGISTRO"
+                       aria-label="Empleador del ciudadano">
 
             </div>
 
@@ -1833,6 +1864,8 @@ let guardadoIdentidadEnCurso = null;
 
 const datosIdentidadGuardables = () => ({
     clase: identidad.clase || "",
+    ocupacion: String(identidad.ocupacion || "").trim(),
+    empleador: String(identidad.empleador || "").trim(),
     puntos_alma: Number(identidad.puntos_alma ?? 4),
     trasfondo: identidad.trasfondo || "",
     tara_sintetica: Array.isArray(identidad.tara_sintetica) ? [...identidad.tara_sintetica] : [],
@@ -1872,7 +1905,12 @@ const guardarIdentidadCitizen = async () => {
         });
         if (error || !data?.exito) {
             identidadPendienteDeGuardar = true;
-            mostrarEstadoGuardadoIdentidad("NO SE PUDO GUARDAR. REVISA TU CONEXIÓN Y REINTENTA.", true);
+            mostrarEstadoGuardadoIdentidad(
+                error?.message?.toLowerCase().includes("ocupacion") || error?.message?.toLowerCase().includes("empleador")
+                    ? "EL SERVIDOR AÚN NO ADMITE OCUPACIÓN/EMPLEADOR. REQUIERE ACTUALIZAR LA FUNCIÓN DE GUARDADO."
+                    : "NO SE PUDO GUARDAR. REVISA TU CONEXIÓN Y REINTENTA.",
+                true
+            );
             console.error("No se pudo guardar la identidad del personaje", error || data);
             return false;
         }
@@ -1891,6 +1929,23 @@ const guardarIdentidadCitizen = async () => {
     if (identidadPendienteDeGuardar && resultado) return guardarIdentidadCitizen();
     return resultado;
 };
+
+const occupationInput = document.getElementById("citizen-occupation");
+const employerInput = document.getElementById("citizen-employer");
+if (occupationInput) {
+    occupationInput.value = identidad.ocupacion || "";
+    occupationInput.addEventListener("input", () => {
+        identidad.ocupacion = occupationInput.value;
+        programarGuardadoIdentidad();
+    });
+}
+if (employerInput) {
+    employerInput.value = identidad.empleador || "";
+    employerInput.addEventListener("input", () => {
+        identidad.empleador = employerInput.value;
+        programarGuardadoIdentidad();
+    });
+}
 
 const programarGuardadoIdentidad = () => {
     identidadPendienteDeGuardar = true;
@@ -2563,6 +2618,12 @@ taraContainer.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         : [];
 
 const talentosCatalogo = ciudadanos.talentos || {};
+const escaparTalento = valor => String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 
 const talentosRequeridosPorClase = {
     backup: ["Sexto sentido", "Lucha con X o Músculos de acero"],
@@ -2626,16 +2687,13 @@ const renderTalentos = () => {
                 seleccionados.length > 0
                     ? seleccionados.map(
                         ([nombre, descripcion]) => `
-                            <label style="display:block; margin:8px 0;">
-                                <input
-                                    type="checkbox"
-                                    value="${nombre}"
-                                    checked
-                                    ${requeridos.includes(nombre) ? "disabled title=\"Talento asociado a la clase\"" : ""}
-                                >
-                                <strong>${nombre}</strong>
-                                <br>
-                                <small>${descripcion}</small>
+                            <label class="talent-choice">
+                                <input type="checkbox" value="${escaparTalento(nombre)}" checked
+                                    ${requeridos.includes(nombre) ? "disabled title=\"Talento asociado a la clase\"" : ""}>
+                                <details class="talent-info">
+                                    <summary>${escaparTalento(nombre)}</summary>
+                                    <small>${escaparTalento(descripcion)}</small>
+                                </details>
                             </label>
                         `
                     ).join("")
@@ -2655,14 +2713,12 @@ const renderTalentos = () => {
             ${
                 disponibles.map(
                     ([nombre, descripcion]) => `
-                        <label style="display:block; margin:8px 0;">
-                            <input
-                                type="checkbox"
-                                value="${nombre}"
-                            >
-                            <strong>${nombre}</strong>
-                            <br>
-                            <small>${descripcion}</small>
+                        <label class="talent-choice">
+                            <input type="checkbox" value="${escaparTalento(nombre)}">
+                            <details class="talent-info">
+                                <summary>${escaparTalento(nombre)}</summary>
+                                <small>${escaparTalento(descripcion)}</small>
+                            </details>
                         </label>
                     `
                 ).join("")

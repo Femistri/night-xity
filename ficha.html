@@ -280,6 +280,17 @@
     const db = window.supabase.createClient("https://mxolzgerwrzeqcfmsxaa.supabase.co", "sb_publishable_ym1P2o0CCXd9E7H89nTaNA_CCldoI6a");
     const $ = id => document.getElementById(id);
     const safe = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    const normalizeTalentName = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
+    const talentAliases = { contactos: "Red de contactos" };
+    const talentDescription = name => {
+      const catalog = core.talentos || {};
+      const normalized = normalizeTalentName(name);
+      const requested = talentAliases[normalized] || name;
+      const key = Object.keys(catalog).find(entry => normalizeTalentName(entry) === normalizeTalentName(requested));
+      if (!key) return "";
+      const value = catalog[key];
+      return typeof value === "string" ? value : (value?.descripcion || value?.description || "");
+    };
     const fmt = value => Number(value || 0).toLocaleString("es-MX");
     const label = person => { const key=person?.nombre_clave||"PERSONAJE"; const player=(person?.nombre_jugador||"").trim(); return player&&player!==key ? `${player} // ${key}` : key; };
     const fail = message => { $("status").textContent=message; $("status").classList.add("error"); };
@@ -452,7 +463,7 @@
       ATTRIBUTES.forEach(attribute=>$(`modifier-${attribute}`).textContent=modifier($(`attribute-${attribute}`).value));
       const identity=active?.ficha?.identidad||{};const key=classKey(active?.clase||identity.clase);const level=Number($("character-level").value||1);const [attack,institute]=(ADVANCEMENT[key]||[])[level-1]||[null,null];
       $("indicator-atq").textContent=attack==null?"—":signed(attack);$("indicator-ins").textContent=institute==null?"—":signed(institute);$("indicator-da").textContent=CLASS_RULES[key]?.da||"—";$("indicator-pow").textContent=$("soul-points").textContent||"—";
-      const talents=CLASS_RULES[key]?.talents||[];const talentCatalog=core.talentos||{};$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active talent-help" data-help="${safe(talentCatalog[talent]||"Sin descripción registrada para este talento.")}" tabindex="0" role="button" aria-label="${safe(talent)}: consultar explicación">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
+      const talents=CLASS_RULES[key]?.talents||[];$("class-talents-list").innerHTML=talents.length?talents.map(talent=>`<span class="tag active talent-help" data-help="${safe(talentDescription(talent)||"Sin descripción registrada para este talento.")}" tabindex="0" role="button" aria-label="${safe(talent)}: consultar explicación">${safe(talent)}</span>`).join(""):`<div class="empty">CLASE SIN REGISTRO</div>`;
       $("class-talents").textContent=key?`DA ${CLASS_RULES[key].da} · TALENTOS DE CLASE: ${talents.join(" · ")}`:"Clase sin registro";
     }
     function manualPayload(characterId){const payload={personaje_id:characterId,nivel:Number($("character-level").value||1),puntos_vida_manual:$("manual-pv").value===""?null:Number($("manual-pv").value),puntos_vida_sesion:$("manual-pv-session").value===""?null:Number($("manual-pv-session").value),alias:$("manual-alias").value.trim()||null};ATTRIBUTES.forEach(attribute=>payload[attribute]=$(`attribute-${attribute}`).value===""?null:Number($(`attribute-${attribute}`).value));SKILLS.forEach(skill=>payload[`habilidad_${skill}`]=Number($(`skill-${skill}`).value||0));for(let index=1;index<=4;index++){const key=String(index).padStart(2,"0");payload[`contacto_${key}`]=$(`contact-${key}`).value.trim()||null;}return payload;}
@@ -625,16 +636,20 @@
       $("inventory").innerHTML=inventoryMarkup(items);
       renderBodyMap(items);
       await renderIncomeReadOnly(active.id);
-      const talents=Array.isArray(identity.talentos)?identity.talentos:[];const talentCatalog=core.talentos||{};$("talents").innerHTML=talents.length?talents.map(name=>`<article class="entry"><details class="talent-detail"><summary class="entry-title talent-help" data-help="${safe(talentCatalog[name]||"Sin descripción registrada para este talento.")}" aria-label="${safe(name)}: consultar explicación">${safe(name)}</summary>${talentCatalog[name]?`<div class="entry-desc">${safe(talentCatalog[name])}</div>`:""}</details></article>`).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
+      const talents=Array.isArray(identity.talentos)?identity.talentos:[];$("talents").innerHTML=talents.length?talents.map(name=>{const description=talentDescription(name);return `<article class="entry"><details class="talent-detail"><summary class="entry-title talent-help" data-help="${safe(description||"Sin descripción registrada para este talento.")}" aria-label="${safe(name)}: consultar explicación">${safe(name)}</summary>${description?`<div class="entry-desc">${safe(description)}</div>`:""}</details></article>`;}).join(""):`<div class="empty">SIN TALENTOS REGISTRADOS</div>`;
       const tares=Array.isArray(identity.tara_sintetica)?identity.tara_sintetica:[];const taraCatalog=core.tara_sintetica||{};$("traits").innerHTML=tares.length?tares.map(name=>`<article class="entry"><div class="entry-title">${safe(name)}</div>${taraCatalog[name]?`<div class="entry-desc">${safe(taraCatalog[name])}</div>`:""}</article>`).join(""):`<div class="empty">SIN TARA SINTÉTICA REGISTRADA</div>`;
       const mental=identity.salud_mental||{};
       const manias=(mental.manias||[]).map(Number);
       const fobias=(mental.fobias||[]).map(Number);
-      const addictions=(mental.adicciones||[]).map(Number);
       const renderMental=(catalog,selected)=>{const matches=(catalog||[]).filter(row=>selected.includes(Number(row.d100)));return matches.length?matches.map(row=>`<article class="entry"><div class="entry-title">${safe(row.termino)}</div><div class="entry-desc">${safe(row.descripcion||"")}</div></article>`).join(""):`<div class="empty">SIN REGISTROS</div>`;};
       $("manias").innerHTML=renderMental(mentalCatalog.manias,manias);
       $("phobias").innerHTML=renderMental(mentalCatalog.fobias,fobias);
-      $("addictions").innerHTML=renderMental(mentalCatalog.adicciones,addictions);
+      const addictionIds = new Set((Array.isArray(mental.adicciones) ? mental.adicciones : []).map(entry => String(entry?.id ?? entry)));
+      const drugs = Array.isArray(productCatalog.categorias?.Drogas) ? productCatalog.categorias.Drogas : [];
+      const selectedDrugs = drugs.filter(drug => addictionIds.has(String(drug.id)));
+      $("addictions").innerHTML = selectedDrugs.length
+        ? selectedDrugs.map(drug => `<article class="entry"><div class="entry-title">${safe(drug.nombre || drug.id)}</div><div class="entry-desc">${safe(drug.descripcion || "")}</div></article>`).join("")
+        : `<div class="empty">SIN REGISTROS</div>`;
       const {data:subs,error:subError}=await db.from("suscripciones_gastos_vida").select("gasto_id,costo,frecuencia,estado,proximo_cobro").eq("personaje_id",active.id);
       const {data:requests,error:reqError}=await db.from("solicitudes_gastos_vida").select("gasto_id,estado,importe_solicitado,fecha_solicitud,tipo_solicitud").eq("personaje_id",active.id).eq("tipo_solicitud","cambio_vivienda").order("fecha_solicitud",{ascending:false}).limit(5);
       const housing=(subs||[]).filter(row=>row.gasto_id.startsWith("VIV-"));const services=(subs||[]).filter(row=>!row.gasto_id.startsWith("VIV-"));
